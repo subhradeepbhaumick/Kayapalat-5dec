@@ -1,0 +1,17 @@
+.ripple {
+    position: absolute;
+    border-radius: 50%;
+    background: rgba(0, 128, 128, 0.4);
+    transform: scale(0);
+    animation: ripple-animation 600ms linear;
+    pointer-events: none;
+    z-index: 1;
+  }
+  
+  @keyframes ripple-animation {
+    to {
+      transform: scale(4);
+      opacity: 0;
+    }
+  }
+  
