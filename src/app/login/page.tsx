@@ -28,8 +28,10 @@ export default function LoginPage() {
 
       // Redirect to homepage after 2s
       setTimeout(() => {
-        router.push("/");
+        router.push("/profile");
       }, 2000);
+      window.location.reload();
+
     } catch (error: any) {
       console.error("Login failed", error.message);
       toast.error(error.response?.data?.message || "Login failed. Try again.");
@@ -85,6 +87,11 @@ export default function LoginPage() {
               value={user.password}
               onChange={(e) => setUser({ ...user, password: e.target.value })}
               placeholder="Enter password"
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !buttonDisabled && !loading) {
+                  onLogin();
+                }
+              }}
             />
             {/* Show/Hide Password Button */}
             <button

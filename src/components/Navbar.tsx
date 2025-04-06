@@ -34,6 +34,7 @@ export default function Navbar() {
       document.cookie = "loggedIn=false; path=/"; // Update cookie state
       setIsLoggedIn(false);
       router.push("/login");
+      window.location.reload();
     } catch (error: any) {
       toast.error(error.message);
     }
@@ -174,27 +175,6 @@ export default function Navbar() {
                 }
               )}
             </ul>
-
-            {/* Sidebar Auth Buttons */}
-            {isLoggedIn ? (
-              <div className="mt-4 flex flex-col gap-2">
-                <Link href="/profile" className="bg-[#295A47] text-white px-3 py-2 rounded-md text-center">
-                  Profile
-                </Link>
-                <button onClick={logout} className="bg-red-500 text-white px-3 py-2 rounded-md text-center">
-                  Logout
-                </button>
-              </div>
-            ) : (
-              <div className="mt-4 flex flex-col gap-2">
-                <Link href="/signup" className="border border-[#295A47] text-[#295A47] px-3 py-2 rounded-md text-center hover:bg-[#295A47] hover:text-white">
-                  Sign Up
-                </Link>
-                <Link href="/login" className="bg-[#295A47] text-white px-3 py-2 rounded-md text-center">
-                  Login
-                </Link>
-              </div>
-            )}
           </div>
         </div>
       )}

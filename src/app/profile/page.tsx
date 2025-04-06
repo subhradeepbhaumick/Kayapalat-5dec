@@ -14,6 +14,9 @@ export default function ProfilePage() {
             await axios.get('/api/users/logout')
             toast.success('Logout successful')
             router.push('/login')
+            window.location.reload();
+            document.cookie = "loggedIn=false; path=/"; // Update cookie state
+            setData("nothing")
         } catch (error:any) {
             console.log(error.message);
             toast.error(error.message)

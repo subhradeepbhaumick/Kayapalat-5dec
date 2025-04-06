@@ -10,6 +10,8 @@ import {
   FaBath,
   FaEllipsisH,
   FaLightbulb,
+  FaPlus,
+  FaPlusCircle,
 } from "react-icons/fa";
 import "../../helpers/css/RippleEffect.css";
 
@@ -23,7 +25,7 @@ const sections = [
   { icon: <FaLightbulb />, label: "False Ceiling", href: "/gallery#false-ceiling" },
   { icon: <FaChild />, label: "Kids Room", href: "/gallery#kids-room" },
   { icon: <FaBath />, label: "Bathroom", href: "/gallery#bathroom" },
-  { icon: <FaEllipsisH />, label: "Explore All", href: "/gallery" },
+  { icon: <FaPlus />, label: "Explore All", href: "/gallery" },
 ];
 
 const ConceptToCompletion = () => {

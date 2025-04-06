@@ -107,7 +107,7 @@ const HeroSection = () => {
 
 
       {/* Scroll to Top Button */}
-      <div className="fixed bottom-20 right-5 flex group">
+      <div className="fixed bottom-20 z-10 right-5 flex group">
   <button
     onClick={scrollToTop}
     className={`cursor-pointer p-4.5 rounded-full bg-[#295A47] text-white shadow-lg transition-opacity 
