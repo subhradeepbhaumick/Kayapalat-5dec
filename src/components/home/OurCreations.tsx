@@ -31,8 +31,8 @@ const imageData = {
         name: "Ananya Singh",
         designation: "Interior Enthusiast",
         rating: 4,
-        comment: "The makeover was amazing! Subtle, stylish, and cozy.",
-        avatar: "https://i.pravatar.cc/50?img=4",
+        comment: "The makeover was amazing! Subtle, stylish, and cozy. Just how I wanted.",
+        avatar: "https://i.pravatar.cc/50?img=2",
       },
     },
   ],
@@ -47,7 +47,7 @@ const imageData = {
         designation: "Working Professional",
         rating: 5,
         comment: "A calm and peaceful bedroom, just what I needed.",
-        avatar: "https://i.pravatar.cc/50?img=5",
+        avatar: "https://i.pravatar.cc/50?img=7",
       },
     },
   ],
@@ -62,7 +62,7 @@ const imageData = {
         designation: "Architect",
         rating: 4,
         comment: "Their ceiling work really added depth to our room design.",
-        avatar: "https://i.pravatar.cc/50?img=6",
+        avatar: "https://i.pravatar.cc/50?img=5",
       },
     },
   ],
@@ -98,10 +98,10 @@ const OurCreations = () => {
   return (
     <section
       className="bg-[#D2EBD0] py-12 px-6 text-[#00423D] text-center"
-      style={{ WebkitTextStroke: "1px black", fontFamily: "'Abril Fatface', cursive" }}
+      style={{  fontFamily: "'Abril Fatface', cursive" }}
     >
       <div className="max-w-5xl mx-auto">
-        <h2 className="text-4xl md:text-7xl text-[#00423D] font-abril">Our Creations</h2>
+        <h2 className="text-4xl md:text-7xl text-[#00423D] font-abril"style={{ WebkitTextStroke: "1px black"}}>Our Creations</h2>
         <p className="mt-4 text-md md:text-2xl text-black">Explore Real Client Transformations</p>
 
         <div className="flex flex-wrap justify-center gap-4 mt-6">
@@ -190,8 +190,8 @@ const OurCreations = () => {
                 ))}
               </div>
             </div>
-            <blockquote className="italic mt-2 text-md md:text-xl">
-              "{testimonial.comment}"
+            <blockquote className="text-gray-700 mt-2 text-md md:text-xl">
+            “ {testimonial.comment} ”
             </blockquote>
           </div>
 

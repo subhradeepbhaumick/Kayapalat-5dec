@@ -68,7 +68,7 @@ const ContactUsPage = () => {
   const handleRequestCallback = () => {
     if (isValid) {
       toast.success('📞 Callback Requested! ', {
-        description:`📱 Phone: ${countryCode} ${phone}`,
+        description: `📱 Phone: ${countryCode} ${phone}`,
         duration: 1500, // Auto-dismiss after 3 seconds
         action: {
           label: <X size={18} className="cursor-pointer" />,
@@ -124,14 +124,14 @@ const ContactUsPage = () => {
           </div>
 
           {/* Input Fields */}
-          <div className="mt-6 space-y-2">
+          <div className="mt-6 bg-white space-y-2">
             <div className="flex gap-2">
               {/* Country Name Dropdown Using ShadCN Select */}
               <Select onValueChange={handleCountrySelect} defaultValue={selectedCountry}>
-                <SelectTrigger className="w-1/3 p-2 border border-gray-300 rounded-lg bg-white hover:bg-gray-100">
+                <SelectTrigger className="w-1/3 p-2 border border-gray-300 opacity-100 rounded-lg bg-white hover:bg-gray-100">
                   <SelectValue placeholder="Select Country" />
                 </SelectTrigger>
-                <SelectContent>
+                <SelectContent className="bg-white border border-gray-200 shadow-md rounded-md">
                   {countryOptions.map((country) => (
                     <SelectItem key={country.value} value={country.label}>
                       {country.label}
@@ -139,6 +139,7 @@ const ContactUsPage = () => {
                   ))}
                 </SelectContent>
               </Select>
+
 
               {/* Phone Number Input */}
               <input
@@ -163,13 +164,12 @@ const ContactUsPage = () => {
               />
               {/* Character Counter Inside Textarea */}
               <p
-                className={`absolute bottom-3 right-2 text-xs font-semibold ${
-                  charCount > charLimit
+                className={`absolute bottom-3 right-2 text-xs font-semibold ${charCount > charLimit
                     ? 'text-red-500'
                     : charCount > 0
-                    ? 'text-green-500'
-                    : 'text-gray-500'
-                }`}
+                      ? 'text-green-500'
+                      : 'text-gray-500'
+                  }`}
               >
                 {charCount}/{charLimit}
               </p>
@@ -179,11 +179,10 @@ const ContactUsPage = () => {
             <button
               onClick={handleRequestCallback}
               disabled={!isValid}
-              className={`w-full py-2 mt-4 rounded-lg transition-all duration-200 ${
-                isValid
+              className={`w-full py-2 mt-4 rounded-lg transition-all duration-200 ${isValid
                   ? 'bg-[#295A47] text-white cursor-pointer hover:bg-[#1e4c3a] active:scale-95 shadow-md hover:shadow-lg'
                   : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-              }`}
+                }`}
             >
               Request a Callback
             </button>

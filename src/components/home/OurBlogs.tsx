@@ -51,7 +51,7 @@ const OurBlogs = () => {
       <div className="hidden md:block transition-transform hover:scale-105 active:scale-95 duration-200 absolute right-10 top-35">
         <button
           onClick={() => router.push('/blogs')}
-          className="border-2 border-[#00423D] rounded-full px-6 py-2 text-sm font-semibold text-[#00423D] cursor-pointer hover:bg-[#b4ddc3] transition-all duration-200"
+          className="border-2 border-[#00423D] bg-[#ffffffb8] rounded-full px-6 py-2 text-sm font-semibold text-[#00423D] cursor-pointer hover:bg-[#b4ddc3] transition-all duration-200"
         >
           See All
         </button>
@@ -66,13 +66,14 @@ const OurBlogs = () => {
             <img
               src={blog.image}
               alt={blog.title}
-              className="w-full h-48 object-fill rounded-xl mb-4 border-2 border-[#00423D]"
+              className="w-full h-48 object-fill rounded-xl mb-4 select-none border-2 border-[#00423D]"
+              draggable={false}
             />
             <h3 className="text-center mb-1">{blog.title}</h3>
             <hr className="border-t-[1px] border-gray-400 w-full mb-2" />
             <p className="text-sm mb-4 text-center">{blog.body}</p>
             <button
-              onClick={() => router.push(`/blog/${blog.title.split(" ")[0]}`)}
+              onClick={() => router.push(`/blogs/${blog.title.replace(/\s+/g, "-")}`)}
               className="rounded-full border-2 border-[#00423D] transition-all cursor-pointer hover:bg-[#cbead1] px-6 py-1 text-sm text-[#00423D] font-medium flex pr-20 pl-20  items-center gap-2  hover:scale-105 active:scale-95 duration-200"
             >
               Read More <FaPlus className="text-xs" />
@@ -85,7 +86,7 @@ const OurBlogs = () => {
       <div className="mt-10 md:hidden">
         <button
           onClick={() => router.push('/blogs')}
-          className="border-2 border-[#00423D] rounded-full px-6 py-2 text-sm font-semibold text-[#00423D] cursor-pointer hover:border-3 transition-all duration-200"
+          className="border-2 border-[#00423D] pr-25 pl-25 rounded-full px-6 py-2 text-lg font-semibold text-[#00423D] cursor-pointer hover:border-3 transition-all duration-200"
         >
           See All
         </button>

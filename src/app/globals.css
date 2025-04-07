@@ -3,6 +3,7 @@
 :root {
   --background: #D2EBD0;
   --foreground: #171717;
+  --radix-select-content-bg: white !important;
 }
 
 ::-webkit-scrollbar {
@@ -15,6 +16,27 @@
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
+
+@keyframes glitter {
+  0%{
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+  50% {
+    opacity: 0.6;
+    transform: scale(1.2) rotate(180deg);
+  }
+  100% {
+    opacity: 0.5;
+    transform: scale(1) rotate(360deg);
+  }
+}
+
+.glitter {
+  animation: glitter 1s infinite ease-in-out;
+}
+
+
 
 body {
   

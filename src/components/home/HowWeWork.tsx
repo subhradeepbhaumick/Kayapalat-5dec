@@ -18,14 +18,16 @@ const HowWeWork = () => {
         <img 
           src="/how-we-work.png" 
           alt="How We Work"
-          className="hidden md:block md:pr-40 md:pl-40 w-full h-full object-cover"
+          className="hidden md:block md:pr-40 md:pl-40 w-full h-full select-none object-cover"
+          draggable={false}
         />
         
         {/* Mobile Image (Shown on small screens, with reduced brightness) */}
         <img 
           src="/how-we-work-mobile.png" 
           alt="How We Work Mobile"
-          className="block md:hidden w-full h-full object-cover"
+          className="block md:hidden w-full h-full select-none object-cover"
+          draggable={false}
         />
       </div>
     </div>

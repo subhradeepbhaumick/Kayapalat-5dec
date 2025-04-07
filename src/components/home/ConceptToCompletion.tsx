@@ -11,7 +11,6 @@ import {
   FaEllipsisH,
   FaLightbulb,
   FaPlus,
-  FaPlusCircle,
 } from "react-icons/fa";
 import "../../helpers/css/RippleEffect.css";
 
@@ -50,12 +49,14 @@ const ConceptToCompletion = () => {
     <section
       className="bg-[#D2EBD0] py-12 px-6 text-[#00423D] text-center"
       style={{
-        WebkitTextStroke: "1px black",
         fontFamily: "'Abril Fatface', cursive",
       }}
     >
       <div className="max-w-5xl mx-auto">
-        <h2 className="text-3xl md:text-6xl text-[#00423D] font-abril">
+        <h2 className="text-3xl md:text-6xl text-[#00423D] font-abril"
+        style={{
+          WebkitTextStroke: "1px black",
+        }}>
           Concept to Completion
         </h2>
         <p className="mt-4 text-md md:text-2xl text-center text-black">
