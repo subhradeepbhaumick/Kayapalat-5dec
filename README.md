@@ -82,14 +82,14 @@
 </details>
 
 
-📸 Screenshots (coming soon...)
+## 📸 Screenshots (coming soon...)
 Will add later.
 
-🙌 Author
+## 🙌 Author
 Made with 💙 by DHIMAN MAJUMDER (Coder_Dhiman)
 Aspiring AI/ML Engineer | Full-stack dev | Builder of beautiful & scalable platforms.
 
-🔗 License
+## 🔗 License
 © 2025 Kayapalat. All rights reserved.
 This website and its source code are the intellectual property of Kayapalat. Unauthorized use, copying, redistribution, or modification of any part of this repository is strictly prohibited.
 This project is not open-source and is protected under copyright law. For inquiries regarding usage or collaboration, please contact the project owner.
