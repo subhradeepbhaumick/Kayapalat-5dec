@@ -1,36 +1,70 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+<h1 align="center">✨ Kayapalat ✨</h1>
+<p align="center">
+  A freelance platform to connect interior designers with clients.<br/>
+  Full-stack | Scalable | Mobile-friendly | Built with ❤️
+</p>
 
-## Getting Started
+---
 
-First, run the development server:
+## 🚧 Project Status
+
+> ✅ Authentication done  
+> ✅ Homepage done  
+> 📱 Mobile responsiveness in progress (per page as developed)  
+> 🧱 Backend modular routes live  
+> 💾 MongoDB restructure planned  
+> 🛠️ Full site development underway
+
+---
+
+<details>
+<summary><strong>🧠 Vision</strong></summary>
+
+> “Kayapalat is more than a marketplace—it’s a transformation engine for the interior design space. We aim to empower designers with visibility and clients with trust.”
+
+</details>
+
+---
+
+## 🚀 Tech Stack
+
+| Layer        | Tech Used              |
+|--------------|------------------------|
+| 💻 Frontend  | Next.js + Tailwind CSS |
+| 🔙 Backend   | FastAPI (Python)       |
+| ☁️ Database | MongoDB Atlas          |
+| 🔐 Auth      | JWT + bcrypt + Google reCAPTCHA |
+| 📤 Media     | Edgestore              |
+| 📦 State     | Context API (or Next.js built-ins) |
+| 🧪 Testing   | (Planned)              |
+| 🚀 Deployment| (Planned: Vercel / Render) |
+
+---
+
+## ✅ Features So Far
+
+- 🔒 **JWT-authenticated** Sign-in / Sign-up  
+- 👥 Multi-role support: Customer, Designer, Partner, Refer & Earn  
+- 🧠 Google reCAPTCHA integration  
+- 🖼️ Profile picture uploads via **Edgestore**  
+- 🧾 Secure password hashing  
+- ⏳ Post-auth countdown redirection  
+- 📞 Callback form with MongoDB storage  
+- 🏠 Fully designed and responsive homepage  
+- 📱 Mobile-first implementation in progress  
+
+---
+
+## 🧩 MongoDB Collections (as planned)
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+📦 kayapalat-db/
+├── users/
+│   ├── Customer
+│   ├── Designer
+│   ├── BusinessPartner
+│   └── ReferAndEarn
+├── gallery/
+│   └── [designer_id]: [imageURL[]]
+├── callback/
+│   └── { name, phone, message }
