@@ -34,7 +34,7 @@
 | 🔙 Backend   | FastAPI (Python)       |
 | ☁️ Database | MongoDB Atlas          |
 | 🔐 Auth      | JWT + bcrypt + Google reCAPTCHA |
-| 📤 Media     | Edgestore              |
+| 📤 Media     | Edgestore (not yet)             |
 | 📦 State     | Context API (or Next.js built-ins) |
 | 🧪 Testing   | (Planned)              |
 | 🚀 Deployment| (Planned: Vercel / Render) |
@@ -68,3 +68,31 @@
 │   └── [designer_id]: [imageURL[]]
 ├── callback/
 │   └── { name, phone, message }
+```
+ℹ️ Currently all data lives under users — will restructure once feature modules are stabilized.
+
+
+<details> <summary><strong>📌 Upcoming Features</strong></summary>
+ Designer profile page with image gallery
+ Client dashboard with live project tracking
+ Admin panel for designer verification
+ Designer search & filter
+ Review & rating system
+ Global mobile-first responsiveness
+</details>
+
+
+📸 Screenshots (coming soon...)
+Will add later.
+
+🙌 Author
+Made with 💙 by DHIMAN MAJUMDER (Coder_Dhiman)
+Aspiring AI/ML Engineer | Full-stack dev | Builder of beautiful & scalable platforms.
+
+🔗 License
+© 2025 Kayapalat. All rights reserved.
+This website and its source code are the intellectual property of Kayapalat. Unauthorized use, copying, redistribution, or modification of any part of this repository is strictly prohibited.
+This project is not open-source and is protected under copyright law. For inquiries regarding usage or collaboration, please contact the project owner.
+
+
+
