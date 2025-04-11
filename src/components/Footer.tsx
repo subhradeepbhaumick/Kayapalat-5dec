@@ -37,7 +37,7 @@ const Footer = () => {
             <div className="flex gap-6 mt-3 text-2xl">
               <Link href="https://facebook.com/" target="_blank"><Facebook className="hover:text-gray-400 transition" /></Link>
               <Link href="https://instagram.com/" target="_blank"><Instagram className="hover:text-gray-400 transition" /></Link>
-              <Link href="https://youtube.com/" target="_blank"><Youtube className="hover:text-gray-400 transition" /></Link>
+              <Link href="https://www.youtube.com/@kayapalat1622" target="_blank"><Youtube className="hover:text-gray-400 transition" /></Link>
               <Link href="https://linkedin.com/" target="_blank">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor" className="hover:text-gray-400 transition">
                   <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.761 0 5-2.239 5-5v-14c0-2.761-2.239-5-5-5zm-11 19h-3v-10h3v10zm-1.5-11.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764c.966 0 1.75.79 1.75 1.764s-.784 1.764-1.75 1.764zm13.5 11.268h-3v-5.604c0-1.337-.026-3.06-1.863-3.06-1.865 0-2.153 1.457-2.153 2.963v5.701h-3v-10h2.877v1.368h.041c.4-.758 1.378-1.559 2.836-1.559 3.033 0 3.604 1.994 3.604 4.589v5.602z" />

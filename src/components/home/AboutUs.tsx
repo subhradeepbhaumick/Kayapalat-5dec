@@ -114,7 +114,7 @@ const AboutUs = () => {
             <div className="flex gap-6 mt-3 text-2xl">
               <Link href="https://facebook.com/" target="_blank"><Facebook className="hover:text-[#00423D] transition" /></Link>
               <Link href="https://instagram.com/" target="_blank"><Instagram className="hover:text-[#00423D] transition" /></Link>
-              <Link href="https://youtube.com/" target="_blank"><Youtube className="hover:text-[#00423D] transition" /></Link>
+              <Link href="https://www.youtube.com/@kayapalat1622" target="_blank"><Youtube className="hover:text-[#00423D] transition" /></Link>
               <Link href="https://linkedin.com/" target="_blank"><Linkedin className="hover:text-[#00423D] transition" /></Link>
             </div>
           </div>
