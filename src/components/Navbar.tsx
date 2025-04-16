@@ -7,22 +7,23 @@ import { Menu, X, User } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import axios from "axios";
 import { toast } from "react-hot-toast";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function Navbar() {
   const router = useRouter();
   const pathname = usePathname();
-  
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isClient, setIsClient] = useState(false);
+  const [citiesOpen, setCitiesOpen] = useState(false);
 
-  // Ensure this runs only on client side
   useEffect(() => {
     setIsClient(true);
     const cookies = document.cookie.split("; ");
-    console.log("Cookies:", cookies); // Debugging line to check cookies
-    const loggedInCookie = cookies.find((cookie) => cookie.startsWith("loggedIn="));
+    const loggedInCookie = cookies.find((cookie) =>
+      cookie.startsWith("loggedIn=")
+    );
     const loggedIn = loggedInCookie?.split("=")[1] === "true";
     setIsLoggedIn(loggedIn);
   }, []);
@@ -31,7 +32,7 @@ export default function Navbar() {
     try {
       await axios.get("/api/users/logout");
       toast.success("Logout successful");
-      document.cookie = "loggedIn=false; path=/"; // Update cookie state
+      document.cookie = "loggedIn=false; path=/";
       setIsLoggedIn(false);
       router.push("/login");
       window.location.reload();
@@ -40,14 +41,18 @@ export default function Navbar() {
     }
   };
 
-  // Prevent SSR mismatch by ensuring rendering happens only on client
-  if (!isClient) {
-    return null;
-  }
+  const [citiesTimeout, setCitiesTimeout] = useState<NodeJS.Timeout | null>(null);
+  const dropdownVariants = {
+    hidden: { opacity: 0, y: -10 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.2, ease: "easeOut" } },
+    exit: { opacity: 0, y: -10, transition: { duration: 0.15 } },
+  };
+
+  if (!isClient) return null;
 
   return (
     <nav className="fixed top-0 w-full bg-[#D7E7D0] shadow-md px-4 py-2 flex items-center justify-between z-50 h-14">
-      {/* Left Section - Logo & Sidebar */}
+      {/* Logo and Sidebar Button */}
       <div className="flex items-center gap-3">
         <button
           onClick={() => setSidebarOpen(true)}
@@ -66,33 +71,99 @@ export default function Navbar() {
         </Link>
       </div>
 
-      {/* Center Navigation - Desktop Only */}
+      {/* Center Navigation */}
       <ul className="hidden lg:flex gap-5 text-gray-700 font-medium text-sm">
-        {["Home", "Dashboard", "Gallery", "How it Works", "Our Designers", "Branding Partners", "Contact Us"].map(
-          (name, index) => {
-            const linkPath =
-              name === "Home" ? "/" : `/${name.toLowerCase().replace(/ /g, "-")}`;
-            const isActive = pathname.replace(/\/$/, "") === linkPath.replace(/\/$/, "");
-            return (
-              <li key={index} className="relative group">
-                <Link
-                  href={linkPath}
-                  className={`transition ${isActive ? "text-[#295A47]" : "hover:text-[#295A47]"}`}
-                >
-                  {name}
-                  <span
-                    className={`absolute left-0 bottom-0 h-[1px] bg-[#295A47]/80 transition-all duration-300 ${
-                      isActive ? "w-full" : "w-0 group-hover:w-full"
+        <li className="relative group">
+          <Link
+            href="/about"
+            className={`transition ${pathname === "/about"
+              ? "text-[#295A47]"
+              : "hover:text-[#295A47]"
+              }`}
+          >
+            About
+            <span
+              className={`absolute left-0 bottom-0 h-[1px] bg-[#295A47]/80 transition-all duration-300 ${pathname === "/about" ? "w-full" : "w-0 group-hover:w-full"
+                }`}
+            ></span>
+          </Link>
+        </li>
+
+        {/* Cities Hover Dropdown */}
+        <li
+          className="relative group"
+          onMouseEnter={() => {
+            if (citiesTimeout) clearTimeout(citiesTimeout);
+            setCitiesOpen(true);
+          }}
+          onMouseLeave={() => {
+            const timeout = setTimeout(() => {
+              setCitiesOpen(false);
+            }, 200);
+            setCitiesTimeout(timeout);
+          }}
+        >
+          <button className="transition cursor-pointer hover:text-[#295A47] flex items-center gap-1">
+            Cities ▾
+          </button>
+
+          <AnimatePresence>
+            {citiesOpen && (
+              <motion.ul
+                initial="hidden"
+                animate="visible"
+                exit="exit"
+                variants={dropdownVariants}
+                className="absolute top-full mt-1 left-0 bg-white shadow-md rounded-md py-4 px-6 w-[500px] z-50 grid grid-cols-4 gap-1"
+              >
+                {["Delhi", "Bangalore", "Mumbai", "Hyderabad","Chennai","Tamil Nadu ", "Kolkata"].map((city, idx) => (
+                  <li key={idx}>
+                    <Link
+                      href={`/cities/${city.toLowerCase()}`}
+                      className="block px-2 py-1 text-gray-700 hover:bg-[#295A47]/10 hover:text-[#295A47]"
+                    >
+                      {city}
+                    </Link>
+                  </li>
+                ))}
+              </motion.ul>
+            )}
+          </AnimatePresence>
+        </li>
+
+
+        {/* Other Links */}
+        {[
+          "Gallery",
+          "How it Works",
+          "Our Designers",
+          "Careers",
+          "Branding Partners",
+          "Contact Us",
+          "Shop",
+        ].map((name, index) => {
+          const linkPath = `/${name.toLowerCase().replace(/ /g, "-")}`;
+          const isActive =
+            pathname.replace(/\/$/, "") === linkPath.replace(/\/$/, "");
+          return (
+            <li key={index} className="relative group">
+              <Link
+                href={linkPath}
+                className={`transition ${isActive ? "text-[#295A47]" : "hover:text-[#295A47]"
+                  }`}
+              >
+                {name}
+                <span
+                  className={`absolute left-0 bottom-0 h-[1px] bg-[#295A47]/80 transition-all duration-300 ${isActive ? "w-full" : "w-0 group-hover:w-full"
                     }`}
-                  ></span>
-                </Link>
-              </li>
-            );
-          }
-        )}
+                ></span>
+              </Link>
+            </li>
+          );
+        })}
       </ul>
 
-      {/* Right Section - Auth Buttons / Profile */}
+      {/* Right Section */}
       <div className="flex gap-2 relative">
         {isLoggedIn ? (
           <div className="relative">
@@ -104,7 +175,10 @@ export default function Navbar() {
             </button>
             {dropdownOpen && (
               <div className="absolute right-0 mt-2 w-32 bg-white shadow-lg rounded-md text-sm py-1">
-                <Link href="/profile" className="block px-4 py-2 hover:bg-gray-100">
+                <Link
+                  href="/profile"
+                  className="block px-4 py-2 hover:bg-gray-100"
+                >
                   Profile
                 </Link>
                 <button
@@ -134,50 +208,113 @@ export default function Navbar() {
         )}
       </div>
 
-      {/* Sidebar for Mobile */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black/30 backdrop-blur-sm z-50 h-screen overflow-hidden"
-          onClick={() => setSidebarOpen(false)}
-        >
-          <div
-            className="fixed left-0 top-0 w-56 bg-white/20 backdrop-blur-lg shadow-lg p-4 rounded-r-2xl flex flex-col gap-3 text-white h-full"
-            onClick={(e) => e.stopPropagation()}
+      {/* Sidebar */}
+      <AnimatePresence>
+        {sidebarOpen && (
+          <motion.div
+            className="fixed inset-0 bg-black/30 backdrop-blur-sm z-50 h-screen"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setSidebarOpen(false)}
           >
-            <button
-              onClick={() => setSidebarOpen(false)}
-              className="absolute top-3 right-4 text-white"
+            <motion.div
+              initial={{ x: -300 }}
+              animate={{ x: 0 }}
+              exit={{ x: -300 }}
+              transition={{ type: "spring", stiffness: 260, damping: 20 }}
+              className="fixed left-0 top-0 w-56 bg-white/20 backdrop-blur-lg shadow-lg p-4 rounded-r-2xl flex flex-col gap-3 text-white h-full"
+              onClick={(e) => e.stopPropagation()}
             >
-              <X size={24} />
-            </button>
-            <h2 className="text-lg font-semibold text-[#D7E7D0] mb-3 border-b border-white/50 pb-2">
-              MENU
-            </h2>
-            <ul className="flex flex-col gap-2">
-              {["Home", "Dashboard", "Gallery", "How it Works", "Our Designers", "Branding Partners", "Contact Us"].map(
-                (name, index) => {
-                  const linkPath =
-                    name === "Home" ? "/" : `/${name.toLowerCase().replace(/ /g, "-")}`;
-                  const isActive = pathname.replace(/\/$/, "") === linkPath.replace(/\/$/, "");
+              <button
+                onClick={() => setSidebarOpen(false)}
+                className="absolute top-3 right-4 text-white"
+              >
+                <X size={24} />
+              </button>
+              <h2 className="text-lg font-semibold text-[#D7E7D0] mb-3 border-b border-white/50 pb-2">
+                MENU
+              </h2>
+              <ul className="flex flex-col gap-2">
+                <li className="border-b border-white/50 pb-1 relative group">
+                  <Link
+                    href="/about"
+                    className="block px-3 py-2 hover:text-[#D7E7D0] transition-transform relative"
+                  >
+                    About
+                    <span className="absolute left-3 bottom-1 h-[1px] w-0 bg-[#D7E7D0]/80 transition-all duration-300 group-hover:w-[90%]"></span>
+                  </Link>
+                </li>
+
+                {/* Cities Dropdown in Sidebar */}
+                <li className="border-b border-white/50 pb-1">
+                  <button
+                    onClick={() => setCitiesOpen(!citiesOpen)}
+                    className="block w-full text-left px-3 py-2 hover:text-[#D7E7D0] transition-transform relative group"
+                  >
+                    Cities ▾
+                    <span className="absolute left-3 bottom-1 h-[1px] w-0 bg-[#D7E7D0]/80 transition-all duration-300 group-hover:w-[90%]"></span>
+                  </button>
+                  {citiesOpen && (
+                    <ul className="ml-4 mt-1">
+                      {[
+                        "Delhi",
+                        "Bangalore",
+                        "Mumbai",
+                        "Hyderabad",
+                        "Kolkata",
+                      ].map((city, idx) => (
+                        <li key={idx} className="relative group">
+                          <Link
+                            href={`/cities/${city.toLowerCase()}`}
+                            className="block px-4 py-1 text-sm hover:text-[#D7E7D0] relative"
+                          >
+                            {city}
+                            <span className="absolute left-4 bottom-0 h-[1px] w-0 bg-[#D7E7D0]/80 transition-all duration-300 group-hover:w-3/4"></span>
+                          </Link>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </li>
+
+                {/* Sidebar Links */}
+                {[
+                  "Gallery",
+                  "How it Works",
+                  "Our Designers",
+                  "Careers",
+                  "Branding Partners",
+                  "Contact Us",
+                  "Shop",
+                ].map((name, index) => {
+                  const linkPath = `/${name
+                    .toLowerCase()
+                    .replace(/ /g, "-")}`;
+                  const isActive =
+                    pathname.replace(/\/$/, "") ===
+                    linkPath.replace(/\/$/, "");
                   return (
                     <li
                       key={index}
-                      className={`border-b border-white/50 pb-1 ${isActive ? "text-[#D7E7D0]" : ""}`}
+                      className={`border-b border-white/50 pb-1 relative group ${isActive ? "text-[#D7E7D0]" : ""
+                        }`}
                     >
                       <Link
                         href={linkPath}
-                        className="block px-3 py-2 hover:scale-105 transition-transform"
+                        className="block px-3 py-2 hover:text-[#D7E7D0] transition-transform relative"
                       >
                         {name}
+                        <span className="absolute left-3 bottom-1 h-[1px] w-0 bg-[#D7E7D0]/80 transition-all duration-300 group-hover:w-[90%]"></span>
                       </Link>
                     </li>
                   );
-                }
-              )}
-            </ul>
-          </div>
-        </div>
-      )}
+                })}
+              </ul>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </nav>
   );
 }

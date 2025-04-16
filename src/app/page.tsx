@@ -7,6 +7,7 @@ import  ClientChronicles  from "@/components/home/ClientChronicles";
 import  HowWeWork  from "@/components/home/HowWeWork";
 import  OurBlogs  from "@/components/home/OurBlogs";
 import  HappinessGuarantee  from "@/components/home/HappinessGuarantee";
+import  FAQ  from "@/components/home/FAQ";
 
 export default function Home() {
   return (
@@ -19,6 +20,7 @@ export default function Home() {
       <ClientChronicles />
       <HowWeWork />
       <OurBlogs />
+      <FAQ />
       <HappinessGuarantee />
     </main>
   );
