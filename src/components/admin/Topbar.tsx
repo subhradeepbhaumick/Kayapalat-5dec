@@ -7,9 +7,12 @@ import { useSidebar } from "@/components/SidebarProvider";
 
 function formatTitle(pathname: string): string {
   const segments = pathname.split("/").filter(Boolean);
-  if (segments.length === 1 && segments[segments.length - 1] === "admin") return "";
+  if (segments.length === 1 && segments[segments.length - 1] === "admin") return "Welcome to Admin Panel";
+  if (segments.length === 0) return "Welcome to Admin Panel";
   const page = segments[segments.length - 1];
   if (page === "callback-request") return "Callback Requests";
+  if (page === "faqs") return "FAQs";
+  if (page === "seo") return "Search Engine Optimisation (SEO)";
   return `${page.charAt(0).toUpperCase() + page.slice(1)}`;
 }
 

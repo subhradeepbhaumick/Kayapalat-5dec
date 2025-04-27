@@ -13,6 +13,7 @@ import {
   Newspaper,
   ClipboardList,
   Globe,
+  HelpCircle,
   LogOut,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -33,8 +34,10 @@ const navGroups = [
     links: [
       { label: "Designs", icon: Brush, href: "/admin/designs" },
       { label: "Galleries", icon: GalleryHorizontal, href: "/admin/galleries" },
+      { label: "FAQs", icon: HelpCircle, href: "/admin/faqs" } ,
       { label: "Blogs", icon: Newspaper, href: "/admin/blogs" },
-      { label: "SEO", icon: Globe, href: "/admin/seo" },
+      { label: "SEO", icon: Globe, href: "/admin/seo" }
+      
     ],
   },
   {
