@@ -14,6 +14,7 @@ export default function SignupPage() {
         username: "",
         phone: "",
         about: "",
+        joinAs: "client", // Default value
     });
     const [buttonDisabled, setButtonDisabled] = useState(true);
     const [loading, setLoading] = useState(false);
@@ -21,6 +22,8 @@ export default function SignupPage() {
     const [passwordMismatch, setPasswordMismatch] = useState(false);
     const [passwordTooShort, setPasswordTooShort] = useState(false);
     const [termsAccepted, setTermsAccepted] = useState(false);
+    const [isTermsLoading, setIsTermsLoading] = useState(false);
+    const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
     // Error states for validations
     const [emailError, setEmailError] = useState("");
@@ -30,6 +33,31 @@ export default function SignupPage() {
     // Regex patterns for validations
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const phonePattern = /^\d{10}$/;
+
+    const options = [
+        { value: "client", label: "Client", icon: (
+            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+            </svg>
+        )},
+        { value: "designer", label: "Designer", icon: (
+            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path>
+            </svg>
+        )},
+        { value: "business_partner", label: "Business Partner", icon: (
+            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+            </svg>
+        )},
+        { value: "refer_earn_partner", label: "Refer & Earn Partner", icon: (
+            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+        )}
+    ];
+
+    const selectedOption = options.find(opt => opt.value === user.joinAs);
 
     // Check password length and mismatch dynamically
     useEffect(() => {
@@ -132,6 +160,15 @@ export default function SignupPage() {
         }
     };
 
+    const handleTermsAccept = () => {
+        setIsTermsLoading(true);
+        // Simulate a loading state for 500ms before accepting terms
+        setTimeout(() => {
+            setTermsAccepted(!termsAccepted);
+            setIsTermsLoading(false);
+        }, 500);
+    };
+
     return (
         <div className="flex flex-col items-center justify-center min-h-screen bg-[#D2EBD0] sm:bg-[#E8F5E9] transition-all duration-300 p-6 py-25 ">
             <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md border border-gray-200 transition-all duration-300">
@@ -155,6 +192,48 @@ export default function SignupPage() {
                         onChange={(e) => setUser({ ...user, username: e.target.value })}
                         placeholder="Enter username"
                     />
+
+                    {/* Join As */}
+                    <label htmlFor="joinAs" className="mb-1 text-sm text-gray-700">
+                        Join As <span className="text-red-500">*</span>
+                    </label>
+                    <div className="relative mb-4 group">
+                        <div 
+                            className="appearance-none p-3 pr-10 border border-gray-300 rounded-lg bg-white text-black focus:outline-none focus:border-teal-500 w-full cursor-pointer transition-all duration-300 hover:border-teal-500 hover:shadow-md"
+                            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                        >
+                            <div className="flex items-center">
+                                {selectedOption?.icon}
+                                <span>{selectedOption?.label}</span>
+                            </div>
+                        </div>
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                            <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                                <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+                            </svg>
+                        </div>
+                        {isDropdownOpen && (
+                            <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg overflow-hidden">
+                                {options.map((option) => (
+                                    <div
+                                        key={option.value}
+                                        className={`flex items-center p-3 cursor-pointer transition-all duration-200 transform hover:scale-[1.02] ${
+                                            user.joinAs === option.value 
+                                                ? 'bg-teal-50' 
+                                                : 'hover:bg-teal-100'
+                                        }`}
+                                        onClick={() => {
+                                            setUser({ ...user, joinAs: option.value });
+                                            setIsDropdownOpen(false);
+                                        }}
+                                    >
+                                        {option.icon}
+                                        <span>{option.label}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
 
                     {/* Email */}
                     <label htmlFor="email" className="mb-1 text-sm text-gray-700">
@@ -248,16 +327,32 @@ export default function SignupPage() {
 
                     {/* Terms and Conditions */}
                     <div className="flex items-center mb-4">
-                        <input
-                            type="checkbox"
-                            id="terms"
-                            checked={termsAccepted}
-                            onChange={() => setTermsAccepted(!termsAccepted)}
-                            className="w-5 h-5 mr-2 cursor-pointer"
-                        />
+                        <div className="relative flex items-center">
+                            <input
+                                type="checkbox"
+                                id="terms"
+                                checked={termsAccepted}
+                                onChange={handleTermsAccept}
+                                className="w-5 h-5 mr-2 cursor-pointer opacity-0 absolute z-10"
+                            />
+                            {!isTermsLoading && (
+                                <div className={`w-5 h-5 border-2 rounded ${termsAccepted ? 'border-teal-500 bg-teal-500' : 'border-gray-300'} flex items-center justify-center transition-all duration-300`}>
+                                    {termsAccepted && (
+                                        <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7"></path>
+                                        </svg>
+                                    )}
+                                </div>
+                            )}
+                            {isTermsLoading && (
+                                <div className="w-5 h-5 flex items-center justify-center">
+                                    <div className="w-4 h-4 border-2 border-t-transparent border-teal-500 rounded-full animate-spin"></div>
+                                </div>
+                            )}
+                        </div>
                         <label
                             htmlFor="terms"
-                            className="text-sm text-gray-700 cursor-pointer"
+                            className="text-sm text-gray-700 cursor-pointer ml-2"
                         >
                             I accept the {" "}
                             <Link
@@ -266,7 +361,7 @@ export default function SignupPage() {
                             >
                                 Terms & Conditions
                             </Link>
-                          <span className="text-red-500">*</span>
+                            <span className="text-red-500">*</span>
                         </label>
                     </div>
 

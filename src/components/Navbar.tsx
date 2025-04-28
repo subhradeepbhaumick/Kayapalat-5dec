@@ -1,41 +1,79 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Menu, X, User } from "lucide-react";
+import { Menu, X, User, LayoutDashboard, LogOut, UserCircle } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "@/context/AuthContext";
 
 export default function Navbar() {
   const router = useRouter();
   const pathname = usePathname();
+  const { isLoggedIn, setIsLoggedIn, checkAuth } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isClient, setIsClient] = useState(false);
   const [citiesOpen, setCitiesOpen] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
+  const lastScrollY = useRef(0);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setIsClient(true);
-    const cookies = document.cookie.split("; ");
-    const loggedInCookie = cookies.find((cookie) =>
-      cookie.startsWith("loggedIn=")
-    );
-    const loggedIn = loggedInCookie?.split("=")[1] === "true";
-    setIsLoggedIn(loggedIn);
+    checkAuth();
+    console.log("Navbar mounted - isLoggedIn:", isLoggedIn);
+  }, []);
+
+  // Check auth state on pathname change and periodically
+  useEffect(() => {
+    checkAuth();
+    console.log("Pathname changed - isLoggedIn:", isLoggedIn);
+    
+    // Set up periodic auth check
+    const interval = setInterval(() => {
+      checkAuth();
+    }, 5000); // Check every 5 seconds
+
+    return () => clearInterval(interval);
+  }, [pathname]);
+
+  // Add a visibility check for the user icon
+  useEffect(() => {
+    if (isLoggedIn) {
+      console.log("User is logged in, showing user icon");
+    }
+  }, [isLoggedIn]);
+
+  useEffect(() => {
+    const controlNavbar = () => {
+      const currentScrollY = window.scrollY;
+      
+      if (currentScrollY < lastScrollY.current || currentScrollY < 100) {
+        setIsVisible(true);
+      } else {
+        setIsVisible(false);
+      }
+      
+      lastScrollY.current = currentScrollY;
+    };
+
+    window.addEventListener('scroll', controlNavbar);
+    return () => {
+      window.removeEventListener('scroll', controlNavbar);
+    };
   }, []);
 
   const logout = async () => {
     try {
       await axios.get("/api/users/logout");
       toast.success("Logout successful");
-      document.cookie = "loggedIn=false; path=/";
+      document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
       setIsLoggedIn(false);
       router.push("/login");
-      window.location.reload();
     } catch (error: any) {
       toast.error(error.message);
     }
@@ -48,10 +86,28 @@ export default function Navbar() {
     exit: { opacity: 0, y: -10, transition: { duration: 0.15 } },
   };
 
+  // Close dropdown on outside click
+  useEffect(() => {
+    if (!dropdownOpen) return;
+    function handleClickOutside(event: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [dropdownOpen]);
+
   if (!isClient) return null;
 
+  console.log("Rendering Navbar - isLoggedIn:", isLoggedIn);
+
   return (
-    <nav className="fixed top-0 w-full bg-[#D7E7D0] shadow-md px-4 py-2 flex items-center justify-between z-50 h-14">
+    <nav 
+      className={`fixed top-0 w-full bg-[#D7E7D0] shadow-md px-4 py-2 flex items-center justify-between z-50 h-14 transition-transform duration-300 ease-out ${
+        isVisible ? 'translate-y-0' : '-translate-y-full'
+      }`}
+    >
       {/* Logo and Sidebar Button */}
       <div className="flex items-center gap-3">
         <button
@@ -166,26 +222,37 @@ export default function Navbar() {
       {/* Right Section */}
       <div className="flex gap-2 relative">
         {isLoggedIn ? (
-          <div className="relative">
+          <div className="relative" ref={dropdownRef}>
             <button
-              className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center hover:bg-gray-400"
+              className="w-10 h-10 rounded-full bg-[#295A47] flex items-center justify-center hover:bg-[#1e3d32] transition-colors cursor-pointer"
               onClick={() => setDropdownOpen(!dropdownOpen)}
             >
-              <User size={20} />
+              <User size={20} className="text-white" />
             </button>
             {dropdownOpen && (
-              <div className="absolute right-0 mt-2 w-32 bg-white shadow-lg rounded-md text-sm py-1">
+              <div className="absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-md text-sm py-1 border border-gray-200">
                 <Link
                   href="/profile"
-                  className="block px-4 py-2 hover:bg-gray-100"
+                  className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-[#295A47]/10 hover:text-[#295A47] cursor-pointer transition-all duration-200 hover:scale-105"
+                  onClick={() => setDropdownOpen(false)}
                 >
+                  <UserCircle size={16} />
                   Profile
                 </Link>
-                <button
-                  onClick={logout}
-                  className="w-full text-left px-4 py-2 hover:bg-gray-100"
+                <Link
+                  href="/dashboard"
+                  className="flex items-center gap-2 px-4 py-2 text-gray-700 hover:bg-[#295A47]/10 hover:text-[#295A47] cursor-pointer transition-all duration-200 hover:scale-105"
+                  onClick={() => setDropdownOpen(false)}
                 >
-                  Logout
+                  <LayoutDashboard size={16} />
+                  Dashboard
+                </Link>
+                <button
+                  onClick={() => { setDropdownOpen(false); logout(); }}
+                  className="flex items-center gap-2 w-full text-left px-4 py-2 text-gray-700 hover:bg-[#295A47]/10 hover:text-[#295A47] cursor-pointer transition-all duration-200 hover:scale-105"
+                >
+                  <LogOut size={16} />
+                  Sign Out
                 </button>
               </div>
             )}

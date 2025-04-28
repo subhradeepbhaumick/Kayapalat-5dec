@@ -4,9 +4,11 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { toast } from "react-hot-toast";
+import { useAuth } from "@/context/AuthContext";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { isLoggedIn, setIsLoggedIn } = useAuth();
   const [user, setUser] = useState({
     email: "",
     password: "",
@@ -15,6 +17,19 @@ export default function LoginPage() {
   const [buttonDisabled, setButtonDisabled] = useState(true);
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [authChecked, setAuthChecked] = useState(false);
+
+  // Wait for auth check before rendering
+  useEffect(() => {
+    setAuthChecked(true);
+  }, []);
+
+  // Redirect if already logged in
+  useEffect(() => {
+    if (authChecked && isLoggedIn) {
+      router.push("/");
+    }
+  }, [isLoggedIn, router, authChecked]);
 
   // Handle login submission
   const onLogin = async () => {
@@ -23,18 +38,30 @@ export default function LoginPage() {
       const response = await axios.post("/api/users/login", user);
       console.log("Login success", response.data);
 
-      // Show welcome toast
-      toast.success("🎉 Welcome back to Kayapalat family!");
-
-      // Redirect to homepage after 2s
-      setTimeout(() => {
-        router.push("/profile");
-      }, 2000);
-      window.location.reload();
+      // Update auth state
+      try {
+        setIsLoggedIn(true);
+        // Show welcome toast
+        toast.success("🎉 Welcome back to Kayapalat family!");
+        // Add a small delay to ensure state updates
+        setTimeout(() => {
+          router.push("/");
+        }, 100);
+      } catch (authError) {
+        console.error("Failed to update auth state:", authError);
+        toast.error("Failed to update authentication state. Please try again.");
+      }
 
     } catch (error: any) {
-      console.error("Login failed", error.message);
-      toast.error(error.response?.data?.message || "Login failed. Try again.");
+      console.error("Login failed", error);
+      if (error.response?.status === 401) {
+        toast.error("Invalid email or password. Please try again.");
+      } else {
+        const errorMessage = error.response?.data?.error || 
+                            error.response?.data?.message || 
+                            "Login failed. Please try again.";
+        toast.error(errorMessage);
+      }
     } finally {
       setLoading(false);
     }
@@ -48,6 +75,14 @@ export default function LoginPage() {
       setButtonDisabled(true);
     }
   }, [user]);
+
+  if (!authChecked) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-[#D2EBD0]">
+        <span className="text-teal-700 text-lg font-semibold">Checking authentication...</span>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-[#D2EBD0] sm:bg-[#E8F5E9] transition-all duration-300 text-black p-6">

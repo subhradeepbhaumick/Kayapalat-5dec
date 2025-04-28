@@ -16,7 +16,12 @@ export async function POST(req: NextRequest) {
     console.log("🔎 Request Body:", reqBody);
      
 
-    const user = await User.findOne({ email });
+    // Use Promise.all to prevent timing attacks
+    const [user, dummyHash] = await Promise.all([
+      User.findOne({ email }),
+      bcrypt.hash('dummy', 10) // Perform a dummy hash operation
+    ]);
+
     if(!user){
       return NextResponse.json({ error: "❗️ User not found" }, { status: 400 });
     }
@@ -25,9 +30,8 @@ export async function POST(req: NextRequest) {
 
     const validPassword = await bcrypt.compare(password, user.password);
 
-
     if(!validPassword){
-      return NextResponse.json({ error: "❗️ Invalid Password" }, { status: 600 });
+      return NextResponse.json({ error: "❗️ Invalid Password" }, { status: 401 });
     }
 
     console.log("🔐 Generating JWT...");
@@ -42,15 +46,41 @@ export async function POST(req: NextRequest) {
     }
     const accessToken = jwt.sign(token, process.env.JWT_SECRET, { expiresIn: "1h" });
 
+    // Create the response
     const response = NextResponse.json({
         message: "🎉 Login Successful",
-        success: true
-    })
-
-    response.cookies.set("token", accessToken, {
-        httpOnly: true,
-        sameSite: "strict",
+        success: true,
+        user: {
+          id: user._id,
+          username: user.username,
+          email: user.email
+        }
     });
+
+    // Set the cookie with proper options
+    response.cookies.set({
+        name: "token",
+        value: accessToken,
+        httpOnly: true,
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+        maxAge: 3600, // 1 hour in seconds
+        path: "/",
+        domain: process.env.NODE_ENV === "production" ? ".kayapalat.com" : "localhost"
+    });
+
+    // Also set a loggedIn cookie for client-side checks
+    response.cookies.set({
+        name: "loggedIn",
+        value: "true",
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+        maxAge: 3600,
+        path: "/",
+        domain: process.env.NODE_ENV === "production" ? ".kayapalat.com" : "localhost"
+    });
+
+    console.log("Cookies set successfully");
 
     return response;
 
