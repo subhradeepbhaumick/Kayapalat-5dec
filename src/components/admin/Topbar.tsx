@@ -1,9 +1,8 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { User, Menu } from "lucide-react";
+import { User } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useSidebar } from "@/components/SidebarProvider";
 
 function formatTitle(pathname: string): string {
   const segments = pathname.split("/").filter(Boolean);
@@ -19,28 +18,22 @@ function formatTitle(pathname: string): string {
 export default function AdminTopbar() {
   const pathname = usePathname();
   const title = formatTitle(pathname);
-  const { open } = useSidebar();
 
   return (
-    <div className="w-full h-16 flex items-center justify-between px-4 md:px-6 border-b shadow-sm bg-white sticky top-0 z-40">
-      {/* Left: Hamburger on mobile */}
-      <div className="flex items-center md:hidden">
-        <Button variant="outline" size="icon" onClick={() => open()}>
-          <Menu className="h-6 w-6" />
-        </Button>
-      </div>
-
-      {/* Center: Title (centered in mobile, aligned left in desktop) */}
-      <div className="pl-65 hidden md:flex">
+    <div className="w-full h-16 flex items-center justify-between px-4 md:px-8 border-b shadow-sm bg-white sticky top-0 z-40">
+      {/* Left: Title */}
+      <div className="hidden md:block">
         {title && (
-          <h1 className="text-2xl text-gray-700" style={{ fontFamily: "'Abril Fatface', cursive" }}>{title}</h1>
+          <h1 className="text-xl md:text-2xl text-gray-700" style={{ fontFamily: "'Abril Fatface', cursive" }}>
+            {title}
+          </h1>
         )}
       </div>
 
-      {/* Right: Admin info (visible on all screens) */}
-      <div className="flex items-center gap-3">
-        <User className="w-8 h-8 text-gray-600 border-2 rounded-full" />
-        <Button className="bg-teal-600 hover:bg-teal-700 text-white rounded-full px-5 py-2 text-sm">
+      {/* Right: Admin info */}
+      <div className="flex items-center gap-2 md:gap-4 ml-auto">
+        <User className="w-6 h-6 md:w-7 md:h-7 text-gray-600 border-2 rounded-full p-1" />
+        <Button className="bg-teal-600 hover:bg-teal-700 text-white rounded-full px-3 md:px-4 py-1.5 text-xs md:text-sm border-2 border-teal-700">
           Kayapalat Admin
         </Button>
       </div>
