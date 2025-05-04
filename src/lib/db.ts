@@ -56,6 +56,25 @@ async function initializeDatabase() {
     `);
     console.log('Blogs table checked/created successfully');
 
+    // Create users table if it doesn't exist
+    await connection.execute(`
+      CREATE TABLE IF NOT EXISTS users (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        type ENUM('owner', 'client') NOT NULL DEFAULT 'client',
+        first_name VARCHAR(255) NOT NULL,
+        last_name VARCHAR(255) NOT NULL,
+        email VARCHAR(255) NOT NULL UNIQUE,
+        password VARCHAR(255) NOT NULL,
+        phone VARCHAR(20) NOT NULL,
+        address TEXT,
+        message TEXT,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+        deleted_at TIMESTAMP NULL DEFAULT NULL
+      )
+    `);
+    console.log('Users table checked/created successfully');
+
     connection.release();
   } catch (error: any) {
     console.error('Database initialization error:', {

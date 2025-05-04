@@ -4,13 +4,13 @@ import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { toast } from "react-hot-toast";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { isLoggedIn, setIsLoggedIn } = useAuth();
+  const { isAuthenticated, login } = useAuth();
   const [user, setUser] = useState({
-    email: "",
+    login: "",
     password: "",
   });
 
@@ -26,41 +26,47 @@ export default function LoginPage() {
 
   // Redirect if already logged in
   useEffect(() => {
-    if (authChecked && isLoggedIn) {
+    if (authChecked && isAuthenticated) {
       router.push("/");
     }
-  }, [isLoggedIn, router, authChecked]);
+  }, [isAuthenticated, router, authChecked]);
 
   // Handle login submission
   const onLogin = async () => {
     try {
       setLoading(true);
       const response = await axios.post("/api/users/login", user);
-      console.log("Login success", response.data);
-
-      // Update auth state
-      try {
-        setIsLoggedIn(true);
+      
+      if (response.data.success) {
+        // Update auth state
+        login(response.data.user);
         // Show welcome toast
         toast.success("🎉 Welcome back to Kayapalat family!");
         // Add a small delay to ensure state updates
         setTimeout(() => {
           router.push("/");
         }, 100);
-      } catch (authError) {
-        console.error("Failed to update auth state:", authError);
-        toast.error("Failed to update authentication state. Please try again.");
+      } else {
+        if (response.data.code === "USER_NOT_FOUND") {
+          toast.error("No account found with that email or username.");
+        } else if (response.data.code === "WRONG_PASSWORD") {
+          toast.error("Incorrect password for this account.");
+        } else {
+          toast.error(response.data.error || "Login failed. Please try again.");
+        }
       }
-
     } catch (error: any) {
       console.error("Login failed", error);
-      if (error.response?.status === 401) {
-        toast.error("Invalid email or password. Please try again.");
+      if (error.response?.data?.error) {
+        if (error.response.data.code === "USER_NOT_FOUND") {
+          toast.error("No account found with that email or username.");
+        } else if (error.response.data.code === "WRONG_PASSWORD") {
+          toast.error("Incorrect password for this account.");
+        } else {
+          toast.error(error.response.data.error);
+        }
       } else {
-        const errorMessage = error.response?.data?.error || 
-                            error.response?.data?.message || 
-                            "Login failed. Please try again.";
-        toast.error(errorMessage);
+        toast.error("Login failed. Please try again.");
       }
     } finally {
       setLoading(false);
@@ -69,7 +75,7 @@ export default function LoginPage() {
 
   // Disable button if fields are empty
   useEffect(() => {
-    if (user.email.length > 0 && user.password.length > 0) {
+    if (user.login.length > 0 && user.password.length > 0) {
       setButtonDisabled(false);
     } else {
       setButtonDisabled(true);
@@ -97,17 +103,17 @@ export default function LoginPage() {
 
         {/* Login Form */}
         <div className="flex flex-col">
-          {/* Email */}
-          <label htmlFor="email" className="mb-1 text-sm text-gray-700">
-            Email
+          {/* Email or Username */}
+          <label htmlFor="login" className="mb-1 text-sm text-gray-700">
+            Email or Username
           </label>
           <input
             className="p-3 border border-gray-300 rounded-lg mb-4 bg-white text-black focus:outline-none focus:border-teal-500"
-            id="email"
-            type="email"
-            value={user.email}
-            onChange={(e) => setUser({ ...user, email: e.target.value })}
-            placeholder="Enter email"
+            id="login"
+            type="text"
+            value={user.login}
+            onChange={(e) => setUser({ ...user, login: e.target.value })}
+            placeholder="Enter email or username"
           />
 
           {/* Password */}
@@ -136,6 +142,13 @@ export default function LoginPage() {
             >
               {showPassword ? "🙈" : "👁️"}
             </button>
+          </div>
+
+          {/* Forgot Password Link */}
+          <div className="mb-4 text-right">
+            <Link href="/forgot-password" className="text-sm text-teal-600 hover:underline">
+              Forgot password?
+            </Link>
           </div>
 
           {/* Login Button */}

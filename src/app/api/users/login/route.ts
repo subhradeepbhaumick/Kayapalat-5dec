@@ -2,12 +2,14 @@ import { executeQuery } from '@/lib/db';
 import { NextRequest, NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import { debug } from 'console';
 
 interface User {
   id: number;
-  type: string;
+  role: string;
   first_name: string;
   last_name: string;
+  username: string;
   email: string;
   password: string;
   phone: string;
@@ -18,33 +20,50 @@ interface User {
 export async function POST(req: NextRequest) {
   try {
     const reqBody = await req.json();
-    const { email, password } = reqBody;
-    console.log("🔎 Request Body:", reqBody);
+    const { login, password } = reqBody;
+    console.log("🔎 Login attempt for:", login);
 
-    // Find user by email
+    // Find user by email or username
     const [users] = await executeQuery<User>(
-      'SELECT * FROM users WHERE email = ? AND deleted_at IS NULL',
-      [email]
+      'SELECT * FROM users WHERE (email = ? OR username = ?) AND deleted_at IS NULL',
+      [login, login]
     );
 
     if (!users || users.length === 0) {
-      return NextResponse.json({ error: "❗️ User not found" }, { status: 400 });
+      console.log("❌ User not found");
+      return NextResponse.json({ 
+        error: "No account found with that email or username.",
+        code: "USER_NOT_FOUND",
+        success: false 
+      }, { status: 401 });
     }
 
     const user = users[0];
-    console.log("User found");
-
+    console.log("✅ User found");
+    console.log("🔍 Password comparison details:");
+    console.log("Input password:", password);
+    console.log("Stored hash:", user.password);
+    console.log("Hash length:", user.password.length);
+    console.log("Hash type:", typeof user.password);
+    
     const validPassword = await bcrypt.compare(password, user.password);
-
+    console.log("Password comparison result:", validPassword);
     if (!validPassword) {
-      return NextResponse.json({ error: "❗️ Invalid Password" }, { status: 401 });
+      console.log("❌ Invalid password");
+      return NextResponse.json({ 
+        error: "Incorrect password for this account.",
+        code: "WRONG_PASSWORD",
+        success: false 
+      }, { status: 401 });
     }
 
     console.log("🔐 Generating JWT...");
     const token = {
       id: user.id,
       email: user.email,
-      type: user.type
+      username: user.username,
+      role: user.role,
+      name: `${user.first_name} ${user.last_name}`
     };
 
     if (!process.env.JWT_SECRET) {
@@ -59,7 +78,10 @@ export async function POST(req: NextRequest) {
       user: {
         id: user.id,
         email: user.email,
-        type: user.type
+        username: user.username,
+        role: user.role,
+        name: `${user.first_name} ${user.last_name}`,
+        phone: user.phone
       }
     });
 
@@ -86,15 +108,12 @@ export async function POST(req: NextRequest) {
       domain: process.env.NODE_ENV === "production" ? ".kayapalat.com" : "localhost"
     });
 
-    console.log("Cookies set successfully");
-
     return response;
-
   } catch (error: any) {
-    console.error("❗️ Internal Server Error:", error.message);
-    return NextResponse.json(
-      { error: error.message || "Internal Server Error" },
-      { status: 500 }
-    );
+    console.error("❗️ Login error:", error);
+    return NextResponse.json({ 
+      error: "An error occurred during login. Please try again.",
+      success: false 
+    }, { status: 500 });
   }
 }
