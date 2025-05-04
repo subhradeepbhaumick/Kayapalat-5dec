@@ -8,12 +8,12 @@ import { usePathname, useRouter } from "next/navigation";
 import axios from "axios";
 import { toast } from "react-hot-toast";
 import { motion, AnimatePresence } from "framer-motion";
-import { useAuth } from "@/context/AuthContext";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function Navbar() {
   const router = useRouter();
   const pathname = usePathname();
-  const { isLoggedIn, setIsLoggedIn, checkAuth } = useAuth();
+  const { isAuthenticated, user, logout } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [isClient, setIsClient] = useState(false);
@@ -24,29 +24,7 @@ export default function Navbar() {
 
   useEffect(() => {
     setIsClient(true);
-    checkAuth();
-    console.log("Navbar mounted - isLoggedIn:", isLoggedIn);
   }, []);
-
-  // Check auth state on pathname change and periodically
-  useEffect(() => {
-    checkAuth();
-    console.log("Pathname changed - isLoggedIn:", isLoggedIn);
-    
-    // Set up periodic auth check
-    const interval = setInterval(() => {
-      checkAuth();
-    }, 5000); // Check every 5 seconds
-
-    return () => clearInterval(interval);
-  }, [pathname]);
-
-  // Add a visibility check for the user icon
-  useEffect(() => {
-    if (isLoggedIn) {
-      console.log("User is logged in, showing user icon");
-    }
-  }, [isLoggedIn]);
 
   useEffect(() => {
     const controlNavbar = () => {
@@ -67,15 +45,18 @@ export default function Navbar() {
     };
   }, []);
 
-  const logout = async () => {
+  const handleLogout = async () => {
     try {
-      await axios.get("/api/users/logout");
-      toast.success("Logout successful");
-      document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-      setIsLoggedIn(false);
-      router.push("/login");
-    } catch (error: any) {
-      toast.error(error.message);
+      const response = await fetch('/api/auth/logout', {
+        method: 'POST',
+      });
+      
+      if (response.ok) {
+        logout();
+        router.push('/login');
+      }
+    } catch (error) {
+      console.error('Logout failed:', error);
     }
   };
 
@@ -99,8 +80,6 @@ export default function Navbar() {
   }, [dropdownOpen]);
 
   if (!isClient) return null;
-
-  console.log("Rendering Navbar - isLoggedIn:", isLoggedIn);
 
   return (
     <nav 
@@ -221,7 +200,7 @@ export default function Navbar() {
 
       {/* Right Section */}
       <div className="flex gap-2 relative">
-        {isLoggedIn ? (
+        {isAuthenticated ? (
           <div className="relative" ref={dropdownRef}>
             <button
               className="w-10 h-10 rounded-full bg-[#295A47] flex items-center justify-center hover:bg-[#1e3d32] transition-colors cursor-pointer"
@@ -248,7 +227,7 @@ export default function Navbar() {
                   Dashboard
                 </Link>
                 <button
-                  onClick={() => { setDropdownOpen(false); logout(); }}
+                  onClick={() => { setDropdownOpen(false); handleLogout(); }}
                   className="flex items-center gap-2 w-full text-left px-4 py-2 text-gray-700 hover:bg-[#295A47]/10 hover:text-[#295A47] cursor-pointer transition-all duration-200 hover:scale-105"
                 >
                   <LogOut size={16} />

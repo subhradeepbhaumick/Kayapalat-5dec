@@ -1,24 +1,64 @@
 import mysql from 'mysql2/promise';
 
-// Create a connection pool
-const pool = mysql.createPool({
+// First create a connection without database to create it if needed
+const initialPool = mysql.createPool({
   host: process.env.DB_HOST || 'localhost',
   user: process.env.DB_USER || 'root',
   password: process.env.DB_PASSWORD || '',
-  database: process.env.DB_NAME || 'kayapalat_keysmat',
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0
 });
 
-// Test the connection
-async function testConnection() {
+// Create database if it doesn't exist
+async function createDatabase() {
   try {
-    const connection = await pool.getConnection();
-    console.log('Successfully connected to MySQL database');
+    const connection = await initialPool.getConnection();
+    await connection.execute(`CREATE DATABASE IF NOT EXISTS ${process.env.DB_NAME || 'kayapalat_db'}`);
+    console.log('Database created/verified successfully');
     connection.release();
   } catch (error: any) {
-    console.error('Error connecting to MySQL database:', {
+    console.error('Database creation error:', error);
+    throw error;
+  }
+}
+
+// Create the main connection pool with the database
+const pool = mysql.createPool({
+  host: process.env.DB_HOST || 'localhost',
+  user: process.env.DB_USER || 'root',
+  password: process.env.DB_PASSWORD || '',
+  database: process.env.DB_NAME || 'kayapalat_db',
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
+});
+
+// Test the connection and create tables if they don't exist
+async function initializeDatabase() {
+  try {
+    // First create the database
+    await createDatabase();
+
+    // Then connect to the database and create tables
+    const connection = await pool.getConnection();
+    console.log('Successfully connected to MySQL database');
+
+    // Create blogs table if it doesn't exist
+    await connection.execute(`
+      CREATE TABLE IF NOT EXISTS blogs (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        title VARCHAR(255) NOT NULL,
+        body TEXT NOT NULL,
+        image VARCHAR(255) NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+    console.log('Blogs table checked/created successfully');
+
+    connection.release();
+  } catch (error: any) {
+    console.error('Database initialization error:', {
       message: error.message,
       code: error.code,
       errno: error.errno,
@@ -29,8 +69,8 @@ async function testConnection() {
   }
 }
 
-// Test the connection when the module is loaded
-testConnection().catch(console.error);
+// Initialize database on startup
+initializeDatabase().catch(console.error);
 
 // Export the pool for use in other files
 export default pool;

@@ -1,72 +1,57 @@
 import nodemailer from 'nodemailer';
-import  User  from '../models/userModel';
-import bcrypt from 'bcryptjs';
 
-// Email content variables
-const getVerifyEmailContent = (hashedToken: string) => `
-  <p>Click <a href="${process.env.DOMAIN}/verifyemail?token=${hashedToken}">here</a> to verify your email.OR
-  <br>
-  Copy and paste this token in the website to verify your email: "${hashedToken}"
-  </p>`;
+// Email templates
+const verificationEmail = (token: string) => `
+  <h1>Welcome to Kayapalat!</h1>
+  <p>Please verify your email by clicking the link below:</p>
+  <a href="${process.env.NEXT_PUBLIC_APP_URL}/verify-email?token=${token}">Verify Email</a>
+`;
 
-const getResetPasswordContent = (hashedToken: string) => `
-  <p>Click <a href="${process.env.DOMAIN}/resetpassword?token=${hashedToken}">here</a> to reset your password.OR
-  <br>
-   Copy and paste this token in the website to reset your password: ${process.env.DOMAIN}/resetpassword?token=${hashedToken}
-  </p>`;
+const resetPasswordEmail = (token: string) => `
+  <h1>Password Reset Request</h1>
+  <p>Click the link below to reset your password:</p>
+  <a href="${process.env.NEXT_PUBLIC_APP_URL}/reset-password?token=${token}">Reset Password</a>
+`;
 
-export const sendEmail = async ({ email, emailType, userId }: any) => {
+// Create transporter
+const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST,
+  port: Number(process.env.SMTP_PORT),
+  secure: true,
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASSWORD,
+  },
+});
+
+// Send verification email
+export const sendVerificationEmail = async (email: string, token: string) => {
   try {
-    const hashedToken = await bcrypt.hash(userId.toString(), 10);
-    console.log(emailType);
-    console.log(typeof emailType);
-
-    if (emailType === 'VERIFY') {
-      const updatedUser = await User.findByIdAndUpdate(userId, {
-        $set:{
-        verifyToken: hashedToken,
-        verifyTokenExpiry: new Date(Date.now() + 3600000)
-        }
-      });
-
-      console.log(updatedUser);
-
-    } else if (emailType === 'RESET') {
-      await User.findByIdAndUpdate(userId, {
-        $set:{
-        forgotPasswordToken: hashedToken,
-        forgotPasswordExpiry: new Date(Date.now() + 3600000)
-        }
-      });
-    }
-
-
-
-
-    // Looking to send emails in production? Check out our Email API/SMTP product!
-    var transporter = nodemailer.createTransport({
-      host: "sandbox.smtp.mailtrap.io",
-      port: 2525,
-      auth: {
-        user: "ce1ecc5e8f0eeb",
-        pass: "b1f487919c146e"
-      }
-    });
-
-    const mailOptions = {
-      from: process.env.SMTP_USER,
+    await transporter.sendMail({
+      from: process.env.SMTP_FROM,
       to: email,
-      subject: emailType === 'VERIFY' ? 'Email Verification' : 'Password Reset',
-      html:
-        emailType === 'VERIFY'
-          ? getVerifyEmailContent(hashedToken)
-          : getResetPasswordContent(hashedToken),
-    };
-
-    const mailResponse = await transporter.sendMail(mailOptions);
-
-    return mailResponse;
-  } catch (error: any) {
-    throw new Error(error.message);
+      subject: 'Verify your email',
+      html: verificationEmail(token),
+    });
+    return true;
+  } catch (error) {
+    console.error('Error sending verification email:', error);
+    return false;
   }
 };
+
+// Send password reset email
+export const sendPasswordResetEmail = async (email: string, token: string) => {
+  try {
+    await transporter.sendMail({
+      from: process.env.SMTP_FROM,
+      to: email,
+      subject: 'Reset your password',
+      html: resetPasswordEmail(token),
+    });
+    return true;
+  } catch (error) {
+    console.error('Error sending password reset email:', error);
+    return false;
+  }
+}; 
