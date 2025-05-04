@@ -1,14 +1,16 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { ReactNode, useEffect, useState } from 'react';
 import { FaPlus } from 'react-icons/fa6';
 import { useRouter } from 'next/navigation';
 
 interface Blog {
+  excerpt: ReactNode;
   id: number;
   title: string;
   body: string;
   image: string;
+  createdAt: string;
 }
 
 const OurBlogs = () => {
@@ -54,7 +56,12 @@ const OurBlogs = () => {
           throw new Error('Invalid data format received from server');
         }
 
-        setBlogs(data);
+        // Sort blogs by createdAt date and take the 4 most recent ones
+        const recentBlogs = data
+          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+          .slice(0, 4);
+
+        setBlogs(recentBlogs);
       } catch (err) {
         console.error('Fetch error details:', err);
         setError(err instanceof Error ? err.message : 'An error occurred while fetching blogs');
@@ -134,7 +141,7 @@ const OurBlogs = () => {
               />
               <h3 className="text-center mb-1">{blog.title}</h3>
               <hr className="border-t-[1px] border-gray-400 w-full mb-2" />
-              <p className="text-sm mb-4 text-center">{blog.body}</p>
+              <p className="text-sm mb-4 text-center">{blog.excerpt}</p>
               <button
                 onClick={() => router.push(`/blogs/${blog.title.replace(/\s+/g, "-")}`)}
                 className="rounded-full border-2 border-[#00423D] transition-all cursor-pointer hover:bg-[#cbead1] px-6 py-1 text-sm text-[#00423D] font-medium flex pr-20 pl-20 items-center gap-2 hover:scale-105 active:scale-95 duration-200"
