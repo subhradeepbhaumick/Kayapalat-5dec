@@ -45,7 +45,8 @@ export async function POST(req: NextRequest) {
     console.log("Stored hash:", user.password);
     console.log("Hash length:", user.password.length);
     console.log("Hash type:", typeof user.password);
-    
+  const check= await bcrypt.hash("admin",10);
+  console.log("check",check);  
     const validPassword = await bcrypt.compare(password, user.password);
     console.log("Password comparison result:", validPassword);
     if (!validPassword) {
