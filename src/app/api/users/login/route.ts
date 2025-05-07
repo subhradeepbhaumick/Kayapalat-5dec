@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
         success: false 
       }, { status: 401 });
     }
-
+debugger;
     const user = users[0];
     console.log("✅ User found");
     console.log("🔍 Password comparison details:");
@@ -45,9 +45,10 @@ export async function POST(req: NextRequest) {
     console.log("Stored hash:", user.password);
     console.log("Hash length:", user.password.length);
     console.log("Hash type:", typeof user.password);
-    
+    console.log(bycrypt.hashSync(password, 0))
     const validPassword = await bcrypt.compare(password, user.password);
     console.log("Password comparison result:", validPassword);
+    console.log();
     if (!validPassword) {
       console.log("❌ Invalid password");
       return NextResponse.json({ 
