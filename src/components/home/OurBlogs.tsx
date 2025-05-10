@@ -5,7 +5,7 @@ import { FaPlus } from 'react-icons/fa6';
 import { useRouter } from 'next/navigation';
 
 interface Blog {
-  excerpt: ReactNode;
+  excerpt: string;
   id: number;
   title: string;
   body: string;
@@ -126,20 +126,23 @@ const OurBlogs = () => {
           {blogs.map((blog) => (
             <div
               key={blog.id}
-              className="bg-[#e8f5e9] rounded-xl p-4 border-2 border-teal-800 w-72 flex flex-col justify-between items-center shadow-md"
+              className="bg-[#e8f5e9] rounded-xl p-4 border-2 border-teal-800 w-80 flex flex-col justify-between items-center shadow-md hover:shadow-lg transition-shadow duration-200"
             >
               <img
                 src={blog.image}
                 alt={blog.title}
-                className="w-full h-48 object-fill rounded-xl mb-4 select-none border-2 border-[#00423D]"
+                className="w-full h-80 object-cover rounded-xl mb-4 select-none border-2 border-[#00423D]"
                 draggable={false}
               />
-              <h3 className="text-center mb-1">{blog.title}</h3>
+              <h3 className="text-center mb-1 font-semibold text-lg">{blog.title}</h3>
               <hr className="border-t-[1px] border-gray-400 w-full mb-2" />
-              <p className="text-sm mb-4 text-center min-h-[4.5rem]">{blog.excerpt}</p>
+              <div 
+                className="text-sm mb-4 text-center min-h-[4.5rem] line-clamp-3"
+                dangerouslySetInnerHTML={{ __html: blog.excerpt }}
+              />
               <button
                 onClick={() => router.push(`/blogs/${blog.slug}`)}
-                className="rounded-full border-2 border-[#00423D] transition-all cursor-pointer hover:bg-[#cbead1] px-6 py-1 text-sm text-[#00423D] font-medium flex pr-20 pl-20 items-center gap-2 hover:scale-105 active:scale-95 duration-200"
+                className="rounded-full border-2 border-[#00423D] transition-all cursor-pointer hover:bg-[#cbead1] px-6 py-1 text-sm text-[#00423D] font-medium flex items-center gap-2 hover:scale-105 active:scale-95 duration-200"
               >
                 Read More <FaPlus className="text-xs" />
               </button>

@@ -9,6 +9,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import BHKInfo from '@/components/estimate/BHKInfo';
+import RoomDetailsForm from '@/components/estimate/RoomDetailsForm';
 
 interface RoomDetails {
   size: string;
@@ -79,6 +81,25 @@ const ROOM_COSTS: { [key: string]: RoomConfig } = {
   },
 };
 
+// Add plan packages configuration
+const PLAN_PACKAGES = {
+  basic: {
+    name: 'Basic',
+    description: 'Essential interior solutions with standard materials',
+    multiplier: 1,
+  },
+  standard: {
+    name: 'Standard',
+    description: 'Premium materials with enhanced features',
+    multiplier: 1.3,
+  },
+  premium: {
+    name: 'Premium',
+    description: 'Luxury finishes with custom solutions',
+    multiplier: 1.6,
+  },
+};
+
 const EstimateCost = () => {
   const [showPropertyTypeModal, setShowPropertyTypeModal] = useState(true);
   const [showRoomModal, setShowRoomModal] = useState(false);
@@ -88,6 +109,7 @@ const EstimateCost = () => {
   const [roomDetails, setRoomDetails] = useState<{ [key: string]: RoomDetails }>({});
   const [formData, setFormData] = useState({
     propertyType: '',
+    commercialType: '',
     bhkType: '',
     rooms: {
       livingRoom: false,
@@ -103,6 +125,7 @@ const EstimateCost = () => {
     budgetRange: '',
     timeline: '',
     additionalRequirements: '',
+    carpetArea: '',
   });
 
   const [estimate, setEstimate] = useState<{
@@ -117,6 +140,12 @@ const EstimateCost = () => {
       };
     };
   } | null>(null);
+
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [selectedPackage, setSelectedPackage] = useState<keyof typeof PLAN_PACKAGES>('standard');
+  const [showBHKInfo, setShowBHKInfo] = useState(false);
+  const [showRoomForm, setShowRoomForm] = useState(false);
+  const [selectedRoomType, setSelectedRoomType] = useState<string>('');
 
   const steps = [
     { id: 1, title: 'BHK Type' },
@@ -157,6 +186,43 @@ const EstimateCost = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    if (formData.propertyType === 'commercial') {
+      if (!formData.commercialType || !formData.carpetArea || !formData.name || !formData.phone || !formData.email) {
+        alert('Please fill in all required fields');
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/estimate', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            propertyType: formData.propertyType,
+            commercialType: formData.commercialType,
+            carpetArea: formData.carpetArea,
+            name: formData.name,
+            phone: formData.phone,
+            email: formData.email,
+            additionalRequirements: formData.additionalRequirements
+          }),
+        });
+
+        if (response.ok) {
+          setShowSuccessMessage(true);
+        } else {
+          alert('Failed to submit. Please try again.');
+        }
+      } catch (error) {
+        console.error('Error submitting form:', error);
+        alert('An error occurred. Please try again.');
+      }
+      return;
+    }
+
+    // Existing residential submission logic
     if (!formData.name || !formData.email || !formData.phone || !formData.address) {
       alert('Please fill in all personal information fields');
       return;
@@ -263,7 +329,7 @@ const EstimateCost = () => {
                 Select Property Type
               </DialogTitle>
             </DialogHeader>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 py-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 py-4">
               <button
                 onClick={() => {
                   setFormData(prev => ({ ...prev, propertyType: 'residential' }));
@@ -275,22 +341,118 @@ const EstimateCost = () => {
                 <span className="font-medium">Residential</span>
               </button>
               <button
-                onClick={() => alert('Coming soon!')}
-                className="p-6 rounded-xl border-2 border-gray-200 hover:border-[#00423D] opacity-50 transition-all duration-300 flex flex-col items-center space-y-3"
+                onClick={() => {
+                  setFormData(prev => ({ ...prev, propertyType: 'commercial' }));
+                  setShowPropertyTypeModal(false);
+                }}
+                className="p-6 rounded-xl border-2 border-gray-200 hover:border-[#00423D] hover:bg-[#F0F9F0] transition-all duration-300 flex flex-col items-center space-y-3"
               >
                 <FaBuilding className="text-3xl text-[#00423D]" />
                 <span className="font-medium">Commercial</span>
               </button>
-              <button
-                onClick={() => alert('Coming soon!')}
-                className="p-6 rounded-xl border-2 border-gray-200 hover:border-[#00423D] opacity-50 transition-all duration-300 flex flex-col items-center space-y-3"
-              >
-                <FaBriefcase className="text-3xl text-[#00423D]" />
-                <span className="font-medium">Office</span>
-              </button>
             </div>
           </DialogContent>
         </Dialog>
+
+        {/* Commercial Type Selection */}
+        {formData.propertyType === 'commercial' && (
+          <Dialog open={true} onOpenChange={() => {}}>
+            <DialogContent className="max-w-2xl bg-white/95 backdrop-blur-sm">
+              <DialogHeader>
+                <DialogTitle className="text-2xl font-semibold text-[#00423D] text-center">
+                  Select Commercial Type
+                </DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <select
+                  name="commercialType"
+                  value={formData.commercialType}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00423D]"
+                  required
+                >
+                  <option value="">Select Commercial Type</option>
+                  <option value="office">Office</option>
+                  <option value="restaurant">Restaurant</option>
+                  <option value="retail">Retail Store</option>
+                  <option value="hotel">Hotel</option>
+                  <option value="other">Other</option>
+                </select>
+                
+                <div>
+                  <label className="block text-gray-700 mb-2">Total Carpet Area (sq.ft)</label>
+                  <input
+                    type="number"
+                    name="carpetArea"
+                    value={formData.carpetArea}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00423D]"
+                    placeholder="Enter carpet area"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-gray-700 mb-2">Project Description</label>
+                  <textarea
+                    name="additionalRequirements"
+                    value={formData.additionalRequirements}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00423D]"
+                    rows={4}
+                    placeholder="Describe your project briefly..."
+                    required
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-gray-700 mb-2">Name</label>
+                    <input
+                      type="text"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00423D]"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-gray-700 mb-2">Phone</label>
+                    <input
+                      type="tel"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00423D]"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-gray-700 mb-2">Email</label>
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00423D]"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="text-center mt-6">
+                  <button
+                    onClick={handleSubmit}
+                    className="px-6 py-3 bg-[#00423D] text-white rounded-lg hover:bg-[#00332D] transition duration-300 font-medium"
+                  >
+                    Submit
+                  </button>
+                </div>
+              </div>
+            </DialogContent>
+          </Dialog>
+        )}
 
         {estimate ? (
           <motion.div
@@ -298,47 +460,75 @@ const EstimateCost = () => {
             animate={{ opacity: 1, y: 0 }}
             className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg p-8"
           >
-            <h2 className="text-2xl font-semibold text-[#00423D] mb-4">Your Estimate</h2>
-            <div className="text-center mb-6">
-              <p className="text-4xl font-bold text-[#00423D]">
-                ₹{estimate?.amount?.toLocaleString() || '0'}
-              </p>
-              <p className="text-gray-600 mt-2">Total Estimated Cost</p>
-            </div>
-            
-            <div className="space-y-6">
-              <div>
-                <h3 className="text-lg font-semibold text-[#00423D] mb-4">Cost Breakdown</h3>
-                <div className="space-y-3">
-                  <div className="flex justify-between">
-                    <span>Base Cost:</span>
-                    <span>₹{estimate?.breakdown?.baseCost?.toLocaleString() || '0'}</span>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Main estimate card */}
+              <div className="md:col-span-2">
+                <h2 className="text-2xl font-semibold text-[#00423D] mb-4">Your Estimate</h2>
+                <div className="text-center mb-6">
+                  <p className="text-4xl font-bold text-[#00423D]">
+                    ₹{estimate?.amount?.toLocaleString() || '0'}
+                  </p>
+                  <p className="text-gray-600 mt-2">{PLAN_PACKAGES[selectedPackage].name} Package</p>
+                </div>
+                
+                <div className="space-y-6">
+                  <div>
+                    <h3 className="text-lg font-semibold text-[#00423D] mb-4">Cost Breakdown</h3>
+                    <div className="space-y-3">
+                      <div className="flex justify-between">
+                        <span>Base Cost:</span>
+                        <span>₹{estimate?.breakdown?.baseCost?.toLocaleString() || '0'}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Package Multiplier:</span>
+                        <span>{PLAN_PACKAGES[selectedPackage].multiplier}x</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Area Multiplier:</span>
+                        <span>{estimate?.breakdown?.areaMultiplier || '0'}x</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Property Type Multiplier:</span>
+                        <span>{estimate?.breakdown?.propertyMultiplier || '0'}x</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>Contingency Buffer:</span>
+                        <span>{estimate?.breakdown?.buffer || '0%'}</span>
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex justify-between">
-                    <span>Area Multiplier:</span>
-                    <span>{estimate?.breakdown?.areaMultiplier || '0'}x</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Property Type Multiplier:</span>
-                    <span>{estimate?.breakdown?.propertyMultiplier || '0'}x</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>Contingency Buffer:</span>
-                    <span>{estimate?.breakdown?.buffer || '0%'}</span>
+
+                  <div>
+                    <h3 className="text-lg font-semibold text-[#00423D] mb-4">Room-wise Breakdown</h3>
+                    <div className="space-y-3">
+                      {Object.entries(estimate?.breakdown?.roomBreakdown || {}).map(([room, cost]) => (
+                        <div key={room} className="flex justify-between">
+                          <span className="capitalize">{room.replace(/([A-Z])/g, ' $1').trim()}:</span>
+                          <span>₹{Number(cost)?.toLocaleString() || '0'}</span>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
 
-              <div>
-                <h3 className="text-lg font-semibold text-[#00423D] mb-4">Room-wise Breakdown</h3>
-                <div className="space-y-3">
-                  {Object.entries(estimate?.breakdown?.roomBreakdown || {}).map(([room, cost]) => (
-                    <div key={room} className="flex justify-between">
-                      <span className="capitalize">{room.replace(/([A-Z])/g, ' $1').trim()}:</span>
-                      <span>₹{Number(cost)?.toLocaleString() || '0'}</span>
+              {/* Package comparison cards */}
+              <div className="space-y-4">
+                {Object.entries(PLAN_PACKAGES)
+                  .filter(([key]) => key !== selectedPackage)
+                  .map(([key, plan]) => (
+                    <div
+                      key={key}
+                      onClick={() => setSelectedPackage(key as keyof typeof PLAN_PACKAGES)}
+                      className="p-4 rounded-xl border-2 border-gray-200 hover:border-[#00423D] cursor-pointer transition-all duration-300"
+                    >
+                      <h3 className="font-semibold text-[#00423D]">{plan.name}</h3>
+                      <p className="text-sm text-gray-600 mb-2">{plan.description}</p>
+                      <p className="text-[#00423D] font-medium">
+                        ₹{(estimate?.amount * plan.multiplier / PLAN_PACKAGES[selectedPackage].multiplier)?.toLocaleString() || '0'}
+                      </p>
                     </div>
                   ))}
-                </div>
               </div>
             </div>
 
@@ -408,8 +598,12 @@ const EstimateCost = () => {
               >
                 <div className="text-center">
                   <h2 className="text-2xl font-semibold text-[#00423D] mb-2">Select rooms to design</h2>
-                  <p className="text-gray-600">To know more about this, 
-                    <button onClick={() => setShowInfoModal(true)} className="text-[#00423D] hover:underline ml-1">
+                  <p className="text-gray-600">
+                    To know more about this, 
+                    <button 
+                      onClick={() => setShowBHKInfo(true)} 
+                      className="text-[#00423D] hover:underline ml-1"
+                    >
                       click here
                     </button>
                   </p>
@@ -418,28 +612,24 @@ const EstimateCost = () => {
                   {Object.entries(formData.rooms).map(([room, isSelected]) => (
                     <div key={room} className="relative">
                       <button
-                        type="button"
-                        onClick={() => handleRoomToggle(room as keyof typeof formData.rooms)}
-                        className={`w-full p-6 rounded-xl border-2 flex items-center justify-between transition-all duration-300 ${
+                        onClick={() => {
+                          setSelectedRoomType(room);
+                          setShowRoomForm(true);
+                        }}
+                        className={`w-full p-4 rounded-xl border-2 transition-all duration-300 ${
                           isSelected
                             ? 'border-[#00423D] bg-[#F0F9F0]'
-                            : 'border-gray-200 hover:border-[#00423D] hover:bg-gray-50'
+                            : 'border-gray-200 hover:border-[#00423D]'
                         }`}
                       >
-                        <div className="flex items-center space-x-4">
-                          {room === 'livingRoom' && <FaCouch className="text-2xl text-[#00423D]" />}
-                          {room === 'bedroom' && <FaBed className="text-2xl text-[#00423D]" />}
-                          {room === 'kitchen' && <FaUtensils className="text-2xl text-[#00423D]" />}
-                          {room === 'bathroom' && <FaBath className="text-2xl text-[#00423D]" />}
-                          {room === 'dining' && <FaUtensils className="text-2xl text-[#00423D]" />}
-                          <div className="text-left">
-                            <span className="font-medium">{room.replace(/([A-Z])/g, ' $1').trim()}</span>
-                            {roomDetails[room] && (
-                              <p className="text-sm text-gray-500">Details Added</p>
-                            )}
-                          </div>
+                        <div className="flex items-center justify-between">
+                          <span className="font-medium capitalize">
+                            {room.replace(/([A-Z])/g, ' $1').trim()}
+                          </span>
+                          {isSelected && (
+                            <FaCheck className="text-[#00423D]" />
+                          )}
                         </div>
-                        {isSelected && <FaCheck className="text-[#00423D]" />}
                       </button>
                     </div>
                   ))}
@@ -452,53 +642,27 @@ const EstimateCost = () => {
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="space-y-6"
+                className="space-y-8"
               >
-                <h2 className="text-2xl font-semibold text-[#00423D]">Project Details</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-gray-700 mb-2">Budget Range</label>
-                    <select
-                      name="budgetRange"
-                      value={formData.budgetRange}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00423D]"
-                      required
+                <h2 className="text-2xl font-semibold text-[#00423D] text-center">Select Your Plan Package</h2>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  {Object.entries(PLAN_PACKAGES).map(([key, plan]) => (
+                    <div
+                      key={key}
+                      onClick={() => setSelectedPackage(key as keyof typeof PLAN_PACKAGES)}
+                      className={`p-6 rounded-xl border-2 cursor-pointer transition-all duration-300 ${
+                        selectedPackage === key
+                          ? 'border-[#00423D] bg-[#F0F9F0]'
+                          : 'border-gray-200 hover:border-[#00423D]'
+                      }`}
                     >
-                      <option value="">Select Budget Range</option>
-                      <option value="0-5">Under ₹5 Lakhs</option>
-                      <option value="5-10">₹5-10 Lakhs</option>
-                      <option value="10-20">₹10-20 Lakhs</option>
-                      <option value="20+">Above ₹20 Lakhs</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-gray-700 mb-2">Project Timeline</label>
-                    <select
-                      name="timeline"
-                      value={formData.timeline}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00423D]"
-                      required
-                    >
-                      <option value="">Select Timeline</option>
-                      <option value="1-2">1-2 Months</option>
-                      <option value="2-4">2-4 Months</option>
-                      <option value="4-6">4-6 Months</option>
-                      <option value="6+">6+ Months</option>
-                    </select>
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-gray-700 mb-2">Additional Requirements</label>
-                  <textarea
-                    name="additionalRequirements"
-                    value={formData.additionalRequirements}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00423D]"
-                    rows={4}
-                    placeholder="Any specific requirements or preferences..."
-                  />
+                      <h3 className="text-xl font-semibold text-[#00423D] mb-2">{plan.name}</h3>
+                      <p className="text-gray-600 mb-4">{plan.description}</p>
+                      <div className="text-[#00423D] font-medium">
+                        {plan.multiplier}x Base Price
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </motion.div>
             )}
@@ -766,6 +930,71 @@ const EstimateCost = () => {
             </div>
           </DialogContent>
         </Dialog>
+
+        {/* Success Message Dialog */}
+        <Dialog open={showSuccessMessage} onOpenChange={setShowSuccessMessage}>
+          <DialogContent className="max-w-md bg-white/95 backdrop-blur-sm">
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-semibold text-[#00423D] text-center">
+                Thank You!
+              </DialogTitle>
+            </DialogHeader>
+            <div className="text-center py-6">
+              <p className="text-gray-600 mb-4">
+                Designers from Kayapalat will contact you soon.
+              </p>
+              <button
+                onClick={() => {
+                  setShowSuccessMessage(false);
+                  setFormData({
+                    propertyType: '',
+                    commercialType: '',
+                    bhkType: '',
+                    rooms: {
+                      livingRoom: false,
+                      bedroom: false,
+                      kitchen: false,
+                      bathroom: false,
+                      dining: false,
+                    },
+                    name: '',
+                    email: '',
+                    phone: '',
+                    address: '',
+                    budgetRange: '',
+                    timeline: '',
+                    additionalRequirements: '',
+                    carpetArea: '',
+                  });
+                  setShowPropertyTypeModal(true);
+                }}
+                className="px-6 py-3 bg-[#00423D] text-white rounded-lg hover:bg-[#00332D] transition duration-300 font-medium"
+              >
+                Start New Estimate
+              </button>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        {/* Add BHK Info Dialog */}
+        <BHKInfo
+          isOpen={showBHKInfo}
+          onClose={() => setShowBHKInfo(false)}
+          bhkType={formData.bhkType}
+        />
+
+        {/* Add Room Details Form */}
+        {showRoomForm && (
+          <RoomDetailsForm
+            roomType={selectedRoomType}
+            totalRooms={selectedRoomType === 'bedroom' ? parseInt(formData.bhkType) : 1}
+            onComplete={(details) => {
+              setRoomDetails(details);
+              setShowRoomForm(false);
+            }}
+            onClose={() => setShowRoomForm(false)}
+          />
+        )}
       </div>
     </div>
   );

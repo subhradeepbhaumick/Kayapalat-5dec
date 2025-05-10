@@ -146,14 +146,15 @@ const BlogsPage = () => {
                 <img
                   src={blog.image}
                   alt={blog.title}
-                  className="w-full h-64 object-cover rounded-xl mb-4 select-none border-2 border-[#00423D]"
+                  className="w-full h-80 object-cover rounded-xl mb-4 select-none border-2 border-[#00423D]"
                   draggable={false}
                 />
                 <h3 className="text-center mb-1 font-semibold text-lg">{blog.title}</h3>
                 <hr className="border-t-[1px] border-gray-400 w-full mb-2" />
-                <p className="text-sm mb-4 text-center min-h-[4.5rem] line-clamp-3">
-                  {blog.excerpt}
-                </p>
+                <div 
+                  className="text-sm mb-4 text-center min-h-[4.5rem] line-clamp-3"
+                  dangerouslySetInnerHTML={{ __html: blog.excerpt }}
+                />
                 <button
                   onClick={() => router.push(`/blogs/${blog.slug}`)}
                   className="rounded-full border-2 border-[#00423D] transition-all cursor-pointer hover:bg-[#cbead1] px-6 py-1 text-sm text-[#00423D] font-medium flex items-center gap-2 hover:scale-105 active:scale-95 duration-200"
