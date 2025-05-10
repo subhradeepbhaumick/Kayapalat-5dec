@@ -10,7 +10,8 @@ interface Blog {
   title: string;
   body: string;
   image: string;
-  createdAt: string;
+  created_at: string;
+  slug: string;
 }
 
 const OurBlogs = () => {
@@ -30,8 +31,6 @@ const OurBlogs = () => {
           throw new Error(`Database connection failed: ${testData.details}`);
         }
 
-        console.log('Database connection test successful');
-
         // Now fetch the blogs
         const response = await fetch('/api/blogs', {
           method: 'GET',
@@ -40,17 +39,13 @@ const OurBlogs = () => {
           },
           cache: 'no-store'
         });
-
-        console.log('Blogs API response status:', response.status);
         
         if (!response.ok) {
           const errorData = await response.json();
-          console.error('Blogs API error:', errorData);
           throw new Error(errorData.error || 'Failed to fetch blogs');
         }
 
         const data = await response.json();
-        console.log('Fetched blogs data:', data);
         
         if (!Array.isArray(data)) {
           throw new Error('Invalid data format received from server');
@@ -58,7 +53,7 @@ const OurBlogs = () => {
 
         // Sort blogs by createdAt date and take the 4 most recent ones
         const recentBlogs = data
-          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+          .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
           .slice(0, 4);
 
         setBlogs(recentBlogs);
@@ -141,9 +136,9 @@ const OurBlogs = () => {
               />
               <h3 className="text-center mb-1">{blog.title}</h3>
               <hr className="border-t-[1px] border-gray-400 w-full mb-2" />
-              <p className="text-sm mb-4 text-center">{blog.excerpt}</p>
+              <p className="text-sm mb-4 text-center min-h-[4.5rem]">{blog.excerpt}</p>
               <button
-                onClick={() => router.push(`/blogs/${blog.title.replace(/\s+/g, "-")}`)}
+                onClick={() => router.push(`/blogs/${blog.slug}`)}
                 className="rounded-full border-2 border-[#00423D] transition-all cursor-pointer hover:bg-[#cbead1] px-6 py-1 text-sm text-[#00423D] font-medium flex pr-20 pl-20 items-center gap-2 hover:scale-105 active:scale-95 duration-200"
               >
                 Read More <FaPlus className="text-xs" />

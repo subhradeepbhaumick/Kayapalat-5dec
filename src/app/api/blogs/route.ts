@@ -1,17 +1,19 @@
-import { NextResponse } from 'next/server';
+import { NextResponse, NextRequest } from 'next/server';
 import { executeQuery } from '@/lib/db';
 
 export async function GET() {
   try {
-    console.log('Fetching blogs from database...');
-    const [blogs] = await executeQuery('SELECT * FROM blogs');
-    console.log('Blogs fetched successfully:', blogs);
+    const [blogs] = await executeQuery('SELECT id, title, slug, excerpt, content, image, created_at FROM blogs ORDER BY created_at DESC');
     
     if (!Array.isArray(blogs)) {
       throw new Error('Invalid data format from database');
     }
 
-    return NextResponse.json(blogs);
+    const blogsWithBody = blogs.map(blog => ({
+      ...blog,
+      body: blog.content // for frontend compatibility
+    }));
+    return NextResponse.json(blogsWithBody);
   } catch (error: any) {
     console.error('Database error details:', {
       message: error.message,

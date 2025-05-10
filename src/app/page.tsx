@@ -22,9 +22,7 @@ const faqs = [
     question: "Is my data secure with Kayapalat?",
     answer: "Absolutely. We use industry-standard encryption and secure authentication methods to protect your data."
   },
-]
-
-
+] 
 
 
 export default function Home() {
