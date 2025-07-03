@@ -322,7 +322,7 @@ const EstimateCost = () => {
         </div>
 
         {/* Initial Property Type Modal */}
-        <Dialog open={showPropertyTypeModal} onOpenChange={setShowPropertyTypeModal}>
+        <Dialog open={showPropertyTypeModal} onOpenChange={() => {}}>
           <DialogContent className="max-w-2xl bg-white/95 backdrop-blur-sm">
             <DialogHeader>
               <DialogTitle className="text-2xl font-semibold text-[#00423D] text-center">
@@ -354,57 +354,148 @@ const EstimateCost = () => {
           </DialogContent>
         </Dialog>
 
-        {/* Commercial Type Selection */}
-        {formData.propertyType === 'commercial' && (
-          <Dialog open={true} onOpenChange={() => {}}>
-            <DialogContent className="max-w-2xl bg-white/95 backdrop-blur-sm">
-              <DialogHeader>
-                <DialogTitle className="text-2xl font-semibold text-[#00423D] text-center">
-                  Select Commercial Type
-                </DialogTitle>
-              </DialogHeader>
-              <div className="space-y-4 py-4">
-                <select
-                  name="commercialType"
-                  value={formData.commercialType}
-                  onChange={handleInputChange}
-                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00423D]"
-                  required
-                >
-                  <option value="">Select Commercial Type</option>
-                  <option value="office">Office</option>
-                  <option value="restaurant">Restaurant</option>
-                  <option value="retail">Retail Store</option>
-                  <option value="hotel">Hotel</option>
-                  <option value="other">Other</option>
-                </select>
-                
-                <div>
-                  <label className="block text-gray-700 mb-2">Total Carpet Area (sq.ft)</label>
-                  <input
-                    type="number"
-                    name="carpetArea"
-                    value={formData.carpetArea}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00423D]"
-                    placeholder="Enter carpet area"
-                    required
-                  />
+        {/* Conditionally render Residential or Commercial form based on property type */}
+        {formData.propertyType === 'residential' && (
+          <motion.form
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            onSubmit={handleSubmit}
+            className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg p-8"
+          >
+            {/* Step 1: BHK Type */}
+            {currentStep === 1 && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="space-y-8"
+              >
+                <div className="text-center">
+                  <h2 className="text-2xl font-semibold text-[#00423D] mb-2">Select your BHK type</h2>
+                  <p className="text-gray-600">To know more about this, 
+                    <button onClick={() => setShowInfoModal(true)} className="text-[#00423D] hover:underline ml-1">
+                      click here
+                    </button>
+                  </p>
                 </div>
-
-                <div>
-                  <label className="block text-gray-700 mb-2">Project Description</label>
-                  <textarea
-                    name="additionalRequirements"
-                    value={formData.additionalRequirements}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00423D]"
-                    rows={4}
-                    placeholder="Describe your project briefly..."
-                    required
-                  />
+                <div className="space-y-4">
+                  {['1', '2', '3', '4', '5'].map((bhk) => (
+                    <button
+                      key={bhk}
+                      type="button"
+                      onClick={() => {
+                        setFormData(prev => ({
+                          ...prev,
+                          bhkType: bhk,
+                          propertyType: 'residential'
+                        }));
+                      }}
+                      className={`w-full p-4 rounded-lg border-2 flex items-center justify-between transition-all duration-300 ${
+                        formData.bhkType === bhk
+                          ? 'border-[#00423D] bg-[#F0F9F0]'
+                          : 'border-gray-200 hover:border-[#00423D] hover:bg-gray-50'
+                      }`}
+                    >
+                      <span className="text-lg font-medium">{bhk} BHK</span>
+                      {formData.bhkType === bhk && <FaCheck className="text-[#00423D]" />}
+                    </button>
+                  ))}
                 </div>
+              </motion.div>
+            )}
 
+            {/* Step 2: Room Selection */}
+            {currentStep === 2 && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="space-y-8"
+              >
+                <div className="text-center">
+                  <h2 className="text-2xl font-semibold text-[#00423D] mb-2">Select rooms to design</h2>
+                  <p className="text-gray-600">
+                    To know more about this, 
+                    <button 
+                      onClick={() => setShowBHKInfo(true)} 
+                      className="text-[#00423D] hover:underline ml-1"
+                    >
+                      click here
+                    </button>
+                  </p>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {Object.entries(formData.rooms).map(([room, isSelected]) => (
+                    <div key={room} className="relative">
+                      <button
+                        onClick={() => {
+                          setSelectedRoomType(room);
+                          setShowRoomForm(true);
+                        }}
+                        className={`w-full p-4 rounded-xl border-2 transition-all duration-300 ${
+                          isSelected
+                            ? 'border-[#00423D] bg-[#F0F9F0]'
+                            : 'border-gray-200 hover:border-[#00423D]'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="font-medium capitalize">
+                            {room.replace(/([A-Z])/g, ' $1').trim()}
+                          </span>
+                          {isSelected && (
+                            <FaCheck className="text-[#00423D]" />
+                          )}
+                        </div>
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+
+            {/* Step 3: Project Details */}
+            {currentStep === 3 && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="space-y-8"
+              >
+                <h2 className="text-2xl font-semibold text-[#00423D] text-center">Project Details</h2>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-gray-700 mb-2">Project Timeline</label>
+                    <input
+                      type="text"
+                      name="timeline"
+                      value={formData.timeline}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00423D]"
+                      placeholder="Enter project timeline"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-gray-700 mb-2">Additional Information</label>
+                    <textarea
+                      name="additionalRequirements"
+                      value={formData.additionalRequirements}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00423D]"
+                      rows={4}
+                      placeholder="Enter any additional information..."
+                      required
+                    />
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {/* Step 4: Personal Information */}
+            {currentStep === 4 && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="space-y-6"
+              >
+                <h2 className="text-2xl font-semibold text-[#00423D]">Personal Information</h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-gray-700 mb-2">Name</label>
@@ -412,6 +503,17 @@ const EstimateCost = () => {
                       type="text"
                       name="name"
                       value={formData.name}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00423D]"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-gray-700 mb-2">Email</label>
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
                       onChange={handleInputChange}
                       className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00423D]"
                       required
@@ -429,29 +531,136 @@ const EstimateCost = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-gray-700 mb-2">Email</label>
+                    <label className="block text-gray-700 mb-2">Address</label>
                     <input
-                      type="email"
-                      name="email"
-                      value={formData.email}
+                      type="text"
+                      name="address"
+                      value={formData.address}
                       onChange={handleInputChange}
                       className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00423D]"
                       required
                     />
                   </div>
                 </div>
+              </motion.div>
+            )}
 
-                <div className="text-center mt-6">
-                  <button
-                    onClick={handleSubmit}
-                    className="px-6 py-3 bg-[#00423D] text-white rounded-lg hover:bg-[#00332D] transition duration-300 font-medium"
-                  >
-                    Submit
-                  </button>
+            {/* Navigation Buttons */}
+            <div className="flex justify-between mt-8">
+              {currentStep > 1 && (
+                <button
+                  type="button"
+                  onClick={prevStep}
+                  className="px-6 py-3 border-2 border-[#00423D] text-[#00423D] rounded-lg hover:bg-[#00423D] hover:text-white transition duration-300 font-medium"
+                >
+                  Back
+                </button>
+              )}
+              <button
+                type={currentStep === steps.length ? 'submit' : 'button'}
+                onClick={currentStep === steps.length ? undefined : nextStep}
+                className="ml-auto px-6 py-3 bg-[#00423D] text-white rounded-lg hover:bg-[#00332D] transition duration-300 font-medium"
+              >
+                {currentStep === steps.length ? 'Get My Estimate' : 'Next'}
+              </button>
+            </div>
+          </motion.form>
+        )}
+
+        {formData.propertyType === 'commercial' && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="space-y-8"
+          >
+            <h2 className="text-2xl font-semibold text-[#00423D] text-center">Commercial Project Details</h2>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-gray-700 mb-2">Commercial Type</label>
+                <select
+                  name="commercialType"
+                  value={formData.commercialType}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00423D]"
+                  required
+                >
+                  <option value="">Select Commercial Type</option>
+                  <option value="office">Office</option>
+                  <option value="restaurant">Restaurant</option>
+                  <option value="retail">Retail Store</option>
+                  <option value="hotel">Hotel</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-gray-700 mb-2">Total Carpet Area (sq.ft)</label>
+                <input
+                  type="number"
+                  name="carpetArea"
+                  value={formData.carpetArea}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00423D]"
+                  placeholder="Enter carpet area"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-gray-700 mb-2">Project Description</label>
+                <textarea
+                  name="additionalRequirements"
+                  value={formData.additionalRequirements}
+                  onChange={handleInputChange}
+                  className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00423D]"
+                  rows={4}
+                  placeholder="Describe your project briefly..."
+                  required
+                />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-gray-700 mb-2">Name</label>
+                  <input
+                    type="text"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00423D]"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 mb-2">Phone</label>
+                  <input
+                    type="tel"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00423D]"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-gray-700 mb-2">Email</label>
+                  <input
+                    type="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00423D]"
+                    required
+                  />
                 </div>
               </div>
-            </DialogContent>
-          </Dialog>
+              <div className="text-center mt-6">
+                <button
+                  onClick={handleSubmit}
+                  className="px-6 py-3 bg-[#00423D] text-white rounded-lg hover:bg-[#00332D] transition duration-300 font-medium"
+                >
+                  Submit
+                </button>
+              </div>
+            </div>
+          </motion.div>
         )}
 
         {estimate ? (
@@ -644,25 +853,32 @@ const EstimateCost = () => {
                 animate={{ opacity: 1 }}
                 className="space-y-8"
               >
-                <h2 className="text-2xl font-semibold text-[#00423D] text-center">Select Your Plan Package</h2>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  {Object.entries(PLAN_PACKAGES).map(([key, plan]) => (
-                    <div
-                      key={key}
-                      onClick={() => setSelectedPackage(key as keyof typeof PLAN_PACKAGES)}
-                      className={`p-6 rounded-xl border-2 cursor-pointer transition-all duration-300 ${
-                        selectedPackage === key
-                          ? 'border-[#00423D] bg-[#F0F9F0]'
-                          : 'border-gray-200 hover:border-[#00423D]'
-                      }`}
-                    >
-                      <h3 className="text-xl font-semibold text-[#00423D] mb-2">{plan.name}</h3>
-                      <p className="text-gray-600 mb-4">{plan.description}</p>
-                      <div className="text-[#00423D] font-medium">
-                        {plan.multiplier}x Base Price
-                      </div>
-                    </div>
-                  ))}
+                <h2 className="text-2xl font-semibold text-[#00423D] text-center">Project Details</h2>
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-gray-700 mb-2">Project Timeline</label>
+                    <input
+                      type="text"
+                      name="timeline"
+                      value={formData.timeline}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00423D]"
+                      placeholder="Enter project timeline"
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-gray-700 mb-2">Additional Information</label>
+                    <textarea
+                      name="additionalRequirements"
+                      value={formData.additionalRequirements}
+                      onChange={handleInputChange}
+                      className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-[#00423D]"
+                      rows={4}
+                      placeholder="Enter any additional information..."
+                      required
+                    />
+                  </div>
                 </div>
               </motion.div>
             )}
@@ -747,7 +963,7 @@ const EstimateCost = () => {
         )}
 
         {/* Room Details Modal */}
-        <Dialog open={showRoomModal} onOpenChange={setShowRoomModal}>
+        <Dialog open={showRoomModal} onOpenChange={() => {}}>
           <DialogContent className="max-w-2xl bg-white/95 backdrop-blur-sm">
             <DialogHeader>
               <DialogTitle className="text-2xl font-semibold text-[#00423D]">
@@ -766,7 +982,6 @@ const EstimateCost = () => {
                         ...roomDetails[selectedRoom],
                         size: e.target.value
                       };
-                      // Uncheck room if size is empty
                       if (!e.target.value) {
                         setFormData(prev => ({
                           ...prev,
@@ -786,7 +1001,6 @@ const EstimateCost = () => {
                   placeholder="Enter room size"
                 />
               </div>
-
               <div>
                 <label className="block text-gray-700 mb-2 font-medium">Required Accessories</label>
                 <div className="grid grid-cols-2 gap-4">
@@ -816,7 +1030,6 @@ const EstimateCost = () => {
                   ))}
                 </div>
               </div>
-
               <div>
                 <label className="block text-gray-700 mb-2 font-medium">Additional Notes</label>
                 <textarea
@@ -838,7 +1051,6 @@ const EstimateCost = () => {
                 />
               </div>
             </div>
-
             <div className="flex justify-between pt-4">
               <button
                 type="button"
@@ -899,7 +1111,7 @@ const EstimateCost = () => {
         </Dialog>
 
         {/* Info Modal */}
-        <Dialog open={showInfoModal} onOpenChange={setShowInfoModal}>
+        <Dialog open={showInfoModal} onOpenChange={() => {}}>
           <DialogContent className="max-w-2xl bg-white/95 backdrop-blur-sm">
             <DialogHeader>
               <DialogTitle className="text-2xl font-semibold text-[#00423D]">
@@ -932,7 +1144,7 @@ const EstimateCost = () => {
         </Dialog>
 
         {/* Success Message Dialog */}
-        <Dialog open={showSuccessMessage} onOpenChange={setShowSuccessMessage}>
+        <Dialog open={showSuccessMessage} onOpenChange={() => {}}>
           <DialogContent className="max-w-md bg-white/95 backdrop-blur-sm">
             <DialogHeader>
               <DialogTitle className="text-2xl font-semibold text-[#00423D] text-center">

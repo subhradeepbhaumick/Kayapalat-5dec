@@ -15,6 +15,7 @@ import {
   HelpCircle,
   LogOut,
   Menu,
+  Star,
 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -42,6 +43,7 @@ const navGroups = [
       { label: "Galleries", icon: GalleryHorizontal, href: "/admin/galleries" },
       { label: "FAQs", icon: HelpCircle, href: "/admin/faqs" },
       { label: "Blogs", icon: Newspaper, href: "/admin/blogs" },
+      { label: "Testimonials", icon: Star, href: "/admin/testimonials" },
       { label: "SEO", icon: Globe, href: "/admin/seo" }
     ],
   },

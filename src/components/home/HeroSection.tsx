@@ -67,7 +67,7 @@ const HeroSection = () => {
         <p className="mt-4 text-lg ">Transform Your Space with the Perfect Designer</p>
         <p className="text-lg ">Browse, Connect, and Bring Your Vision to Life!</p>
         <div className="mt-6 flex flex-wrap gap-4">
-          <Link href="/estimate-cost">
+          <Link href="/estimate">
             <button className="w-60 border-2 border-[#295A47] flex items-center justify-center px-6 py-3 rounded-lg text-lg hover:bg-[#295A47] cursor-pointer bg-[#295a476b] shadow-lg transition ease-in-out duration-300">
               <FaPen className="mr-2" /> Estimate Your Cost
             </button>
