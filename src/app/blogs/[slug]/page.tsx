@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
+import Image from "next/image";
 
 interface Blog {
   id: number;
@@ -40,7 +41,7 @@ export default function BlogReadPage() {
 
   return (
     <section className="max-w-3xl mx-auto py-12 px-4">
-      <img src={blog.image} alt={blog.title} className="w-full rounded-xl mb-6" />
+      <Image src={blog.image} alt={blog.title} className="w-full rounded-xl mb-6" />
       <h1 className="text-4xl font-bold mb-2 text-[#00423D]">{blog.title}</h1>
       <div className="text-gray-500 mb-6">{new Date(blog.created_at).toLocaleDateString()}</div>
       <article className="prose prose-lg text-[#222]" dangerouslySetInnerHTML={{ __html: blog.content }} />

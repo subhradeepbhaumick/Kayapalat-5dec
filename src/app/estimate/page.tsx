@@ -494,7 +494,7 @@ const handleBHKSelect = (bhkType: string, customConfig?: CustomConfig) => {
   </div>
 )}
 
-// In Step 2 (Room Selection), make sure the RoomSelector gets the correct configuration:
+{/* In Step 2 (Room Selection), make sure the RoomSelector gets the correct configuration: */}
 {resStep === 1 && (
   <div className="flex w-full flex-row-reverse">
     <div className="w-1/2 flex flex-col justify-center">

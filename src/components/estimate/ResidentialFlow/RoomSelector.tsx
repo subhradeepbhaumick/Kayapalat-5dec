@@ -9,6 +9,12 @@ import {
   FaBath,
   FaRedo,
   FaCheck,
+  FaPlus,
+  FaMinus,
+  FaChevronLeft,
+  FaChevronRight,
+  FaChevronDown,
+  FaInfoCircle, 
 } from "react-icons/fa";
 import {
   Dialog,
@@ -47,9 +53,40 @@ const RoomSelector: React.FC<RoomSelectorProps> = ({
     { id: "bathroom", label: "Bathroom", icon: <FaBath />, key: "bathroom" },
   ];
 
+  // Mock data for room options (you can replace this with your actual data)
+  const roomOptions = {
+    material: [
+      { value: "BWP-Ply", label: "BWP-Ply", price: 0 },
+      { value: "MDF", label: "MDF", price: 500 },
+      { value: "Plywood", label: "Plywood", price: 800 },
+      { value: "Particle Board", label: "Particle Board", price: 300 },
+    ],
+    finish: [
+      { value: "BWP-Ply-Matte-Laminate", label: "BWP-Ply-Matte-Laminate", price: 0 },
+      { value: "Glossy-Laminate", label: "Glossy Laminate", price: 1000 },
+      { value: "Veneer", label: "Veneer", price: 1500 },
+      { value: "Paint", label: "Paint", price: 800 },
+    ],
+    hardware: [
+      { value: "Hettich", label: "Hettich", price: 0 },
+      { value: "Blum", label: "Blum", price: 2000 },
+      { value: "Hafele", label: "Hafele", price: 1500 },
+      { value: "Ebco", label: "Ebco", price: 1200 },
+    ],
+    shape: [
+      { value: "L-shaped", label: "L-shaped", price: 0 },
+      { value: "U-shaped", label: "U-shaped", price: 1000 },
+      { value: "Straight", label: "Straight", price: 500 },
+      { value: "Island", label: "Island", price: 2000 },
+    ],
+  };
+
   const [openPanel, setOpenPanel] = useState<string | null>(null);
   const [roomDetails, setRoomDetails] = useState<any>({});
+  const [savedRooms, setSavedRooms] = useState<{ [key: string]: boolean }>({});
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [accessoriesVisible, setAccessoriesVisible] = useState<{ [key: string]: boolean }>({});
+  const [carouselIndex, setCarouselIndex] = useState<{ [key: string]: number }>({});
 
   // Debug log to see what bhkType contains
   useEffect(() => {
@@ -59,7 +96,10 @@ const RoomSelector: React.FC<RoomSelectorProps> = ({
   const handleResetAll = () => {
     setOpenPanel(null);
     setRoomDetails({});
+    setSavedRooms({});
     setErrors({});
+    setAccessoriesVisible({});
+    setCarouselIndex({});
   };
 
   const handleTogglePanel = (roomId: string) => {
@@ -95,16 +135,43 @@ const RoomSelector: React.FC<RoomSelectorProps> = ({
     return baseAccessories;
   };
 
-  const handleAccessoryToggle = (roomKey: string, acc: string) => {
+  const handleAccessoryQuantityChange = (roomKey: string, acc: string, change: number) => {
     setRoomDetails((prev: Record<string, any>) => {
-      const selected = prev[roomKey]?.accessories || [];
-      const updated = selected.includes(acc)
-        ? selected.filter((a: string) => a !== acc)
-        : [...selected, acc];
+      const accessories = prev[roomKey]?.accessories || {};
+      const currentQuantity = accessories[acc] || 0;
+      const newQuantity = Math.max(0, currentQuantity + change);
+      
       return {
         ...prev,
-        [roomKey]: { ...prev[roomKey], accessories: updated },
+        [roomKey]: {
+          ...prev[roomKey],
+          accessories: {
+            ...accessories,
+            [acc]: newQuantity,
+          },
+        },
       };
+    });
+  };
+
+  const toggleAccessoriesVisibility = (roomKey: string) => {
+    setAccessoriesVisible((prev) => ({
+      ...prev,
+      [roomKey]: !prev[roomKey],
+    }));
+  };
+
+  const handleCarouselNavigation = (roomType: string, direction: 'prev' | 'next') => {
+    const roomCount = getRoomCount(roomType);
+    setCarouselIndex((prev) => {
+      const current = prev[roomType] || 0;
+      let newIndex;
+      if (direction === 'prev') {
+        newIndex = current === 0 ? roomCount - 1 : current - 1;
+      } else {
+        newIndex = current === roomCount - 1 ? 0 : current + 1;
+      }
+      return { ...prev, [roomType]: newIndex };
     });
   };
 
@@ -117,23 +184,37 @@ const RoomSelector: React.FC<RoomSelectorProps> = ({
       }));
       return;
     }
+    
+    // Mark this room as saved
+    setSavedRooms((prev) => ({
+      ...prev,
+      [roomKey]: true,
+    }));
+    
     onRoomSelect(roomKey, roomDetails[roomKey]);
     setOpenPanel(null);
   };
 
   const handleCancel = (roomKey: string) => {
-    setRoomDetails((prev) => {
+    setRoomDetails((prev: typeof roomDetails) => {
       const updated = { ...prev };
       delete updated[roomKey];
       return updated;
     });
+    
+    // Remove from saved rooms if it was saved
+    setSavedRooms((prev) => {
+      const updated = { ...prev };
+      delete updated[roomKey];
+      return updated;
+    });
+    
     setOpenPanel(null);
   };
 
   const isRoomTypeSaved = (roomId: string) => {
-    return Object.keys(roomDetails).some(
-      (key) =>
-        key.startsWith(roomId) && roomDetails[key]?.area && !errors[key]
+    return Object.keys(savedRooms).some((key) => 
+      key.startsWith(roomId) && savedRooms[key]
     );
   };
 
@@ -166,55 +247,57 @@ const RoomSelector: React.FC<RoomSelectorProps> = ({
     return count;
   };
 
-  const renderRoomForms = (roomType: string) => {
-    const count = getRoomCount(roomType);
-    
-    // Don't render if this room type is not included in the BHK configuration
-    if (count === 0) return null;
-    
-    const forms = [];
+  const renderRoomCard = (roomType: string, roomIndex: number) => {
+    const roomKey = `${roomType}_${roomIndex + 1}`;
+    const isKidsRoom = roomDetails[roomKey]?.kidsRoom || false;
+    const accessories = getAccessoriesForRoom(roomType, isKidsRoom);
+    const currentAccessories = roomDetails[roomKey]?.accessories || {};
 
-    for (let i = 1; i <= count; i++) {
-      const roomKey = `${roomType}_${i}`;
-      const isKidsRoom = roomDetails[roomKey]?.kidsRoom || false;
-      const accessories = getAccessoriesForRoom(roomType, isKidsRoom);
+    return (
+      <motion.div
+        key={roomKey}
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className="bg-white border-2 border-gray-200 rounded-xl p-6 shadow-lg min-h-[600px] w-full max-w-md mx-auto"
+      >
+        <h4 className="font-bold text-xl mb-4 text-[#00423D] capitalize text-center">
+          {roomType === 'livingRoom' ? 'Living Room' : roomType.replace(/([A-Z])/g, ' $1').trim()} {getRoomCount(roomType) > 1 ? ` ${roomIndex + 1}` : ""}
+        </h4>
 
-      forms.push(
-        <motion.div
-          key={roomKey}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="p-4 border rounded-lg bg-gray-50 mb-5"
-        >
-          <h4 className="font-semibold mb-3 text-[#00423D] capitalize">
-            {roomType === 'livingRoom' ? 'Living Room' : roomType.replace(/([A-Z])/g, ' $1').trim()} {count > 1 ? i : ""}
-          </h4>
+        <div className="space-y-4">
+          {/* Carpet Area */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Carpet Area (sq.ft) *
+            </label>
+            <input
+              type="number"
+              className="w-full border-2 border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#00423D] focus:border-transparent"
+              value={roomDetails[roomKey]?.area || ""}
+              onChange={(e) =>
+                handleDetailChange(roomKey, "area", e.target.value)
+              }
+              placeholder="Enter carpet area"
+              min="1"
+            />
+            {errors[roomKey] && (
+              <p className="text-red-600 text-sm mt-1">{errors[roomKey]}</p>
+            )}
+          </div>
 
+          {/* Toggle Features */}
           <div className="space-y-3">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Carpet Area (sq.ft) *
-              </label>
-              <input
-                type="number"
-                className="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#00423D] focus:border-transparent"
-                value={roomDetails[roomKey]?.area || ""}
-                onChange={(e) =>
-                  handleDetailChange(roomKey, "area", e.target.value)
-                }
-                placeholder="Enter carpet area in square feet"
-                min="1"
-              />
-              {errors[roomKey] && (
-                <p className="text-red-600 text-sm mt-1">{errors[roomKey]}</p>
-              )}
-            </div>
-
-            <div className="flex flex-wrap items-center gap-5">
-              {/* False Ceiling Toggle */}
+            {/* False Ceiling Toggle */}
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium">False Ceiling</span>
               <div className="flex items-center gap-2">
+                {featurePrices['falseCeiling'] && (
+                  <span className="text-xs text-gray-500">
+                    (+₹{featurePrices['falseCeiling'].toLocaleString('en-IN')})
+                  </span>
+                )}
                 <div
-                  className={`w-10 h-5 rounded-full flex items-center p-1 cursor-pointer transition duration-200 ${
+                  className={`w-12 h-6 rounded-full flex items-center p-1 cursor-pointer transition duration-200 ${
                     roomDetails[roomKey]?.falseCeiling
                       ? "bg-[#00423D]"
                       : "bg-gray-300"
@@ -229,44 +312,46 @@ const RoomSelector: React.FC<RoomSelectorProps> = ({
                 >
                   <div
                     className={`w-4 h-4 bg-white rounded-full shadow transition duration-200 ${
-                      roomDetails[roomKey]?.falseCeiling ? "translate-x-5" : ""
+                      roomDetails[roomKey]?.falseCeiling ? "translate-x-6" : ""
                     }`}
                   />
                 </div>
-                <span className="text-sm">False Ceiling</span>
-                {featurePrices['falseCeiling'] && (
-                  <span className="text-xs text-gray-500">
-                    (+₹{featurePrices['falseCeiling'].toLocaleString('en-IN')})
-                  </span>
-                )}
               </div>
+            </div>
 
-              {/* Kids Room toggle - only for bedrooms */}
-              {roomType === "bedroom" && (
-                <div className="flex items-center gap-2">
+            {/* Kids Room toggle - only for bedrooms */}
+            {roomType === "bedroom" && (
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">Kids Room</span>
+                <div
+                  className={`w-12 h-6 rounded-full flex items-center p-1 cursor-pointer transition duration-200 ${
+                    isKidsRoom ? "bg-[#00423D]" : "bg-gray-300"
+                  }`}
+                  onClick={() =>
+                    handleDetailChange(roomKey, "kidsRoom", !isKidsRoom)
+                  }
+                >
                   <div
-                    className={`w-10 h-5 rounded-full flex items-center p-1 cursor-pointer transition duration-200 ${
-                      isKidsRoom ? "bg-[#00423D]" : "bg-gray-300"
+                    className={`w-4 h-4 bg-white rounded-full shadow transition duration-200 ${
+                      isKidsRoom ? "translate-x-6" : ""
                     }`}
-                    onClick={() =>
-                      handleDetailChange(roomKey, "kidsRoom", !isKidsRoom)
-                    }
-                  >
-                    <div
-                      className={`w-4 h-4 bg-white rounded-full shadow transition duration-200 ${
-                        isKidsRoom ? "translate-x-5" : ""
-                      }`}
-                    />
-                  </div>
-                  <span className="text-sm">Kids Room</span>
+                  />
                 </div>
-              )}
+              </div>
+            )}
 
-              {/* Loft toggle - only for Kitchen */}
-              {roomType === "kitchen" && (
+            {/* Loft toggle - only for Kitchen */}
+            {roomType === "kitchen" && (
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">Loft</span>
                 <div className="flex items-center gap-2">
+                  {featurePrices['loft'] && (
+                    <span className="text-xs text-gray-500">
+                      (+₹{featurePrices['loft'].toLocaleString('en-IN')})
+                    </span>
+                  )}
                   <div
-                    className={`w-10 h-5 rounded-full flex items-center p-1 cursor-pointer transition duration-200 ${
+                    className={`w-12 h-6 rounded-full flex items-center p-1 cursor-pointer transition duration-200 ${
                       roomDetails[roomKey]?.loft ? "bg-[#00423D]" : "bg-gray-300"
                     }`}
                     onClick={() =>
@@ -279,81 +364,254 @@ const RoomSelector: React.FC<RoomSelectorProps> = ({
                   >
                     <div
                       className={`w-4 h-4 bg-white rounded-full shadow transition duration-200 ${
-                        roomDetails[roomKey]?.loft ? "translate-x-5" : ""
+                        roomDetails[roomKey]?.loft ? "translate-x-6" : ""
                       }`}
                     />
                   </div>
-                  <span className="text-sm">Loft</span>
-                  {featurePrices['loft'] && (
-                    <span className="text-xs text-gray-500">
-                      (+₹{featurePrices['loft'].toLocaleString('en-IN')})
-                    </span>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {/* Accessories */}
-            {accessories.length > 0 && (
-              <div>
-                <div className="font-medium text-gray-700 mb-2">
-                  Accessories {isKidsRoom && roomType === 'bedroom' && '(Including Kids-specific options)'}
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-                  {accessories.map((acc) => {
-                    const price = accessoryPrices[roomType]?.[acc] || 
-                                 (isKidsRoom ? accessoryPrices['kids']?.[acc] : 0) || 0;
-                    return (
-                      <label
-                        key={acc}
-                        className="flex items-center gap-2 border rounded-lg px-3 py-2 cursor-pointer hover:bg-gray-50 transition duration-200"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={
-                            roomDetails[roomKey]?.accessories?.includes(acc) ||
-                            false
-                          }
-                          onChange={() => handleAccessoryToggle(roomKey, acc)}
-                          className="rounded text-[#00423D] focus:ring-[#00423D]"
-                        />
-                        <div className="flex flex-col flex-1 min-w-0">
-                          <span className="text-sm font-medium truncate">{acc}</span>
-                          {price > 0 && (
-                            <span className="text-xs text-gray-500">
-                              +₹{price.toLocaleString('en-IN')}
-                            </span>
-                          )}
-                        </div>
-                      </label>
-                    );
-                  })}
                 </div>
               </div>
             )}
           </div>
 
-          <div className="flex justify-between mt-5 pt-4 border-t">
-            <button
-              type="button"
-              onClick={() => handleCancel(roomKey)}
-              className="px-4 py-2 bg-gray-200 text-gray-700 rounded hover:bg-gray-300 transition duration-200"
-            >
-              Cancel
-            </button>
-            <button
-              type="button"
-              onClick={() => handleSave(roomKey)}
-              className="px-4 py-2 bg-[#00423D] text-white rounded hover:bg-[#00332D] transition duration-200"
-            >
-              Save Room
-            </button>
+          {/* Room Options Dropdowns */}
+          <div className="space-y-3">
+            {/* Material */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Material
+              </label>
+              <select
+                className="w-full border-2 border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#00423D] focus:border-transparent"
+                value={roomDetails[roomKey]?.material || "BWP-Ply"}
+                onChange={(e) =>
+                  handleDetailChange(roomKey, "material", e.target.value)
+                }
+              >
+                {roomOptions.material.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label} {option.price > 0 && `(+₹${option.price.toLocaleString('en-IN')})`}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Finish */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Finish
+              </label>
+              <select
+                className="w-full border-2 border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#00423D] focus:border-transparent"
+                value={roomDetails[roomKey]?.finish || "BWP-Zy-Matte-Laminate"}
+                onChange={(e) =>
+                  handleDetailChange(roomKey, "finish", e.target.value)
+                }
+              >
+                {roomOptions.finish.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label} {option.price > 0 && `(+₹${option.price.toLocaleString('en-IN')})`}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Hardware */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Hardware
+              </label>
+              <select
+                className="w-full border-2 border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#00423D] focus:border-transparent"
+                value={roomDetails[roomKey]?.hardware || "Hettich"}
+                onChange={(e) =>
+                  handleDetailChange(roomKey, "hardware", e.target.value)
+                }
+              >
+                {roomOptions.hardware.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label} {option.price > 0 && `(+₹${option.price.toLocaleString('en-IN')})`}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Shape */}
+            {roomType === "kitchen" && (<div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Shape
+              </label>
+              <select
+                className="w-full border-2 border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#00423D] focus:border-transparent"
+                value={roomDetails[roomKey]?.shape || "L-shaped"}
+                onChange={(e) =>
+                  handleDetailChange(roomKey, "shape", e.target.value)
+                }
+              >
+                {roomOptions.shape.map((option) => (
+                  <option key={option.value} value={option.value}>
+                    {option.label} {option.price > 0 && `(+₹${option.price.toLocaleString('en-IN')})`}
+                  </option>
+                ))}
+              </select>
+            </div>
+            )}
           </div>
-        </motion.div>
-      );
+
+          {/* Accessories */}
+          {accessories.length > 0 && (
+            <div>
+              <div 
+                className="flex items-center justify-between cursor-pointer p-2 bg-gray-50 rounded-lg hover:bg-gray-100 transition duration-200"
+                onClick={() => toggleAccessoriesVisibility(roomKey)}
+              >
+                <span className="text-sm font-medium text-gray-700">
+                  Accessories {isKidsRoom && roomType === 'bedroom' && '(Including Kids options)'}
+                </span>
+                <div className="flex items-center gap-2">
+                  <FaPlus className={`text-[#00423D] transition-transform duration-200 ${
+                    accessoriesVisible[roomKey] ? 'rotate-45' : ''
+                  }`} />
+                </div>
+              </div>
+
+              <AnimatePresence>
+                {accessoriesVisible[roomKey] && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: "auto" }}
+                    exit={{ opacity: 0, height: 0 }}
+                    transition={{ duration: 0.3 }}
+                    className="mt-2 space-y-2 max-h-40 overflow-y-auto"
+                  >
+                    {accessories.map((acc) => {
+                      const price = accessoryPrices[roomType]?.[acc] || 
+                                   (isKidsRoom ? accessoryPrices['kids']?.[acc] : 0) || 0;
+                      const quantity = currentAccessories[acc] || 0;
+                      
+                      return (
+                        <div
+                          key={acc}
+                          className="flex items-center justify-between p-2 border rounded-lg bg-white"
+                        >
+                          <div className="flex-1 min-w-0">
+                            <div className="text-sm font-medium truncate">{acc}</div>
+                            {price > 0 && (
+                              <div className="text-xs text-gray-500">
+                                ₹{price.toLocaleString('en-IN')} each
+                              </div>
+                            )}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <button
+                              type="button"
+                              onClick={() => handleAccessoryQuantityChange(roomKey, acc, -1)}
+                              className="w-6 h-6 rounded-full bg-gray-200 hover:bg-gray-300 flex items-center justify-center transition duration-200"
+                              disabled={quantity === 0}
+                            >
+                              <FaMinus className="text-xs" />
+                            </button>
+                            <span className="w-8 text-center text-sm font-medium">
+                              {quantity}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => handleAccessoryQuantityChange(roomKey, acc, 1)}
+                              className="w-6 h-6 rounded-full bg-[#00423D] hover:bg-[#00332D] text-white flex items-center justify-center transition duration-200"
+                            >
+                              <FaPlus className="text-xs" />
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          )}
+        </div>
+
+        <div className="flex justify-between mt-6 pt-4 border-t">
+          <button
+            type="button"
+            onClick={() => handleCancel(roomKey)}
+            className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition duration-200"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={() => handleSave(roomKey)}
+            className="px-4 py-2 bg-[#00423D] text-white rounded-lg hover:bg-[#00332D] transition duration-200"
+          >
+            Save Room
+          </button>
+        </div>
+      </motion.div>
+    );
+  };
+
+  const renderRoomCarousel = (roomType: string) => {
+    const count = getRoomCount(roomType);
+    
+    // Don't render if this room type is not included in the BHK configuration
+    if (count === 0) return null;
+
+    const currentIndex = carouselIndex[roomType] || 0;
+    
+    if (count === 1) {
+      return renderRoomCard(roomType, 0);
     }
 
-    return forms;
+    return (
+      <div className="relative">
+        <div className="flex items-center justify-between mb-4">
+          <button
+            onClick={() => handleCarouselNavigation(roomType, 'prev')}
+            className="p-2 rounded-full bg-[#00423D] text-white hover:bg-[#00332D] transition duration-200"
+          >
+            <FaChevronLeft />
+          </button>
+          
+          <div className="flex-1 text-center">
+            <span className="text-sm text-gray-600">
+              Room {currentIndex + 1} of {count}
+            </span>
+          </div>
+          
+          <button
+            onClick={() => handleCarouselNavigation(roomType, 'next')}
+            className="p-2 rounded-full bg-[#00423D] text-white hover:bg-[#00332D] transition duration-200"
+          >
+            <FaChevronRight />
+          </button>
+        </div>
+
+        <div className="overflow-hidden">
+          <motion.div
+            key={`${roomType}-${currentIndex}`}
+            initial={{ opacity: 0, x: 100 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.3 }}
+          >
+            {renderRoomCard(roomType, currentIndex)}
+          </motion.div>
+        </div>
+
+        {/* Dots indicator */}
+        <div className="flex justify-center mt-4 space-x-2">
+          {Array.from({ length: count }).map((_, index) => (
+            <button
+              key={index}
+              onClick={() => setCarouselIndex(prev => ({ ...prev, [roomType]: index }))}
+              className={`w-2 h-2 rounded-full transition duration-200 ${
+                index === currentIndex ? 'bg-[#00423D]' : 'bg-gray-300'
+              }`}
+            />
+          ))}
+        </div>
+      </div>
+    );
   };
 
   const content = (
@@ -361,7 +619,7 @@ const RoomSelector: React.FC<RoomSelectorProps> = ({
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className="w-full max-w-4xl bg-white/95 rounded-xl shadow-lg p-6 sm:p-8"
+      className="w-full max-w-6xl bg-white/95 rounded-xl shadow-lg p-6 sm:p-8"
     >
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-xl sm:text-2xl font-semibold text-[#00423D]">Configure Your Rooms</h2>
@@ -396,7 +654,7 @@ const RoomSelector: React.FC<RoomSelectorProps> = ({
       </motion.div>
 
       <motion.div
-        className="space-y-4"
+        className="space-y-6"
         initial="hidden"
         animate="visible"
         variants={{
@@ -415,7 +673,7 @@ const RoomSelector: React.FC<RoomSelectorProps> = ({
           return (
             <motion.div 
               key={room.id} 
-              className="border rounded-lg overflow-hidden"
+              className="border-2 border-gray-200 rounded-xl overflow-hidden"
               variants={{
                 hidden: { opacity: 0, y: 20 },
                 visible: { opacity: 1, y: 0 },
@@ -423,7 +681,7 @@ const RoomSelector: React.FC<RoomSelectorProps> = ({
             >
               <motion.div
                 whileHover={{ scale: 1.01 }}
-                className={`p-4 rounded-lg border-2 flex justify-between items-center cursor-pointer transition duration-200 ${
+                className={`p-4 rounded-t-xl border-b-2 flex justify-between items-center cursor-pointer transition duration-200 ${
                   openPanel === room.id
                     ? "border-[#00423D] bg-green-50"
                     : "border-gray-200 hover:border-gray-300 bg-white"
@@ -433,7 +691,7 @@ const RoomSelector: React.FC<RoomSelectorProps> = ({
                 <div className="flex items-center gap-3">
                   <div className="text-2xl text-[#00423D]">{room.icon}</div>
                   <div>
-                    <span className="font-medium">{room.label}</span>
+                    <span className="font-medium text-lg">{room.label}</span>
                     {roomCount > 1 && (
                       <span className="text-sm text-gray-500 ml-2">
                         ({roomCount} rooms)
@@ -447,15 +705,12 @@ const RoomSelector: React.FC<RoomSelectorProps> = ({
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  {isRoomTypeSaved(room.id) && (
-                    <FaCheck className="text-green-600 text-lg" />
-                  )}
                   <motion.div
                     animate={{ rotate: openPanel === room.id ? 180 : 0 }}
                     transition={{ duration: 0.2 }}
                     className="text-gray-400"
                   >
-                    ▼
+                    <FaChevronDown />
                   </motion.div>
                 </div>
               </motion.div>
@@ -469,8 +724,8 @@ const RoomSelector: React.FC<RoomSelectorProps> = ({
                     transition={{ duration: 0.3 }}
                     className="overflow-hidden"
                   >
-                    <div className="p-4 bg-gray-50 border-t">
-                      {renderRoomForms(room.id)}
+                    <div className="p-6 bg-gray-50">
+                      {renderRoomCarousel(room.id)}
                     </div>
                   </motion.div>
                 )}
@@ -489,37 +744,40 @@ const RoomSelector: React.FC<RoomSelectorProps> = ({
         >
           <p>No room configuration available. Please select a BHK type first.</p>
         </motion.div>
-      )}
+      )}  
 
-      {/* Help section for card mode */}
-      {mode === "card" && (
-        <motion.div 
-          className="mt-6 p-4 bg-green-50 rounded-lg border border-green-200"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.4 }}
-        >
-          <h4 className="font-semibold text-[#00423D] mb-2">How to Configure Rooms</h4>
-          <ul className="text-sm text-gray-700 space-y-1">
-            <li>• Click on each room type to expand and configure</li>
-            <li>• Enter carpet area for each room (required)</li>
-            <li>• Toggle features like false ceiling or loft as needed</li>
-            <li>• Select accessories to customize your room</li>
-            <li>• Save each room configuration before moving to the next</li>
-          </ul>
-        </motion.div>
-      )}
-    </motion.div>
+{/* Help section for card mode */}
+{mode === "card" && (
+          <motion.div 
+            className="mt-6 p-4 bg-green-50 rounded-lg border border-green-200"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.4 }}
+          >
+            <div className="flex items-center gap-2 mb-3">
+              <FaInfoCircle className="text-green-600" />
+              <h3 className="font-semibold text-green-800">How to Configure Your Rooms</h3>
+            </div>
+            <div className="text-sm text-green-700 space-y-2">
+              <p>• Click on any room type to expand and configure individual rooms</p>
+              <p>• Enter the carpet area for each room (required)</p>
+              <p>• Use toggles to add features like false ceiling, loft, or mark as kids room</p>
+              <p>• Select materials, finishes, hardware, and shapes from dropdown menus</p>
+              <p>• Click "Accessories" to add optional items to each room</p>
+              <p>• Use navigation arrows for multiple rooms of the same type</p>
+              <p>• Save each room configuration before moving to the next</p>
+            </div>
+          </motion.div>
+        )}
+      </motion.div>
   );
-
+  // Modal mode rendering
   if (mode === "modal") {
     return (
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="max-w-5xl w-full overflow-y-auto max-h-[95vh] bg-white/95 backdrop-blur-sm rounded-lg">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-semibold text-[#00423D] text-center">
-              Room Configuration
-            </DialogTitle>
+            <DialogTitle>Configure Your Rooms</DialogTitle>
           </DialogHeader>
           {content}
         </DialogContent>
@@ -527,6 +785,7 @@ const RoomSelector: React.FC<RoomSelectorProps> = ({
     );
   }
 
+  // Card mode rendering
   return content;
 };
 
