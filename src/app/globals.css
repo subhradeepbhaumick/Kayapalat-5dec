@@ -1,20 +1,22 @@
 @import "tailwindcss";
+@import '../styles/_variables.scss';
+@import '../styles/_keyframe-animations.scss';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 :root {
   --background: #D2EBD0;
   --foreground: #171717;
   --radix-select-content-bg: white !important;
-}
-
-::-webkit-scrollbar {
-  display: none;
-}
-
-:root {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+}
+
+body::-webkit-scrollbar {
+  display: none;
 }
 
 @keyframes glitter {
@@ -36,11 +38,168 @@
   animation: glitter 1s infinite ease-in-out;
 }
 
-
+/* --- Custom Horizontal Scrollbar --- */
+.horizontal-scrollbar::-webkit-scrollbar {
+  height: 6px;
+  width: 5px;
+  @apply rounded-full;
+}
+.horizontal-scrollbar::-webkit-scrollbar-track {
+  @apply bg-gray-200 rounded-full;
+}
+.horizontal-scrollbar::-webkit-scrollbar-thumb {
+  @apply bg-[#00423D] rounded-full;
+}
+.horizontal-scrollbar::-webkit-scrollbar-thumb:hover {
+  @apply bg-[#00261a];
+}
 
 body {
   
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* --- CUSTOM PROSE STYLES --- */
+
+/* For Links */
+.prose a {
+  @apply text-[#00423D] font-bold underline hover:text-[#00261a];
+}
+
+/* For Inline Code */
+.prose code {
+  @apply bg-gray-100 text-gray-800 font-mono text-sm px-1.5 py-0.5 rounded-sm border border-[#00423D];
+}
+
+/* For Blockquotes */
+.prose blockquote {
+  @apply border-l-4 border-[#00423D] bg-gray-50 text-gray-700 italic px-4 py-2 my-4;
+}
+.prose blockquote p:first-of-type::before,
+.prose blockquote p:last-of-type::after {
+  content: none;
+}
+
+/* FIX: Reset margins on paragraphs inside list items for alignment */
+.prose ul li > p,
+.prose ol li > p {
+    margin: 0 !important;
+}
+
+/* Regular unordered lists */
+.prose ul:not([data-type="taskList"]) {
+  list-style: none !important;
+  padding-left: 1.5rem !important;
+  margin: 1rem 0 !important;
+}
+
+.prose ul:not([data-type="taskList"]) > li {
+  position: relative !important;
+  margin: 0.5rem 0 !important;
+  padding-left: 0.5rem !important; /* Added padding to create space for the bullet */
+}
+
+.prose ul:not([data-type="taskList"]) > li::before {
+  content: "•" !important;
+  position: absolute !important;
+  left: -1rem !important; /* Adjusted position */
+  top: 0.1em !important; /* Fine-tune vertical alignment */
+  color: rgb(75 85 99) !important;
+  font-weight: bold !important;
+  font-size: 1.25em; /* Make bullet more visible */
+}
+
+/* Regular ordered lists */
+.prose ol {
+  list-style: none !important;
+  padding-left: 1.5rem !important;
+  margin: 1rem 0 !important;
+  counter-reset: item !important;
+}
+
+.prose ol > li {
+  position: relative !important;
+  margin: 0.5rem 0 !important;
+  counter-increment: item !important;
+  padding-left: 0.5rem !important; /* Added padding to create space for the number */
+}
+
+.prose ol > li::before {
+  content: counter(item, decimal) "." !important;
+  position: absolute !important;
+  left: -1.5rem !important; /* Adjusted position */
+  top: 0 !important;
+  color: rgb(75 85 99) !important;
+  font-weight: 500 !important;
+  width: 1.2rem; /* Give it a fixed width */
+  text-align: right; /* Align numbers to the right */
+  margin-right: 0.3rem;
+}
+
+
+/* Task Lists */
+.prose ul[data-type="taskList"] {
+  list-style: none !important;
+  padding-left: 0 !important;
+  margin: 1rem 0 !important;
+}
+
+/* FIX: Make the entire task item non-interactive */
+.prose ul[data-type="taskList"] > li[data-type="taskItem"] {
+  display: flex !important;
+  align-items: flex-start !important;
+  margin: 0.5rem 0 !important;
+  pointer-events: none !important; /* Disable clicks on the whole item */
+}
+
+.prose ul[data-type="taskList"] > li[data-type="taskItem"]::before {
+  display: none !important;
+}
+
+.prose ul[data-type="taskList"] > li[data-type="taskItem"] > label {
+  display: flex !important;
+  align-items: center !important;
+  margin-right: 0.5rem !important;
+  margin-top: 0.25rem !important; /* Adjusted for better alignment */
+  cursor: default !important;
+}
+
+.prose ul[data-type="taskList"] > li[data-type="taskItem"] > label > input[type="checkbox"] {
+  cursor: default !important;
+  margin: 0 !important;
+}
+
+/* FIX: Allow text selection in the content part of the task item */
+.prose ul[data-type="taskList"] > li[data-type="taskItem"] > div {
+  flex: 1 !important;
+  pointer-events: auto !important; /* Re-enable pointer events for the text only */
+}
+
+/* Completed task styling */
+.prose ul[data-type="taskList"] > li[data-type="taskItem"][data-checked="true"] > div p {
+  text-decoration: line-through !important;
+  color: rgb(107 114 128) !important;
+}
+
+
+/* For Headings */
+.prose h1 {
+  @apply text-4xl font-bold mt-8 mb-4 text-[#00423D];
+}
+.prose h2 {
+  @apply text-3xl font-bold mt-6 mb-3 text-[#00423D];
+}
+.prose h3 {
+  @apply text-2xl font-bold mt-4 mb-2 text-[#00423D];
+}
+.prose h4 {
+  @apply text-xl font-bold mt-4 mb-2;
+}
+.prose h5 {
+  @apply text-lg font-bold mt-2 mb-1;
+}
+.prose h6 {
+  @apply text-base font-bold mt-2 mb-1;
 }

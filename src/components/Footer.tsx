@@ -14,7 +14,7 @@ const abhaya = al({ variable: "--al-sans", subsets: ["latin"], weight: ['400','5
 const Footer = () => {
   return (
 <div className="bg-[#D2EBD0] ">
-<footer className="relative z-10 bg-teal-800 text-white p-10 mt-auto ">
+<footer className="relative z-100 bg-teal-800 text-white p-10 mt-auto ">
       <div className="container mx-auto grid grid-cols-1 md:grid-cols-4 gap-10   mt-6 px-4  lg:px-20">
         {/* Newsletter Section */}
         <div>

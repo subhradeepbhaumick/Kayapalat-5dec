@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 
-export async function GET(req: Request) {
+export async function GET(request: Request) {
   try {
-    const token = await getToken({ req });
+    const token = await getToken({ req: request });
     
     if (!token) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

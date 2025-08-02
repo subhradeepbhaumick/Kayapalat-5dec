@@ -29,7 +29,7 @@ export default function Home() {
   return (
     <main className="w-full mx-auto">
       <HeroSection />
-      <OurCreations />
+      <OurCreations page="home" />
       <ConceptToCompletion />
       <AboutUs />
       <DesignIdeas />

@@ -626,9 +626,9 @@ const RoomSelector: React.FC<RoomSelectorProps> = ({
         <button
           type="button"
           onClick={handleResetAll}
-          className="text-sm text-red-600 flex items-center gap-2 hover:text-red-700 transition duration-200"
+          className=" text-sm text-red-600 flex items-center gap-2 hover:text-red-700 transition duration-200"
         >
-          <FaRedo /> Reset All
+          <FaRedo className="hidden md:flex" /> Reset All
         </button>
       </div>
 

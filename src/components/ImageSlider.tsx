@@ -9,7 +9,7 @@ interface ImageSliderProps {
 }
 
 export const ImageSlider = ({ beforeImage, afterImage }: ImageSliderProps) => {
-  const [sliderPosition, setSliderPosition] = useState(30);
+  const [sliderPosition, setSliderPosition] = useState(37);
   const [isDragging, setIsDragging] = useState(false);
 
   const handleMove = (clientX: number, rect: DOMRect) => {
@@ -46,13 +46,13 @@ export const ImageSlider = ({ beforeImage, afterImage }: ImageSliderProps) => {
         onMouseDown={handleInteractionStart}
         onTouchStart={handleInteractionStart}
       >
-        <Image alt="Before" fill priority src={beforeImage} className="object-cover" />
+        <Image alt="Before" fill priority src={afterImage} className="object-cover" />
 
         <div
           className="absolute top-0 left-0 right-0 w-full max-w-[700px] aspect-[70/45] m-auto overflow-hidden select-none"
           style={{ clipPath: `inset(0 ${100 - sliderPosition}% 0 0)` }}
         >
-          <Image alt="After" fill priority src={afterImage} className="object-cover" />
+          <Image alt="After" fill priority src={beforeImage} className="object-cover" />
         </div>
 
         <div

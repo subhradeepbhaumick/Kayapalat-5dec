@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono , Saira_Stencil_One, Inter } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
 import ClientLayoutWrapper from "@/components/ClientLayoutWrapper";
@@ -15,6 +15,13 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
+const sairaStencil = Saira_Stencil_One({
+  subsets: ['latin'],
+  weight: ['400'], // The font only has one weight
+  variable: '--font-saira-stencil-one',
+});
+
 export const metadata: Metadata = {
   title: "Kayapalat - Transforming Your Style",
   description: "Welcome to Kayapalat - Join and explore!",
@@ -26,7 +33,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" className={`${inter.variable} ${sairaStencil.variable}`}>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <AuthProvider>
           <ClientLayoutWrapper>

@@ -36,7 +36,7 @@ const BHKTypeSelector: React.FC<BHKTypeSelectorProps> = ({
   });
 
   const bhkOptions = [
-    { value: '1BHK', label: '1 BHK', rooms: ['1 Bedroom', '1 Living Room', '1 Kitchen', '1 Bathroom'] },
+    { value: '1BHK', label: '1 BHK', rooms: ['1 Bedroom', '1 Living Room', '1 Kitchen', '1 Bathroom', '1 Dining'] },
     { value: '2BHK', label: '2 BHK', rooms: ['2 Bedrooms', '1 Living Room', '1 Kitchen', '2 Bathrooms', '1 Dining'] },
     { value: '3BHK', label: '3 BHK', rooms: ['3 Bedrooms', '1 Living Room', '1 Kitchen', '2 Bathrooms', '1 Dining'] },
     { value: '4BHK', label: '4 BHK', rooms: ['4 Bedrooms', '1 Living Room', '1 Kitchen', '3 Bathrooms', '1 Dining'] },

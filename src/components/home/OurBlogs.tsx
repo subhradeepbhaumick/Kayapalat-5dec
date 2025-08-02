@@ -1,17 +1,20 @@
 'use client';
 
-import React, { ReactNode, useEffect, useState } from 'react';
-import { FaPlus } from 'react-icons/fa6';
+import React, { useEffect, useState } from 'react';
+import { FaPlus, FaTag } from 'react-icons/fa6';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 
+// Interface updated to include tags
 interface Blog {
   excerpt: string;
   id: number;
   title: string;
-  body: string;
   image: string;
   created_at: string;
   slug: string;
+  category_name?: string;
+  tags?: { name: string; slug: string }[];
 }
 
 const OurBlogs = () => {
@@ -21,42 +24,21 @@ const OurBlogs = () => {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchBlogs = async () => {
+    const fetchFeaturedBlogs = async () => {
       try {
-        // First test the database connection
-        const testResponse = await fetch('/api/test-db');
-        const testData = await testResponse.json();
-        
-        if (!testData.success) {
-          throw new Error(`Database connection failed: ${testData.details}`);
-        }
-
-        // Now fetch the blogs
-        const response = await fetch('/api/blogs', {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          cache: 'no-store'
-        });
-        
+        // Fetching only blogs marked as "featured"
+        const response = await fetch('/api/blogs?featured=true', { cache: 'no-store' });
         if (!response.ok) {
           const errorData = await response.json();
           throw new Error(errorData.error || 'Failed to fetch blogs');
         }
 
-        const data = await response.json();
-        
+        const { blogs: data } = await response.json();
         if (!Array.isArray(data)) {
-          throw new Error('Invalid data format received from server');
+          throw new Error('Invalid data format from server');
         }
 
-        // Sort blogs by createdAt date and take the 4 most recent ones
-        const recentBlogs = data
-          .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-          .slice(0, 4);
-
-        setBlogs(recentBlogs);
+        setBlogs(data);
       } catch (err) {
         console.error('Fetch error details:', err);
         setError(err instanceof Error ? err.message : 'An error occurred while fetching blogs');
@@ -65,14 +47,15 @@ const OurBlogs = () => {
       }
     };
 
-    fetchBlogs();
+    fetchFeaturedBlogs();
   }, []);
 
+  // --- Loading, Error, and Empty states ---
   if (loading) {
     return (
       <div className="text-center py-12">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#00423D] mx-auto"></div>
-        <p className="mt-4 text-[#00423D]">Loading blogs...</p>
+        <p className="mt-4 text-[#00423D]">Loading Blogs...</p>
       </div>
     );
   }
@@ -81,12 +64,6 @@ const OurBlogs = () => {
     return (
       <div className="text-center py-12">
         <div className="text-red-500 mb-4">Error: {error}</div>
-        <button
-          onClick={() => window.location.reload()}
-          className="border-2 border-[#00423D] rounded-full px-6 py-2 text-sm font-semibold text-[#00423D] cursor-pointer hover:bg-[#b4ddc3] transition-all duration-200"
-        >
-          Try Again
-        </button>
       </div>
     );
   }
@@ -94,69 +71,75 @@ const OurBlogs = () => {
   if (blogs.length === 0) {
     return (
       <div className="text-center py-12">
-        <p className="text-[#00423D]">No blogs available at the moment.</p>
+        <p className="text-[#00423D]">No featured blogs available at the moment.</p>
       </div>
     );
   }
 
+  // --- Main Component Return ---
   return (
     <section className="relative w-full">
       <div className="bg-[#D2EBD0] py-12 px-6 text-[#00423D] text-center relative font-sans">
-        <h2
-          className="text-5xl md:text-7xl text-[#00423D] font-abril"
-          style={{
-            WebkitTextStroke: '1px black',
-            fontFamily: "'Abril Fatface', cursive",
-          }}
-        >
+        <h2 className="text-5xl md:text-7xl text-[#00423D] font-abril" style={{ WebkitTextStroke: '1px black', fontFamily: "'Abril Fatface', cursive" }}>
           Our Blogs
         </h2>
-
-        {/* See All button for desktop */}
-        <div className="hidden md:block transition-transform hover:scale-105 active:scale-95 duration-200 absolute right-10 top-35">
-          <button
-            onClick={() => router.push('/blogs')}
-            className="border-2 border-[#00423D] bg-[#ffffffb8] rounded-full px-6 py-2 text-sm font-semibold text-[#00423D] cursor-pointer hover:bg-[#b4ddc3] transition-all duration-200"
-          >
-            See All
+        <div className="hidden md:block absolute right-10 top-40 -translate-y-1/2">
+          <button onClick={() => router.push('/blogs')} className="border-2 border-[#00423D] bg-[#ffffffb8] rounded-full px-6 py-2 text-sm font-semibold text-[#00423D] cursor-pointer hover:bg-[#b4ddc3] transition-all duration-200">
+            See All Blogs
           </button>
         </div>
 
         <div className="flex gap-6 flex-wrap mt-10 md:mt-20 justify-center">
+          {/* --- New Card Design --- */}
           {blogs.map((blog) => (
-            <div
-              key={blog.id}
-              className="bg-[#e8f5e9] rounded-xl p-4 border-2 border-teal-800 w-80 flex flex-col justify-between items-center shadow-md hover:shadow-lg transition-shadow duration-200"
-            >
-              <img
-                src={blog.image}
-                alt={blog.title}
-                className="w-full h-80 object-cover rounded-xl mb-4 select-none border-2 border-[#00423D]"
-                draggable={false}
-              />
-              <h3 className="text-center mb-1 font-semibold text-lg">{blog.title}</h3>
-              <hr className="border-t-[1px] border-gray-400 w-full mb-2" />
-              <div 
-                className="text-sm mb-4 text-center min-h-[4.5rem] line-clamp-3"
-                dangerouslySetInnerHTML={{ __html: blog.excerpt }}
-              />
-              <button
-                onClick={() => router.push(`/blogs/${blog.slug}`)}
-                className="rounded-full border-2 border-[#00423D] transition-all cursor-pointer hover:bg-[#cbead1] px-6 py-1 text-sm text-[#00423D] font-medium flex items-center gap-2 hover:scale-105 active:scale-95 duration-200"
-              >
-                Read More <FaPlus className="text-xs" />
-              </button>
+            <div key={blog.id} className="w-80 bg-white rounded-xl group flex flex-col shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 border border-gray-200/80 text-left">
+              <div className="relative w-full h-52 rounded-t-xl overflow-hidden">
+                <Image
+                  src={blog.image || 'https://placehold.co/600x400/d2ebd0/00423d?text=Image'}
+                  alt={blog.title}
+                  fill
+                  style={{ objectFit: 'cover' }}
+                  className="transition-transform  border-2 rounded-[5%] duration-300 group-hover:scale-105"
+                />
+              </div>
+
+              <div className="mt-auto p-6 flex flex-col flex-grow">
+                {blog.category_name && (
+                  <p className="text-sm font-bold text-[#2e8b57] mb-2 uppercase tracking-wider">{blog.category_name}</p>
+                )}
+
+                <h3 className="font-bold text-gray-800 mb-3 text-lg leading-snug">{blog.title}</h3>
+
+                {blog.tags && blog.tags.length > 0 && (
+                  <div className="flex flex-wrap items-center gap-2 mb-auto">
+                    {blog.tags.slice(0, 3).map(tag => (
+                      <span key={tag.slug} className="bg-teal-100 text-teal-800 text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1.5  ">
+                        <FaTag size={10} /> {tag.name}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                <div className="text-sm text-gray-600 mt-4 line-clamp-3" dangerouslySetInnerHTML={{ __html: blog.excerpt || '' }} />
+
+                
+                
+                <div className="mt-auto pt-4 border-t border-gray-200/80">
+                  <button
+                    onClick={() => router.push(`/blogs/${blog.slug}`)}
+                    className="w-full rounded-full border-2 border-[#00423D] transition-all bg-[#00423D] text-white hover:bg-[#00261a] px-6 py-2 text-sm font-medium flex cursor-pointer items-center justify-center gap-2"
+                  >
+                    Read Story <FaPlus className="text-xs" />
+                  </button>
+                </div>
+              </div>
             </div>
           ))}
         </div>
 
-        {/* See All button for mobile */}
         <div className="mt-10 md:hidden">
-          <button
-            onClick={() => router.push('/blogs')}
-            className="border-2 border-[#00423D] pr-25 pl-25 rounded-full px-6 py-2 text-lg font-semibold text-[#00423D] cursor-pointer hover:border-3 transition-all duration-200"
-          >
-            See All
+          <button onClick={() => router.push('/blogs')} className="border-2 border-[#00423D] rounded-full px-6 py-2 text-lg font-semibold text-[#00423D]">
+            See All Blogs
           </button>
         </div>
       </div>
