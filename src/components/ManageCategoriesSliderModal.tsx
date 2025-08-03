@@ -169,7 +169,7 @@ export function ManageCategoriesSliderModal({ isOpen, onOpenChange }: ManageCate
                     key={icon.name}
                     type="button"
                     onClick={() => setSelectedIcon(icon.name)}
-                    className={`p-2 rounded-md cursor-pointer transition-colors text-xl flex-shrink-0 min-w-[40px] ${selectedIcon === icon.name
+                    className={`p-2 rounded-md cursor-pointer transition-colors text-xl flex-shrink-0 min-w-[35px] ${selectedIcon === icon.name
                       ? 'bg-[#00423D] text-white'
                       : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                       }`}

@@ -95,8 +95,8 @@ export function OurCreationsClient({ sliders, categories }: { sliders: SliderDat
 
         <div className="relative w-full max-w-[700px] mx-auto mt-6">
           <div className="relative">
-            <div className="absolute top-10 text-[#00423D] px-2 rounded text-sm">Before</div>
-            <div className="absolute right-0 top-10 text-[#00423D] px-2 rounded text-sm">After</div>
+            <div className="absolute  text-[#00423D] px-2 rounded text-sm">Before</div>
+            <div className="absolute right-0  text-[#00423D] px-2 rounded text-sm">After</div>
             <ImageSlider
               beforeImage={currentSlides[currentIndex].before_image}
               afterImage={currentSlides[currentIndex].after_image}

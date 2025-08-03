@@ -37,7 +37,7 @@ export const ImageSlider = ({ beforeImage, afterImage }: ImageSliderProps) => {
   const handleInteractionEnd = () => setIsDragging(false);
 
   return (
-    <div className="w-full relative pt-15" onMouseUp={handleInteractionEnd} onTouchEnd={handleInteractionEnd}>
+    <div className="w-full relative pt-5" onMouseUp={handleInteractionEnd} onTouchEnd={handleInteractionEnd}>
 
       <div
         className="relative w-full max-w-[700px] aspect-[70/45] m-auto overflow-hidden select-none"

@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Facebook, Instagram, Youtube, Linkedin, Award, Users, Clock, Star, CheckCircle, Heart, Shield, Zap, Target, ArrowRight, ChevronDown, ChevronUp, Plus, Minus, MapPin, Phone, Mail, Calendar, User, Briefcase, ExternalLink, XCircle } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { FaArrowUp } from "react-icons/fa";
-import { title } from "process";
+
 
 // Simple window width hook
 function useWindowWidth() {

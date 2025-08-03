@@ -3,14 +3,14 @@
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import SocialShare from './SocialShare';
-import { ImageSlider } from '@/components/ImageSlider';
+import React from 'react';
 import { formatDate, calculateReadTime } from '@/lib/utils';
 import {
   Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator
 } from "@/components/ui/breadcrumb";
 import { ScrollToTopButton } from './ScrollToTopButton'; // NEW: Import ScrollToTopButton
 import { Tag, Folder } from 'lucide-react'; // NEW: Import icons
+import { BlogHeroSection } from './BlogHeroSection'; // NEW: Import BlogHeroSection
 
 
 const BackgroundPattern = ({ color = '#00423D', opacity = 0.05 }) => {
@@ -146,20 +146,7 @@ export default async function BlogReadPage({ params }: { params: { slug: string 
     <>
       <ScrollToTopButton /> {/* NEW: Added scroll to top button */}
 
-      <section className="relative h-[60vh] md:h-[80vh] flex items-center justify-center text-center text-white px-6">
-        <div className="absolute inset-0">
-          {blog.before_image && blog.after_image ? (
-            <ImageSlider beforeImage={blog.before_image} afterImage={blog.after_image} />
-          ) : (
-            <Image src={blog.image} alt={blog.title} fill style={{ objectFit: 'cover' }} priority />
-          )}
-          <div className="absolute inset-0 bg-black/50"></div>
-        </div>
-        <div className="relative z-10">
-          <h1 className="text-4xl md:text-7xl font-saira-stencil font-bold tracking-wider drop-shadow-lg mb-4">{blog.title}</h1>
-          <SocialShare title={blog.title} />
-        </div>
-      </section>
+      <BlogHeroSection />
 
       <section className="relative bg-[#F4F7F4] py-16 px-6">
         <BackgroundPattern />
