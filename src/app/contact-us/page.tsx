@@ -7,16 +7,16 @@ import Link from 'next/link';
 
 // --- Custom Combobox Component (Mimicking shadcn/ui Combobox behavior) ---
 // This component provides a searchable dropdown functionality.
-const Combobox = ({ options, value, onValueChange, placeholder, searchTerm, onSearchTermChange, className }) => {
+const Combobox = ({ options , value, onValueChange, placeholder, searchTerm, onSearchTermChange, className }) => {
   const [isOpen, setIsOpen] = useState(false);
   const comboboxRef = useRef(null);
 
   // Determine the displayed label based on the current value
-  const displayLabel = options.find(option => option.value === value)?.label || placeholder;
+  const displayLabel = options.find((option: any) => option.value === value)?.label || placeholder;
 
   // Close dropdown when clicking outside
   useEffect(() => {
-    const handleClickOutside = (event) => {
+    const handleClickOutside = (event: MouseEvent) => {
       if (comboboxRef.current && !comboboxRef.current.contains(event.target)) {
         setIsOpen(false);
         onSearchTermChange(''); // Clear search term when closing
@@ -280,8 +280,8 @@ const ContactUsPage = () => {
   }, [name, email, phone, whatsappSameAsPhone, whatsappNumber, message, charCount, reasonForContact, selectedCity]);
 
   // --- Event Handlers for Input Changes ---
-  const handleNameChange = (e) => setName(e.target.value);
-  const handleEmailChange = (e) => {
+  const handleNameChange = (e:any) => setName(e.target.value);
+  const handleEmailChange = (e:any) => {
     setEmail(e.target.value);
     // Re-evaluate email validation immediately on change
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -291,18 +291,18 @@ const ContactUsPage = () => {
       setEmailError('');
     }
   };
-  const handlePhoneChange = (e) => setPhone(e.target.value);
-  const handleWhatsappSameAsPhoneChange = (e) => setWhatsappSameAsPhone(e.target.checked);
-  const handleWhatsappNumberChange = (e) => setWhatsappNumber(e.target.value);
-  const handleMessageChange = (e) => {
+  const handlePhoneChange = (e:any) => setPhone(e.target.value);
+  const handleWhatsappSameAsPhoneChange = (e:any) => setWhatsappSameAsPhone(e.target.checked);
+  const handleWhatsappNumberChange = (e:any) => setWhatsappNumber(e.target.value);
+  const handleMessageChange = (e:any) => {
     const value = e.target.value;
     setMessage(value);
     setCharCount(value.length);
   };
-  const handleReasonChange = (value) => setReasonForContact(value);
-  const handleCityChange = (value) => setSelectedCity(value);
+  const handleReasonChange = (value:any) => setReasonForContact(value);
+  const handleCityChange = (value:any) => setSelectedCity(value);
 
-  const handleCountrySelect = (value) => {
+  const handleCountrySelect = (value:any) => {
     // Value now corresponds to unique identifiers like '+1-CA' or '+1-US'
     setCountryCode(value);
   };
@@ -395,7 +395,7 @@ const ContactUsPage = () => {
 
   // --- Handle Enter Key Press ---
   // Allows submitting the form by pressing Enter if valid.
-  const handleKeyPress = (e) => {
+  const handleKeyPress = (e:any) => {
     if (e.key === 'Enter' && isValid && !isSubmitting) {
       e.preventDefault(); // Prevent default form submission behavior
       handleSubmit();

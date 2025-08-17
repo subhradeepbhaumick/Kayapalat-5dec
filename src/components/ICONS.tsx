@@ -67,5 +67,5 @@ export const ICON_COMPONENTS: { [key: string]: React.ReactNode } = {
   FaHome: <FaHome className="w-4 h-4 md:w-6 md:h-6" />,
   
   // Default fallback icon
-  Default: <FaHardHat className="w-4 h-4 md:w-6 md:h-6" />,
+  Default: <FaHome className="w-4 h-4 md:w-6 md:h-6" />,
 };

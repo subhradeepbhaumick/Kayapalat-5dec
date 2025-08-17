@@ -191,7 +191,7 @@ const ContactSection = ({ router }: { router: any }) => {
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: index * 0.1 }}
             >
-              <a href={contact.link} target="_blank" rel="noopener noreferrer" className="block h-full flex flex-col justify-between cursor-pointer">
+              <a href={contact.link} target="_blank" rel="noopener noreferrer" className=" h-full flex flex-col justify-between cursor-pointer">
                 <contact.icon className="w-12 h-12 text-[#00423D] mx-auto mb-4" />
                 <h3 className="text-xl font-bold text-gray-900 mb-2">{contact.title}</h3>
                 <p className="text-gray-700 font-medium mb-1 hover:underline flex-grow flex items-center justify-center">{contact.info}</p>
@@ -428,7 +428,7 @@ const BlogsPage = () => {
               </div>
               <div className="flex-shrink-0">
                 <div className="bg-gray-200 rounded-full p-1 relative flex items-center text-sm">
-                  <div className={`absolute h-[calc(100%-8px)] w-[calc(50%-4px)] bg-white rounded-full shadow-md transition-all duration-300 ease-in-out ${sortOrder === 'latest' ? 'left-1' : 'left-[calc(50%+3px)]'}`} />
+                  <div className={`absolute h-[calc(100%-8px)] w-[calc(50%-4px)] bg-white rounded-full shadow-md transition-all duration-300 ease-in-out ${sortOrder === 'latest' ? 'left-1' : 'left-[calc(48%)] pl-5'}`} />
                   <button onClick={() => setSortOrder('latest')} className={`relative px-4 py-1 rounded-full transition-colors duration-300 ease-in-out cursor-pointer ${sortOrder === 'latest' ? 'text-[#00423D] font-semibold' : 'text-gray-600'}`}>Latest</button>
                   <button onClick={() => setSortOrder('popular')} className={`relative px-4 py-1 rounded-full transition-colors duration-300 ease-in-out cursor-pointer ${sortOrder === 'popular' ? 'text-[#00423D] font-semibold' : 'text-gray-600'}`}>Popular</button>
                 </div>

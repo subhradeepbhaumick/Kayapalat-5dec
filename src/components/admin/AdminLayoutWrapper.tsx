@@ -10,11 +10,11 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
   const { isOpen } = useSidebar();
   
   return (
-    <div className="flex h-screen bg-[#D2EBD0]">
+    <div className="flex min-h-screen ">
       <AdminSidebar />
       <div className={`flex-1 transition-all duration-300 ${isOpen ? 'ml-64' : 'ml-20'}`}>
         <Topbar />
-        <main className="p-6 overflow-y-auto">{children}</main>
+        <main className=" overflow-y-auto">{children}</main>
       </div>
     </div>
   );

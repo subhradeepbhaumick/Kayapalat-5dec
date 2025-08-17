@@ -20,7 +20,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import { useSidebar } from "@/components/SidebarProvider";
+// import { useSidebar } from "@/components/SidebarProvider";
 
 const navGroups = [
   {

@@ -1297,7 +1297,7 @@ export default function AboutUsPage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: index * 0.1 }}
               >
-                <Link href={contact.link} target="_blank" rel="noopener noreferrer" className="block h-full flex flex-col justify-between">
+                <Link href={contact.link} target="_blank" rel="noopener noreferrer" className=" h-full flex flex-col justify-between">
                   <contact.icon className="w-12 h-12 text-[#00423D] mx-auto mb-4" />
                   <h3 className="text-xl font-bold text-gray-900 mb-2">{contact.title}</h3>
                   <p className="text-gray-700 font-medium mb-1 hover:underline flex-grow flex items-center justify-center">{contact.info}</p>

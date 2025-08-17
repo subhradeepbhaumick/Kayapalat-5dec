@@ -35,9 +35,8 @@ export async function POST(request: NextRequest) {
     // --- Sanitize filename and create a unique name ---
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
-    const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1E9)}`;
-    const sanitizedFileName = file.name.replace(/[^a-zA-Z0-9.]/g, '_');
-    const newFileName = `${uniqueSuffix}-${sanitizedFileName}`;
+    const sanitizedFileName = file.name.replace(/[^a-zA-Z0-9.]/g, '-');
+    const newFileName = `${sanitizedFileName}`;
     const path = join(uploadDir, newFileName);
 
     // --- Write file to the server ---

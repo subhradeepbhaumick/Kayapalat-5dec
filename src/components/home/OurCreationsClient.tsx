@@ -46,16 +46,49 @@ export function OurCreationsClient({ sliders, categories }: { sliders: SliderDat
       return acc;
     }, {});
   }, [sliders]);
-  
+
   const [activeCategoryId, setActiveCategoryId] = useState<number | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
 
+  // First useEffect - must always be called
   useEffect(() => {
     if (categories.length > 0 && activeCategoryId === null) {
       setActiveCategoryId(categories[0].id);
     }
   }, [categories, activeCategoryId]);
 
+  // Define handlers before the second useEffect
+  const handlePrev = () => {
+    if (activeCategoryId !== null && imageData[activeCategoryId]) {
+      const currentSlides = imageData[activeCategoryId];
+      setCurrentIndex((p) => (p > 0 ? p - 1 : currentSlides.length - 1));
+    }
+  };
+
+  const handleNext = () => {
+    if (activeCategoryId !== null && imageData[activeCategoryId]) {
+      const currentSlides = imageData[activeCategoryId];
+      setCurrentIndex((p) => (p < currentSlides.length - 1 ? p + 1 : 0));
+    }
+  };
+
+  // Second useEffect - must always be called
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'ArrowLeft') {
+        handlePrev();
+      } else if (event.key === 'ArrowRight') {
+        handleNext();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [handlePrev, handleNext]);
+
+  // All hooks must be called before any conditional returns
+  // Now we can safely do our conditional checks
   if (activeCategoryId === null || !imageData[activeCategoryId]) {
     return null; // Don't show the component if there are no published items to display
   }
@@ -63,17 +96,36 @@ export function OurCreationsClient({ sliders, categories }: { sliders: SliderDat
   const currentSlides = imageData[activeCategoryId];
   const testimonial = currentSlides[currentIndex];
 
-  const handlePrev = () => setCurrentIndex((p) => (p > 0 ? p - 1 : currentSlides.length - 1));
-  const handleNext = () => setCurrentIndex((p) => (p < currentSlides.length - 1 ? p + 1 : 0));
   const handleCategoryChange = (categoryId: number) => {
     setActiveCategoryId(categoryId);
     setCurrentIndex(0);
   };
 
+  // If no slides are available for the active category, return null
+  if (currentSlides.length === 0) {
+    return null;
+  }
+  // If there are no testimonials, return null
+  if (!testimonial || !testimonial.testimonial_name) {
+    return null;
+  }
+  // If there are no images, return null
+  if (!testimonial.before_image || !testimonial.after_image) {
+    return null;
+  }
+  // If there are no categories, return null
+  if (categories.length === 0) {
+    return null;
+  }
+  // If there are no icons, return null
+  if (Object.keys(ICON_COMPONENTS).length === 0) {
+    return null;
+  }
+
   return (
     <section className="bg-[#D2EBD0] py-12 px-6 text-[#00423D] text-center">
       <div className="max-w-5xl mx-auto">
-        <h2 className="text-4xl md:text-7xl text-[#00423D]" style={{ fontFamily: "'Abril Fatface', cursive", WebkitTextStroke: "1px black"}}>Our Creations</h2>
+        <h2 className="text-4xl md:text-7xl text-[#00423D]" style={{ fontFamily: "'Abril Fatface', cursive", WebkitTextStroke: "1px black" }}>Our Creations</h2>
         <p className="mt-4 text-md md:text-2xl text-black">Explore Real Client Transformations</p>
 
         <div className="flex flex-wrap justify-center gap-4 mt-6">
@@ -118,18 +170,24 @@ export function OurCreationsClient({ sliders, categories }: { sliders: SliderDat
         </div>
 
         <div className="mt-8 text-black text-left max-w-xl mx-auto flex items-start gap-4">
-          <div className="min-w-[50px] min-h-[50px]">
-            <Image src={testimonial.testimonial_dp} alt={testimonial.testimonial_name} width={50} height={50} className="rounded-full object-cover" />
+          <div className="w-[50px] h-[50px] rounded-full overflow-hidden flex items-center justify-center flex-shrink-0">
+            <Image
+              src={testimonial.testimonial_dp}
+              alt={testimonial.testimonial_name}
+              width={50}
+              height={50}
+              className="w-full h-full object-cover"
+            />
           </div>
           <div>
             <p className="text-base font-medium">{testimonial.testimonial_name}</p>
             <div className="flex items-center gap-4">
-              <p className="text-sm italic mt-1">{testimonial.designation}</p>
+              <p className="text-sm mt-1">{testimonial.designation}</p>
               <div className="flex items-center gap-1">
                 {[...Array(testimonial.rating)].map((_, i) => <FaStar key={i} className="text-yellow-400 text-xs" />)}
               </div>
             </div>
-            <blockquote className="text-gray-700 mt-2 text-md md:text-xl">“ {testimonial.comment} ”</blockquote>
+            <blockquote className="text-gray-700 border-l-4 border-[#00423D] pl-4 mt-2 text-md md:text-sm">{testimonial.comment}</blockquote>
           </div>
         </div>
       </div>

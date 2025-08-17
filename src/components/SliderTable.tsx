@@ -232,12 +232,36 @@ export function SliderTable() {
               ) : filteredSliders.map((slider) => (
                 <TableRow key={slider.id}>
                   <TableCell className="flex justify-center gap-2 pl-6 pr-4 py-2 px-4">
-                    <Image src={slider.before_image} alt="Before" width={64} height={64} className="rounded-md object-cover" />
-                    <Image src={slider.after_image} alt="After" width={64} height={64} className="rounded-md object-cover" />
+                    <div className="w-16 h-16 rounded-md overflow-hidden flex items-center justify-center flex-shrink-0">
+                      <Image
+                        src={slider.before_image}
+                        alt="Before"
+                        width={64}
+                        height={64}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="w-16 h-16 rounded-md overflow-hidden flex items-center justify-center flex-shrink-0">
+                      <Image
+                        src={slider.after_image}
+                        alt="After"
+                        width={64}
+                        height={64}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
                   </TableCell>
                   <TableCell className="px-4">
                     <div className="flex items-center gap-3">
-                      <Image src={slider.testimonial_dp || '/placeholder-avatar.png'} alt={slider.testimonial_name} width={32} height={32} className="rounded-full object-cover" />
+                      <div className="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center flex-shrink-0">
+                        <Image
+                          src={slider.testimonial_dp || '/placeholder-avatar.png'}
+                          alt={slider.testimonial_name}
+                          width={32}
+                          height={32}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
                       <div>
                         <div className="font-medium">{slider.testimonial_name}</div>
                         <div className="text-xs text-muted-foreground">{slider.designation}</div>

@@ -38,7 +38,7 @@ interface SliderFormProps {
 }
 
 const emptyForm: SliderData = {
-    before_image: '', after_image: '', testimonial_dp: '',
+    before_image: '', after_image: '', testimonial_dp: '/user.png',
     testimonial_name: '', designation: '', rating: 4, comment: '',
     category_id: null, page_id: null, status: 'draft',
 };

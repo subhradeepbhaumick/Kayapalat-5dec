@@ -21,8 +21,7 @@ export function generateSlug(title: string): string {
     .trim()
     .replace(/\s+/g, '-')
     .replace(/[^\w\-]+/g, '')
-    .replace(/\-\-+/g, '-')
-    + '-' + timestamp;
+    .replace(/\-\-+/g, '-');
 }
 
 // The primary function to execute all queries

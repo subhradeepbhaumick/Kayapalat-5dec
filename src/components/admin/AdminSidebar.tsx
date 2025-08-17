@@ -40,7 +40,7 @@ const navGroups = [
     title: "Content Management",
     links: [
       { label: "Designs", icon: Brush, href: "/admin/designs" },
-      { label: "Galleries", icon: GalleryHorizontal, href: "/admin/galleries" },
+      { label: "Gallery", icon: GalleryHorizontal, href: "/admin/gallery" },
       { label: "FAQs", icon: HelpCircle, href: "/admin/faqs" },
       { label: "Blogs", icon: Newspaper, href: "/admin/blogs" },
       { label: "Testimonials", icon: Star, href: "/admin/testimonials" },

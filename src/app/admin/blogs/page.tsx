@@ -29,7 +29,7 @@ export default function ManageBlogsPage() {
   };
 
   return (
-    <div className="p-6 md:p-8">
+    <div className="p-6 md:p-8 bg-[#D2EBD0] min-h-screen">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Manage Blogs</h1>

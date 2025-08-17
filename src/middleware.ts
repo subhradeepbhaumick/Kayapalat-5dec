@@ -1,37 +1,28 @@
-import { NextResponse } from 'next/server'
-import type { NextRequest } from 'next/server'
- 
+// File: middleware.ts
+import { withAuth } from "next-auth/middleware";
+import { NextResponse } from "next/server";
 
-export function middleware(request: NextRequest) {
-  const path = request.nextUrl.pathname
+export default withAuth(
+  function middleware(req) {
+    // Block the /simple page for everyone
+    if (req.nextUrl.pathname.startsWith("/simple")) {
+      return NextResponse.rewrite(new URL("/unauthorized", req.url)); // Or redirect to home
+    }
 
-  const isPublicPath = path === '/login' || path === '/signup' || path === '/verifyemail'
-
-  const token = request.cookies.get('token')?.value || ''
-
-  const response = NextResponse.next()
-
-  // Set a cookie to indicate login status
-  response.cookies.set('loggedIn', token ? 'true' : 'false', { path: '/' })
-
-  if(isPublicPath && token) {
-    return NextResponse.redirect(new URL('/', request.nextUrl))
+    // Check for admin role on admin routes
+    if (req.nextUrl.pathname.startsWith("/admin") && req.nextauth.token?.role !== "admin") {
+      return NextResponse.rewrite(new URL("/unauthorized", req.url)); // Or redirect to home
+    }
+  },
+  {
+    callbacks: {
+      // This ensures the middleware only runs if the user is logged in
+      authorized: ({ token }) => !!token,
+    },
   }
+);
 
-  if (!isPublicPath && !token) {
-    return NextResponse.redirect(new URL('/login', request.nextUrl))
-  }
-
-  return response
-}
-
- 
-// See "Matching Paths" below to learn more
-export const config = {
-  matcher: [
-    '/profile',
-    '/login',
-    '/signup',
-    '/verifyemail'
-  ]
-}
+// This config applies the middleware to the specified routes
+export const config = { 
+   matcher: ["/profile", "/simple" , "/dashboard/:path*"] 
+};
