@@ -21,44 +21,29 @@ async function ensureDirExists(directoryPath: string) {
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
-    const searchTerm = searchParams.get('search') || '';
-    const categoryId = searchParams.get('category') || '';
+    // New 'filter' param for smart filters
+    const filter = searchParams.get('filter') || 'latest'; 
 
-    // Base query now includes all new fields for the redesigned gallery
-    let query = `
-      SELECT
-        gi.id,
-        gi.title,
-        gi.image_path,
-        gi.is_featured,
-        gi.likes,
-        gi.designer_name,
-        gi.designer_designation,
-        gi.designer_dp_path,
-        gi.designer_comment,
-        gc.id AS category_id,
-        gc.name AS category_name,
-        gc.icon_name,
-        gi.created_at
-      FROM
-        GalleryImages AS gi
-      JOIN
-        GalleryCategories AS gc ON gi.category_id = gc.id
-      WHERE
-        gi.title LIKE ?
-    `;
-    const params: (string | number)[] = [`%${searchTerm}%`];
+    let orderByClause = 'ORDER BY gi.is_featured DESC, gi.created_at DESC';
 
-    // Append category filter if provided (for admin table)
-    if (categoryId) {
-      query += ' AND gi.category_id = ?';
-      params.push(parseInt(categoryId));
+    if (filter === 'most_liked') {
+      // Order by likes, then by views as a tie-breaker
+      orderByClause = 'ORDER BY gi.is_featured DESC, gi.likes DESC, gi.view_count DESC';
     }
 
-    // Sort by featured status first, then by creation date
-    query += ' ORDER BY gi.is_featured DESC, gi.created_at DESC;';
+    const query = `
+      SELECT
+        gi.id, gi.title, gi.image_path, gi.is_featured, gi.likes,
+        gi.designer_name, gi.designer_designation, gi.designer_dp_path,
+        gi.designer_comment, gi.view_count,
+        gc.id AS category_id, gc.name AS category_name
+      FROM GalleryImages AS gi
+      JOIN GalleryCategories AS gc ON gi.category_id = gc.id
+      WHERE gi.status = 'published'
+      ${orderByClause};
+    `;
     
-    const images = await db.query(query, params);
+    const images = await db.query(query);
     return NextResponse.json(images);
 
   } catch (error) {

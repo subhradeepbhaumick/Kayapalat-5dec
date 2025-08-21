@@ -30,7 +30,7 @@ export function ScrollToTopButton() {
   return (
     <button
       onClick={scrollToTop}
-      className={`fixed bottom-8 right-8 z-5 bg-[#00423D] text-white p-4 rounded-full shadow-lg hover:bg-[#00261a] transition-all duration-300 ${isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-50'}`}
+      className={`fixed bottom-8 right-8 z-50 bg-[#00423D] text-white p-4 rounded-full shadow-lg hover:bg-[#00261a] transition-all duration-300 ${isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-50'}`}
       aria-label="Scroll to top"
     >
       <FaArrowUp />

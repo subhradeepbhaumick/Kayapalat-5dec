@@ -1,7 +1,8 @@
 // File: src/app/gallery/page.tsx
 import { GalleryClient } from "./GalleryClient";
+import { ScrollToTopButton } from '@/app/blogs/[slug]/ScrollToTopButton';
 
-// --- INTERFACES
+// --- INTERFACES ---
 export interface GalleryImage {
   id: number;
   title: string;
@@ -17,7 +18,6 @@ export interface GalleryImage {
   icon_name: string | null;
 }
 
-// A new interface for our Category objects, which now include an icon.
 export interface Category {
   id: number;
   name: string;
@@ -27,15 +27,14 @@ export interface Category {
 interface SEOData {
   meta_title: string;
   meta_description: string;
+  content?: string;
 }
 
 // --- DATA FETCHING ---
-// This function is updated to fetch all the new data and derive categories from the images.
-async function getGalleryData(): Promise<{ images: GalleryImage[], categories: Category[] }> {
+async function getGalleryData(): Promise<{ images: GalleryImage[]; categories: Category[] }> {
   try {
-    // We only need to call the gallery-images endpoint now, as it contains all the data.
-    const imagesRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/gallery-images`, { 
-      cache: 'no-store' 
+    const imagesRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/gallery-images`, {
+      cache: 'no-store',
     });
 
     if (!imagesRes.ok) {
@@ -43,12 +42,10 @@ async function getGalleryData(): Promise<{ images: GalleryImage[], categories: C
     }
 
     const images: GalleryImage[] = await imagesRes.json();
-    
-    // --- Derive unique categories from the fetched images ---
-    // This is more efficient than a separate API call.
+
+    // Derive unique categories from images
     const categoryMap = new Map<number, Category>();
     images.forEach(img => {
-      // If we haven't seen this category ID before, add it to our map.
       if (!categoryMap.has(img.category_id)) {
         categoryMap.set(img.category_id, {
           id: img.category_id,
@@ -57,19 +54,17 @@ async function getGalleryData(): Promise<{ images: GalleryImage[], categories: C
         });
       }
     });
-    // Convert the map of unique categories into an array.
+
     const categories = Array.from(categoryMap.values());
 
     return { images, categories };
-
   } catch (error) {
     console.error("Gallery data fetch error:", error);
-    // Return empty arrays on error to prevent the page from crashing.
-    return { images: [], categories: [] }; 
+    return { images: [], categories: [] };
   }
 }
 
-// --- DYNAMIC METADATA (No changes needed here) ---
+// --- DYNAMIC METADATA ---
 export async function generateMetadata() {
   try {
     const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/seo/gallery`, {
@@ -82,7 +77,9 @@ export async function generateMetadata() {
         description: 'A collection of stunning interior designs.',
       };
     }
+
     const seoData: SEOData = await res.json();
+
     return {
       title: seoData.meta_title,
       description: seoData.meta_description,
@@ -96,33 +93,19 @@ export async function generateMetadata() {
   }
 }
 
+// --- SEO Block Data Fetch ---
 
 // --- MAIN PAGE COMPONENT ---
 export default async function GalleryPage() {
-  // Fetch the redesigned data structure.
   const { images, categories } = await getGalleryData();
 
   return (
     <main>
-      {/* Hero Section (No changes needed here) */}
-      <section className="bg-[#00423D] text-white text-center py-20 px-6">
-        <h1 className="text-4xl md:text-6xl font-saira-stencil font-bold tracking-wider">
-          Our Design Gallery
-        </h1>
-        <p className="text-lg text-gray-300 mt-4 max-w-2xl mx-auto">
-          Explore a curated collection of our finest interior designs and find your inspiration.
-        </p>
-      </section>
 
-      {/* Pass the full images and categories arrays to the client component */}
       <GalleryClient images={images} categories={categories} />
+      
+      {/* Scroll To Top Button */}
+      <ScrollToTopButton />
     </main>
   );
 }
-
-
-
-
-
-
-

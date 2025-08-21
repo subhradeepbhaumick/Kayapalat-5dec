@@ -1,77 +1,117 @@
-// File: src/components/gallery/FeaturedCarousel.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import Image from 'next/image';
-import { motion, AnimatePresence, Transition } from 'framer-motion';
+import { motion, AnimatePresence, Transition, PanInfo, useScroll, useTransform } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Heart } from 'lucide-react';
 import type { GalleryImage } from '@/app/gallery/page';
+import { getCategoryColor } from '@/lib/colours';
+import confetti from 'canvas-confetti';
 
-// --- PROPS UPDATED FOR CENTRALIZED STATE ---
 interface FeaturedCarouselProps {
   images: GalleryImage[];
   onImageClick: (image: GalleryImage) => void;
-  likedImageIds: Set<number>; // Receives the set of liked image IDs
-  onLike: (imageId: number) => void; // Receives the handler function
+  likedImageIds: Set<number>;
+  onLike: (imageId: number) => void;
 }
 
 export function FeaturedCarousel({ images, onImageClick, likedImageIds, onLike }: FeaturedCarouselProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [direction, setDirection] = useState(0);
+  const carouselRef = useRef<HTMLDivElement>(null);
 
-  const transition: Transition = { duration: 0.4, ease: 'easeInOut' };
+  const { scrollYProgress } = useScroll({
+    target: carouselRef,
+    offset: ["start start", "end start"],
+  });
+  const y = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]);
+
+  const transition: Transition = { duration: 0.5, ease: 'easeInOut' };
 
   const slideVariants = {
-    hidden: (direction: number) => ({ x: direction > 0 ? '100%' : '-100%', opacity: 0 }),
+    hidden: (dir: number) => ({ x: dir > 0 ? '100%' : '-100%', opacity: 0.8 }),
     visible: { x: 0, opacity: 1 },
-    exit: (direction: number) => ({ x: direction < 0 ? '100%' : '-100%', opacity: 0 }),
+    exit: (dir: number) => ({ x: dir < 0 ? '100%' : '-100%', opacity: 0.8 }),
   };
 
-  const nextSlide = () => {
+  const nextSlide = useCallback(() => {
     setDirection(1);
-    setCurrentIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
+    setCurrentIndex(prev => (prev === images.length - 1 ? 0 : prev + 1));
+  }, [images.length]);
+
+  const prevSlide = useCallback(() => {
+    setDirection(-1);
+    setCurrentIndex(prev => (prev === 0 ? images.length - 1 : prev - 1));
+  }, [images.length]);
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft') prevSlide();
+      if (e.key === 'ArrowRight') nextSlide();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [prevSlide, nextSlide]);
+
+  const handleDragEnd = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+    if (info.offset.x > 50) prevSlide();
+    else if (info.offset.x < -50) nextSlide();
   };
 
-  const prevSlide = () => {
-    setDirection(-1);
-    setCurrentIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
-  };
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (document.querySelector('.featured-carousel:hover') === null) {
+        nextSlide();
+      }
+    }, 2000);
+    return () => clearInterval(interval);
+  }, [nextSlide]);
+
+  if (!images || images.length === 0) return null;
 
   const currentImage = images[currentIndex];
-  
-  // --- LOCAL STATE REMOVED ---
-  // The component no longer manages its own 'likes' or 'isLiked' state.
+  const isLiked = likedImageIds.has(currentImage.id);
+  const categoryColor = getCategoryColor(currentImage.category_name);
 
-  const handleLikeClick = (e: React.MouseEvent) => {
+  const handleLikeClick = (e: React.MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
-    // Call the centralized handler from the parent component
+    if (isLiked) return;
     onLike(currentImage.id);
+
+    const rect = e.currentTarget.getBoundingClientRect();
+    confetti({
+      particleCount: 50,
+      spread: 60,
+      origin: {
+        x: (rect.left + rect.right) / 2 / window.innerWidth,
+        y: (rect.top + rect.bottom) / 2 / window.innerHeight,
+      },
+      colors: ['#ef4444', '#f87171', '#fca5a5'],
+      scalar: 1.2,
+    });
   };
 
-  // The useEffect for resetting local state is no longer needed and has been removed.
-
-  if (!images || images.length === 0) {
-    return null; 
-  }
-
-  // Determine if the current image is liked based on the prop
-  const isLiked = currentImage ? likedImageIds.has(currentImage.id) : false;
-
   return (
-    <div className="w-full max-w-5xl mx-auto mb-16">
-      <h2 className="text-4xl font-bold text-center text-[#00423D] mb-8">Featured Designs</h2>
-      <div className="relative h-[60vh] rounded-2xl shadow-2xl overflow-hidden">
-        <AnimatePresence initial={false} custom={direction}>
+    <div ref={carouselRef} className="w-full h-[70vh] md:h-[90vh] mb-10 relative overflow-hidden group featured-carousel">
+      <AnimatePresence initial={false} custom={direction}>
+        <motion.div
+          key={currentIndex}
+          custom={direction}
+          variants={slideVariants}
+          initial="hidden"
+          animate="visible"
+          exit="exit"
+          transition={transition}
+          className="absolute inset-0 w-full h-full"
+          drag="x"
+          dragConstraints={{ left: 0, right: 0 }}
+          onDragEnd={handleDragEnd}
+        >
+          {/* onTap used instead of onClick to avoid drag conflicts */}
           <motion.div
-            key={currentIndex}
-            custom={direction}
-            variants={slideVariants}
-            initial="hidden"
-            animate="visible"
-            exit="exit"
-            transition={transition}
-            className="absolute inset-0 w-full h-full cursor-pointer"
-            onClick={() => onImageClick(currentImage)}
+            style={{ y }}
+            className="relative w-full h-full cursor-pointer"
+            onTap={() => onImageClick(currentImage)}
           >
             <Image
               src={currentImage.image_path}
@@ -81,34 +121,57 @@ export function FeaturedCarousel({ images, onImageClick, likedImageIds, onLike }
               priority
             />
           </motion.div>
-        </AnimatePresence>
+        </motion.div>
+      </AnimatePresence>
 
-        {/* Navigation Arrows */}
-        <button onClick={prevSlide} className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/30 text-white p-2 rounded-full hover:bg-black/50 transition-colors z-10"><ChevronLeft size={24} /></button>
-        <button onClick={nextSlide} className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/30 text-white p-2 rounded-full hover:bg-black/50 transition-colors z-10"><ChevronRight size={24} /></button>
+      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent pointer-events-none" />
 
-        {/* Bottom Info Card */}
-        <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/70 to-transparent">
-            <div className="bg-white/90 backdrop-blur-sm p-4 rounded-xl flex justify-between items-center">
-                <div className="flex items-center gap-3">
-                    <Image
-                        src={currentImage.designer_dp_path || '/user.png'}
-                        alt={currentImage.designer_name || 'Designer'}
-                        width={48}
-                        height={48}
-                        className="rounded-full object-cover bg-gray-200"
-                    />
-                    <div>
-                        <p className="font-bold text-gray-900">{currentImage.designer_name || 'Team KayaPalat'}</p>
-                        <p className="text-sm text-gray-600">{currentImage.designer_comment}</p>
-                    </div>
-                </div>
-                <button onClick={handleLikeClick} className="flex items-center gap-1.5 text-gray-600 hover:text-red-500 transition-colors flex-shrink-0 pl-4">
-                    {/* UI now driven by props */}
-                    <Heart className={`w-6 h-6 ${isLiked ? 'text-red-500 fill-current' : ''}`} />
-                    <span className="text-lg font-bold">{currentImage.likes}</span>
-                </button>
+      <button
+        onClick={e => { e.stopPropagation(); prevSlide(); }}
+        aria-label="Previous slide"
+        className="absolute z-10 left-4 top-1/2 -translate-y-1/2 bg-white/20 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+      >
+        <ChevronLeft size={28} />
+      </button>
+      <button
+        onClick={e => { e.stopPropagation(); nextSlide(); }}
+        aria-label="Next slide"
+        className="absolute z-10 right-4 top-1/2 -translate-y-1/2 bg-white/20 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+      >
+        <ChevronRight size={28} />
+      </button>
+
+      <div className="absolute top-4 right-4 z-10">
+        <span className={`px-3 py-1 text-xs font-bold rounded-md ${categoryColor.bg} ${categoryColor.text}`}>
+          {currentImage.category_name}
+        </span>
+      </div>
+
+      <div className="absolute bottom-0 left-0 right-0 p-4 md:p-8 text-white">
+        <div className="flex justify-between items-end">
+          <div className="max-w-xl">
+            <h2 className="text-2xl md:text-4xl font-bold drop-shadow-lg">{currentImage.title}</h2>
+            <div className="flex items-center gap-3 mt-2">
+              <Image
+                src={currentImage.designer_dp_path || '/user.png'}
+                alt={currentImage.designer_name || ''}
+                width={32}
+                height={32}
+                className="rounded-full object-cover border-2 border-white/50"
+              />
+              <div>
+                <p className="font-semibold text-sm drop-shadow-md">{currentImage.designer_name || 'Team KayaPalat'}</p>
+                <p className="text-xs text-white/80 drop-shadow-md">{currentImage.designer_designation || 'Designer'}</p>
+              </div>
             </div>
+          </div>
+
+          <button onClick={handleLikeClick} aria-label="Like this design" className="flex-shrink-0">
+            <div className={`w-14 h-14 rounded-full flex items-center justify-center transition-colors ${isLiked ? 'bg-red-500/80' : 'bg-white/20 hover:bg-white/30'}`}>
+              <Heart className={`w-7 h-7 transition-transform ${isLiked ? 'text-white fill-white scale-110' : 'text-white'}`} />
+            </div>
+            <p className="text-center font-bold mt-1 text-sm">{currentImage.likes}</p>
+          </button>
         </div>
       </div>
     </div>

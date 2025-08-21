@@ -560,21 +560,21 @@ export default function AboutUsPage() {
       title: "Design Only",
       description: "Get comprehensive 3D designs and execute yourself",
       features: ["3D Visualization", "Layout Planning", "Material List", "Execution Guide"],
-      price: "Starting ₹15,000",
+      price: "Starting ₹ 15,000 only",
       popular: false
     },
     {
       title: "Turnkey Solution",
       description: "Complete end-to-end interior solution",
       features: ["Complete Design", "Material Procurement", "Execution", "Installation", "Final Handover"],
-      price: "Starting ₹50,000",
+      price: "Starting ₹ 3,00,000 only",
       popular: true // Marked as most popular
     },
     {
       title: "Design & Project Management",
       description: "Full design service with project oversight",
       features: ["Everything in Design Only", "Project Management", "Vendor Coordination", "Quality Checks"],
-      price: "Starting ₹25,000",
+      price: "Starting ₹ 50,000 only",
       popular: false
     }
   ];
@@ -895,12 +895,12 @@ export default function AboutUsPage() {
             Our Service Models
           </motion.h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 ">
             {serviceModels.map((service, index) => (
               <motion.div
                 key={index}
-                className={`bg-[#F8FDF8] rounded-2xl p-6 md:p-8 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 relative border border-gray-100 ${
-                  service.popular ? 'md:scale-110 md:z-10 border-2 border-[#00423D]' : '' // Added scale-110 for popular card
+                className={`bg-[#F8FDF8] rounded-2xl p-6 md:p-8 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 relative border-2 border-[#00423D]${
+                  service.popular ? 'md:scale-110 md:z-10 ' : '' // Added scale-110 for popular card
                 }`}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}

@@ -5,6 +5,7 @@ import { db } from '@/lib/db'; // Your database connection utility
 interface SEOData {
   meta_title: string;
   meta_description: string;
+  content?: string;
 }
 
 export async function GET(
@@ -20,8 +21,8 @@ export async function GET(
     }
 
     // The query to get SEO data for a specific page
-    const query = 'SELECT meta_title, meta_description FROM PageSEO WHERE page_identifier = ?';
-    
+    const query = 'SELECT meta_title, meta_description, content FROM PageSEO WHERE page_identifier = ?';
+
     // Execute the query with the page identifier as a parameter
     const seoDataArray = await db.query<SEOData[]>(query, [pageIdentifier]);
 
