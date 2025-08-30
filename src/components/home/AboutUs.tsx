@@ -1,196 +1,343 @@
-"use client";
-import React, { useEffect, useRef, useState } from "react";
-import Link from "next/link";
-import { Facebook, Instagram, Youtube, Linkedin } from "lucide-react";
+"use client"
 
-const AboutUs = () => {
-  const [showModal, setShowModal] = useState(false);
-  const [modalPosition, setModalPosition] = useState<"above" | "below">("below");
-  const applyNowRef = useRef<HTMLButtonElement>(null);
-  const modalRef = useRef<HTMLDivElement>(null);
+import { motion, AnimatePresence, useAnimation } from "framer-motion"
+import { CheckCircle } from "lucide-react"
+import Link from "next/link"
+import React, { useState, useEffect, useRef, useCallback } from "react"
+import { cn } from "@/lib/utils" // Assuming you have a utility for classnames
 
-  const createRipple = (e: any) => {
-    const circle = document.createElement("span");
-    const button = e.currentTarget;
-    const diameter = Math.max(button.clientWidth, button.clientHeight);
-    const radius = diameter / 2;
+// --- Helper Components ---
 
-    circle.style.width = circle.style.height = `${diameter}px`;
-    circle.style.left = `${e.clientX - button.getBoundingClientRect().left - radius}px`;
-    circle.style.top = `${e.clientY - button.getBoundingClientRect().top - radius}px`;
-    circle.classList.add("ripple");
-
-    const ripple = button.getElementsByClassName("ripple")[0];
-    if (ripple) ripple.remove();
-    button.appendChild(circle);
-  };
+// 1. Typewriter Effect Component
+const Typewriter = ({ texts, duration = 3000 }: { texts: string[]; duration?: number }) => {
+  const [index, setIndex] = useState(0)
 
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        modalRef.current &&
-        !modalRef.current.contains(event.target as Node) &&
-        applyNowRef.current &&
-        !applyNowRef.current.contains(event.target as Node)
-      ) {
-        setShowModal(false);
-      }
-    };
-
-    if (showModal) {
-      document.addEventListener("mousedown", handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [showModal]);
-
-  const toggleModal = () => {
-    if (applyNowRef.current) {
-      const rect = applyNowRef.current.getBoundingClientRect();
-      const spaceBelow = window.innerHeight - rect.bottom;
-      const spaceAbove = rect.top;
-
-      setModalPosition(spaceBelow < 180 && spaceAbove > 180 ? "above" : "below");
-    }
-    setShowModal((prev) => !prev);
-  };
+    const interval = setInterval(() => {
+      setIndex((prevIndex) => (prevIndex + 1) % texts.length)
+    }, duration)
+    return () => clearInterval(interval)
+  }, [texts, duration])
 
   return (
-    <section
-      className="bg-[#D2EBD0] py-12 px-10 md:px-12"
-      style={{ fontFamily: "'Abril Fatface', cursive" }}
-    >
-      <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-12">
-        {/* Left Side */}
-        <div className="lg:w-1/2">
-          <h2 className="text-5xl md:text-6xl text-[#00423D] mb-6 text-center" style={{ WebkitTextStroke: "1px black" }}>
-            About Us
-          </h2>
-          <p className="text-md tracking-wide text-gray-700 mb-4">
-            At Kayapalat, we are dedicated to transforming your spaces into personalized sanctuaries that reflect your unique style and needs.
-          </p>
-          <blockquote className="text-xl font-semibold text-[#00423D] mb-4">
-            “ Our mission is to make high-quality interior design accessible and affordable for everyone ”
-          </blockquote>
-          <p className="text-gray-700 mb-6">
-            At Kayapalat, we believe that great design has the power to enhance your life. Let us help you create a space that you'll love to live in.
-          </p>
-          <div className="flex justify-center md:justify-self-start">
-            <a href="/contact-us">
-              <button
-                className="bg-teal-900 text-white px-8 py-3 rounded-lg cursor-pointer shadow hover:bg-teal-800 transition relative overflow-hidden"
-                onClick={(e) => {
-                  createRipple(e);
-                }}
-              >
-                Contact Us
-              </button>
-            </a>
-          </div>
+    <div className="relative h-8 w-full"> {/* <-- FIX IS HERE */}
+      <AnimatePresence>
+        <motion.p
+          key={index}
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 10 }}
+          transition={{ duration: 0.5 }}
+          className="absolute w-full text-lg md:text-2xl text-center text-[#00423D] mb-2 font-semibold px-2"
+        >
+          {texts[index]}
+        </motion.p>
+      </AnimatePresence>
+    </div>
+  )
+}
 
-          {/* Stats */}
-          <div className="flex justify-center items-center mt-8 space-x-6 text-center">
-            <div>
-              <h3 className="text-2xl text-[#00423D]" style={{ WebkitTextStroke: "1px black" }}>10 +</h3>
-              <p className="text-gray-600">Awards Gained</p>
-            </div>
-            <div className="border-l-2 border-gray-400 h-10"></div>
-            <div>
-              <h3 className="text-2xl text-[#00423D]" style={{ WebkitTextStroke: "1px black" }}>350 +</h3>
-              <p className="text-gray-600">Happy Customers</p>
-            </div>
-            <div className="border-l-2 border-gray-400 h-10"></div>
-            <div>
-              <h3 className="text-2xl text-[#00423D]" style={{ WebkitTextStroke: "1px black" }}>10 +</h3>
-              <p className="text-gray-600">Years of Experience</p>
-            </div>
-          </div>
+// 2. Confetti/Floating Shapes Component
+const FloatingShapes = () => {
+  const shapes = Array.from({ length: 15 })
+  return (
+    <div className="absolute inset-0 w-full h-full overflow-hidden z-[-1]">
+      {shapes.map((_, i) => {
+        const size = Math.random() * 20 + 5
+        const duration = Math.random() * 10 + 10
+        const delay = Math.random() * 5
+        const startX = Math.random() * 100
+        const startY = Math.random() * 20 + 100
+        return (
+          <motion.div
+            key={i}
+            className="absolute rounded-full bg-[#00423D]/20"
+            style={{
+              width: size,
+              height: size,
+              left: `${startX}%`,
+            }}
+            initial={{ y: 0, opacity: 0 }}
+            animate={{ y: `-${startY}vh`, opacity: [0, 1, 0] }}
+            transition={{
+              duration,
+              delay,
+              repeat: Infinity,
+              ease: "linear",
+            }}
+          />
+        )
+      })}
+    </div>
+  )
+}
 
-          {/* Social Links */}
-          <div className="mt-6">
-            <h3 className="text-lg font-[var(--l-sans)]">Follow Us:</h3>
-            <div className="flex gap-6 mt-3 text-2xl">
-              <Link href="https://facebook.com/" target="_blank"><Facebook className="hover:text-[#00423D] transition" /></Link>
-              <Link href="https://instagram.com/" target="_blank"><Instagram className="hover:text-[#00423D] transition" /></Link>
-              <Link href="https://www.youtube.com/@kayapalat1622" target="_blank"><Youtube className="hover:text-[#00423D] transition" /></Link>
-              <Link href="https://linkedin.com/" target="_blank"><Linkedin className="hover:text-[#00423D] transition" /></Link>
-            </div>
-          </div>
-        </div>
+// 3. Combined Attract & Particle Button Component
+const InteractiveButton = ({ children, className, onClick }: { children: React.ReactNode; className?: string; onClick?: (e: React.MouseEvent<HTMLButtonElement>) => void }) => {
+    const [isAttracting, setIsAttracting] = useState(false);
+    const [showParticles, setShowParticles] = useState(false);
+    const [particles, setParticles] = useState<{ id: number; x: number; y: number }[]>([]);
+    const particlesControl = useAnimation();
+    const buttonRef = useRef(null);
+    const particleCount = 15;
 
-        {/* Right Side */}
-        <div className="lg:w-1/2 relative">
-          <h2 className="text-4xl md:text-6xl text-[#00423D] mb-6 text-center" style={{ WebkitTextStroke: "1px black" }}>
-            Choose Your Fit
-          </h2>
-          <p className="text-gray-800 mb-4">
-            <span className="font-bold text-xl md:text-2xl text-[#00423D]">Kayapalat</span> works on the basis of three flexible
-            service models. Choose the level of involvement that suits you best:
-          </p>
-          <ul className="list-disc list-inside text-lg text-gray-800 space-y-4">
-            <li>
-              <span className="font-semibold text-[#00423D]">Design-Only Service –</span> We create detailed layouts and stunning 3D designs while you handle execution.
-            </li>
-            <li>
-              <span className="font-semibold text-[#00423D]">Design & Project Management –</span> We oversee execution while you provide the materials.
-            </li>
-            <li>
-              <span className="font-semibold text-[#00423D]">Turnkey Interior Design Services –</span> From concept to completion, we manage everything for a stress-free experience.
-            </li>
-          </ul>
+    useEffect(() => {
+        const newParticles = Array.from({ length: particleCount }, (_, i) => ({
+            id: i,
+            x: Math.random() * 200 - 100,
+            y: Math.random() * 200 - 100,
+        }));
+        setParticles(newParticles);
+    }, []);
 
-          {/* Apply Now Button */}
-          <div className="mt-8 flex justify-center relative">
-            <button
-              ref={applyNowRef}
-              className="relative cursor-pointer overflow-hidden px-8 py-3 rounded-full border-2 border-teal-900 text-teal-900 font-semibold hover:border-teal-800 transition duration-300 group"
-              onClick={(e) => {
-                createRipple(e);
-                toggleModal();
-              }}
-            >
-              <span className="relative z-10">Apply Now</span>
-              <span className="absolute inset-0  opacity-0 group-hover:opacity-100 transition duration-300 ease-out"></span>
-            </button>
+    const handleInteractionStart = useCallback(() => {
+        setIsAttracting(true);
+        particlesControl.start({
+            x: 0,
+            y: 0,
+            transition: { type: "spring", stiffness: 80, damping: 12 },
+        });
+    }, [particlesControl]);
 
-            {/* Modal */}
-            {showModal && (
-              <div
-                ref={modalRef}
-                className={`absolute ${
-                  modalPosition === "above" ? "bottom-full mb-3" : "top-full mt-3"
-                } left-1/2 transform -translate-x-1/2 w-max bg-white shadow-xl rounded-xl p-6 z-20`}
-              >
-                <Link
-                  href="/service/design-only"
-                  className="block text-[#00423D] hover:scale-105 transition transform cursor-pointer no-underline mb-2"
-                  onClick={() => setShowModal(false)}
-                >
-                  Design-Only Service
-                </Link>
-                <Link
-                  href="/service/design-project-management"
-                  className="block text-[#00423D] hover:scale-105 transition transform cursor-pointer no-underline mb-2"
-                  onClick={() => setShowModal(false)}
-                >
-                  Design & Project Management
-                </Link>
-                <Link
-                  href="/service/turnkey"
-                  className="block text-[#00423D] hover:scale-105 transition transform cursor-pointer no-underline"
-                  onClick={() => setShowModal(false)}
-                >
-                  Turnkey Interior Design Services
-                </Link>
-              </div>
+    const handleInteractionEnd = useCallback(() => {
+        setIsAttracting(false);
+        particlesControl.start((i) => ({
+            x: particles[i]?.x,
+            y: particles[i]?.y,
+            transition: { type: "spring", stiffness: 80, damping: 12 },
+        }));
+    }, [particlesControl, particles]);
+    
+    // FIX: The component's own click handler now also calls the onClick prop from the parent.
+    const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+        setShowParticles(true);
+        setTimeout(() => setShowParticles(false), 800);
+        if (onClick) {
+            onClick(e);
+        }
+    };
+
+    const ClickParticles = () => {
+        if (!buttonRef.current) return null;
+        return (
+             <AnimatePresence>
+                {showParticles &&
+                    [...Array(8)].map((_, i) => (
+                        <motion.div
+                            key={i}
+                            className="fixed w-1.5 h-1.5 rounded-full"
+                            style={{
+                                background: '#FFFFFF',
+                                left: "50%",
+                                top: "50%",
+                                position: "absolute",
+                            }}
+                            initial={{ scale: 0, x: "-50%", y: "-50%" }}
+                            animate={{
+                                scale: [0, 1.2, 0],
+                                x: ["-50%", `calc(-50% + ${(Math.random() - 0.5) * 150}px)`],
+                                y: ["-50%", `calc(-50% + ${(Math.random() - 0.5) * 150}px)`],
+                            }}
+                             exit={{ scale: 0 }}
+                            transition={{ duration: 0.6, ease: "easeOut", delay: i * 0.05 }}
+                        />
+                    ))}
+            </AnimatePresence>
+        );
+    };
+
+    return (
+        <button
+            ref={buttonRef}
+            onMouseEnter={handleInteractionStart}
+            onMouseLeave={handleInteractionEnd}
+            onClick={handleClick}
+            className={cn(
+                "relative w-full rounded py-2 font-semibold transition-all duration-300 overflow-hidden",
+                "bg-[#00423D] text-white hover:bg-[#002b28]",
+                className
             )}
-          </div>
-        </div>
-      </div>
-    </section>
-  );
+        >
+            {particles.map((p, i) => (
+                <motion.div
+                    key={p.id}
+                    custom={i}
+                    initial={{ x: p.x, y: p.y, opacity: 0 }}
+                    animate={particlesControl}
+                    className={cn(
+                        "absolute w-1 h-1 rounded-full bg-white/50",
+                        "transition-opacity duration-300",
+                        isAttracting ? "opacity-100" : "opacity-0"
+                    )}
+                />
+            ))}
+            <ClickParticles />
+            <span className="relative z-10">{children}</span>
+        </button>
+    );
 };
 
-export default AboutUs;
+
+// --- Main Pricing Component ---
+
+export default function PricingCreative() {
+  const creativeSubheadings = [
+    "Empower Your Vision",
+    "Flexible Solutions",
+    "Unmatched Experience",
+    "Tailored to You",
+    "Innovative Approaches",
+    "Transformative Experiences",
+    "Your Success, Our Commitment"
+  ]
+
+  return (
+    <section className="relative flex flex-col items-center py-20 bg-transparent overflow-hidden">
+      <FloatingShapes />
+      {/* Heading */}
+      <h2
+        className="text-5xl md:text-6xl text-center mb-3 font-['Abril_Fatface',cursive] text-[#0b2739] tracking-tight"
+        style={{ WebkitTextStroke: "1px #00423D" }}
+      >
+        Choose Your Fit
+      </h2>
+
+      {/* Creative Subheading with Typewriter Effect */}
+      <Typewriter texts={creativeSubheadings} />
+
+      {/* Informative Subheading Spacer */}
+      <p className="text-base text-center text-transparent mb-10 px-2 pointer-events-none">
+        .
+      </p>
+
+      {/* Pricing Cards */}
+      <div className="flex flex-col md:flex-row items-center md:items-stretch justify-center gap-8 w-full max-w-6xl px-4">
+        
+        {/* Design Only Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: [-4, 4, -4] }}
+          transition={{
+            type: "spring",
+            duration: 0.6,
+            y: {
+              duration: 3,
+              repeat: Infinity,
+              repeatType: "reverse",
+              ease: "easeInOut",
+            },
+          }}
+          whileHover={{ scale: 1.03, y: -10 }}
+          className="bg-white/80 backdrop-blur-sm border-[#00423D] flex flex-col items-start rounded-2xl border-2 px-8 py-8 shadow-2xl w-full md:w-96"
+        >
+          <div className="mb-2 text-2xl font-bold text-[#153a2b]">
+            Design Only
+          </div>
+          <p className="mb-4 text-gray-700 min-h-[40px]">
+            Get comprehensive 3D designs and execute yourself
+          </p>
+          <ul className="mb-6 space-y-2 text-base text-gray-800">
+            <li className="flex items-center gap-2"><CheckCircle className="text-green-700" size={20}/>3D Visualization</li>
+            <li className="flex items-center gap-2"><CheckCircle className="text-green-700" size={20}/>Layout Planning</li>
+            <li className="flex items-center gap-2"><CheckCircle className="text-green-700" size={20}/>Material List</li>
+            <li className="flex items-center gap-2"><CheckCircle className="text-green-700" size={20}/>Execution Guide</li>
+          </ul>
+          <div className="mt-auto w-full">
+            <div className="mb-6 text-xl font-extrabold text-[#00423D]">
+              Starting ₹ 15,000 only
+            </div>
+            <Link href="/contact-us" className="w-full" legacyBehavior>
+                <InteractiveButton className="">Choose This Plan</InteractiveButton>
+            </Link>
+          </div>
+        </motion.div>
+
+        {/* Turnkey Solution Card (Most Popular) */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: [0, -8, 0] }}
+          transition={{
+            type: "spring",
+            duration: 0.7,
+            y: {
+              duration: 2.5,
+              repeat: Infinity,
+              repeatType: "reverse",
+              ease: "easeInOut",
+            },
+          }}
+          whileHover={{ scale: 1.03, y: -15 }}
+          className="bg-white/90 backdrop-blur-sm border-[#00423D] flex flex-col items-start rounded-2xl border-2 px-8 py-10 shadow-2xl w-full md:w-96 relative z-10"
+        >
+          <motion.div
+             animate={{ scale: [1, 1.08, 1] }}
+             transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+             className="bg-[#00423D] text-white absolute -top-4 left-1/2 -translate-x-1/2 rounded-full px-5 py-1 text-sm font-bold shadow-lg"
+          >
+            Most Popular
+          </motion.div>
+          <div className="mb-2 text-2xl font-bold text-[#153a2b]">
+            Turnkey Solution
+          </div>
+          <p className="mb-4 text-gray-700 min-h-[40px]">
+            Complete end-to-end interior solution
+          </p>
+          <ul className="mb-6 space-y-2 text-base text-gray-800">
+            <li className="flex items-center gap-2"><CheckCircle className="text-green-700" size={20}/>Complete Design</li>
+            <li className="flex items-center gap-2"><CheckCircle className="text-green-700" size={20}/>Material Procurement</li>
+            <li className="flex items-center gap-2"><CheckCircle className="text-green-700" size={20}/>Execution</li>
+            <li className="flex items-center gap-2"><CheckCircle className="text-green-700" size={20}/>Installation</li>
+            <li className="flex items-center gap-2"><CheckCircle className="text-green-700" size={20}/>Final Handover</li>
+          </ul>
+          <div className="mt-auto w-full">
+            <div className="mb-6 text-xl font-extrabold text-[#00423D]">
+              Starting ₹ 3,00,000 only
+            </div>
+            <Link href="/contact-us" className="w-full" legacyBehavior>
+               <InteractiveButton className="">Choose This Plan</InteractiveButton>
+            </Link>
+          </div>
+        </motion.div>
+
+        {/* Project Management Card */}
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: [4, -4, 4] }}
+          transition={{
+            type: "spring",
+            duration: 0.6,
+            y: {
+              duration: 3,
+              repeat: Infinity,
+              repeatType: "reverse",
+              ease: "easeInOut",
+            },
+          }}
+          whileHover={{ scale: 1.03, y: -10 }}
+          className="bg-white/80 backdrop-blur-sm border-[#00423D] flex flex-col items-start rounded-2xl border-2 px-8 py-8 shadow-2xl w-full md:w-96"
+        >
+          <div className="mb-2 text-2xl font-bold text-[#153a2b]">
+            Design & Project Management
+          </div>
+          <p className="mb-4 text-gray-700 min-h-[40px]">
+            Full design service with project oversight
+          </p>
+          <ul className="mb-6 space-y-2 text-base text-gray-800">
+            <li className="flex items-center gap-2"><CheckCircle className="text-green-700" size={20}/>Everything in Design Only</li>
+            <li className="flex items-center gap-2"><CheckCircle className="text-green-700" size={20}/>Project Management</li>
+            <li className="flex items-center gap-2"><CheckCircle className="text-green-700" size={20}/>Vendor Coordination</li>
+            <li className="flex items-center gap-2"><CheckCircle className="text-green-700" size={20}/>Quality Checks</li>
+          </ul>
+           <div className="mt-auto w-full">
+            <div className="mb-6 text-xl font-extrabold text-[#00423D]">
+              Starting ₹ 50,000 only
+            </div>
+            <Link href="/contact-us" className="w-full" legacyBehavior>
+                <InteractiveButton className="">Choose This Plan</InteractiveButton>
+            </Link>
+           </div>
+        </motion.div>
+      </div>
+    </section>
+  )
+}

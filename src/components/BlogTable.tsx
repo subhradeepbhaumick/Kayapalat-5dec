@@ -157,6 +157,7 @@ export function BlogTable() {
                         <SelectTrigger className="w-[200px] bg-[#00423D]/15 z-10 hover:bg-[#00423D]/25 active:bg-[#00423D]/35 transition-colors duration-200">
                             <SelectValue placeholder="All Categories" />
                         </SelectTrigger>
+                        
                         <SelectPortal>
                             <SelectContent position="popper" className="bg-white border border-gray-200 shadow-lg">
                                 <SelectItem value="all" className="hover:bg-[#00423D]/10 focus:bg-[#00423D]/15 data-[state=checked]:bg-[#00423D]/20 data-[state=checked]:text-[#00423D] data-[state=checked]:font-medium transition-colors duration-150 cursor-pointer">

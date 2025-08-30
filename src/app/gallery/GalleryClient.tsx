@@ -6,7 +6,6 @@ import { ChevronDown } from 'lucide-react';
 import type { GalleryImage, Category } from '@/app/gallery/page';
 import { GalleryCard } from '@/components/gallery/GalleryCard';
 import { GalleryLightbox } from '@/components/gallery/GalleryLightbox';
-import { FeaturedCarousel } from '@/components/gallery/FeaturedCarousel';
 import { GalleryCardSkeleton } from '@/components/gallery/GalleryCardSkeleton';
 import {
   DropdownMenu,
@@ -14,13 +13,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import  HeroWithCarousel  from "@/components/gallery/HeroWithCarousel";
+import HeroWithCarousel from "@/components/gallery/HeroWithCarousel";
 import { MapPin, Phone, Mail } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import GalleryLanding from '@/components/gallery/GalleryLanding';
+import { PromoCard, PromoCardProps } from '@/components/gallery/PromoCard';
 
-const IMAGES_PER_PAGE = 20;
+const IMAGES_PER_PAGE = 30;
 
 const slugify = (text: string) =>
   text
@@ -33,30 +32,37 @@ const slugify = (text: string) =>
     .replace(/^-+/, '')
     .replace(/-+$/, '');
 
-
 interface SEOData {
   meta_title: string;
   meta_description: string;
   content?: string;
 }
 
+const promoCardData: PromoCardProps[] = [
+  { id: 1, title: "Start Your Dream Project", description: "Get a free, no-obligation estimate for your interior design project today.", link: "/estimate", linkLabel: "Get a Free Estimate", design: 'primary' },
+  { id: 2, title: "See Our Process", description: "Learn how we turn your vision into a stunning reality, from concept to completion.", link: "/about-us", linkLabel: "Learn More", design: 'secondary' },
+  { id: 3, title: "Have a Question?", description: "Our design experts are here to help. Contact us for a consultation.", link: "/contact-us", linkLabel: "Contact Us", design: 'tertiary' },
+];
 
-
+function isGalleryImage(item: GalleryImage | PromoCardProps): item is GalleryImage {
+  return (item as GalleryImage).image_path !== undefined;
+}
 
 const ContactSection = ({ router }: { router: any }) => {
-    return(
-      <section className="py-16 bg-gradient-to-r from-rose-50 to-pink-50 relative">
+  return (
+    <section className="py-16 bg-gradient-to-r from-rose-50 to-pink-50 relative">
       <div className="absolute inset-0 opacity-5">
         <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
           <defs>
             <pattern id="contactPattern" width="20" height="20" patternUnits="userSpaceOnUse">
-              <circle cx="10" cy="10" r="3" fill="none" stroke="#EC4899" strokeWidth="0.5"/>
-              <circle cx="10" cy="10" r="1" fill="#EC4899" opacity="0.3"/>
+              <circle cx="10" cy="10" r="3" fill="none" stroke="#EC4899" strokeWidth="0.5" />
+              <circle cx="10" cy="10" r="1" fill="#EC4899" opacity="0.3" />
             </pattern>
           </defs>
-          <rect width="100%" height="100%" fill="url(#contactPattern)"/>
+          <rect width="100%" height="100%" fill="url(#contactPattern)" />
         </svg>
       </div>
+
 
       <div className="max-w-7xl mx-auto px-4 md:px-6 relative z-10">
         <motion.div
@@ -72,6 +78,7 @@ const ContactSection = ({ router }: { router: any }) => {
             Ready to transform your space? Let's discuss your project and bring your vision to life.
           </p>
         </motion.div>
+
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 md:gap-8 mb-8">
           {[
@@ -111,27 +118,28 @@ const ContactSection = ({ router }: { router: any }) => {
         </motion.div>
       </div>
     </section>
-    );
+  );
 };
-
 
 export function GalleryClient({ images: initialImages, categories }: { images: GalleryImage[], categories: Category[] }) {
   const [allImages, setAllImages] = useState(initialImages);
   const [isLoading, setIsLoading] = useState(false);
   const [likedImageIds, setLikedImageIds] = useState(new Set<number>());
-
   const [activeCategory, setActiveCategory] = useState<Category | 'all'>('all');
-  const [activeSmartFilter, setActiveSmartFilter] = useState<'latest' | 'most_liked'>('latest');
+  const [activeSmartFilter, setActiveSmartFilter] = useState<'latest' | 'most_liked'>('most_liked');
   const [visibleItems, setVisibleItems] = useState(IMAGES_PER_PAGE);
   const [selectedImage, setSelectedImage] = useState<GalleryImage | null>(null);
 
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
   useEffect(() => {
-    const hash = decodeURIComponent(window.location.hash.substring(1));
-    if (hash) {
-      const imageToOpen = initialImages.find(img => slugify(img.title) === hash);
+    const slug = searchParams.get('image');
+    if (slug) {
+      const imageToOpen = initialImages.find(img => slugify(img.title) === slug);
       if (imageToOpen) setSelectedImage(imageToOpen);
     }
-  }, [initialImages]);
+  }, [initialImages, searchParams]);
 
   const fetchImages = useCallback(async (filter: string) => {
     setIsLoading(true);
@@ -175,12 +183,12 @@ export function GalleryClient({ images: initialImages, categories }: { images: G
     return allImages.filter(img => img.category_id === activeCategory.id);
   }, [activeCategory, allImages]);
 
-  const itemsToShow = useMemo(() => filteredImages.slice(0, visibleItems), [filteredImages, visibleItems]);
-
   const handleImageClick = (image: GalleryImage) => {
     setSelectedImage(image);
     const slug = slugify(image.title);
-    window.history.pushState(null, '', `#${slug}`);
+    const url = new URL(window.location.href);
+    url.searchParams.set('image', slug);
+    router.push(url.toString(), { scroll: false });
     fetch('/api/gallery/view', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -190,7 +198,9 @@ export function GalleryClient({ images: initialImages, categories }: { images: G
 
   const closeLightbox = () => {
     setSelectedImage(null);
-    window.history.pushState(null, '', window.location.pathname);
+    const url = new URL(window.location.href);
+    url.searchParams.delete('image');
+    router.replace(url.toString(), { scroll: false });
   };
 
   const allImagesForLightbox = useMemo(() => {
@@ -198,28 +208,51 @@ export function GalleryClient({ images: initialImages, categories }: { images: G
     return allImages.filter(img => img.category_id === selectedImage.category_id);
   }, [selectedImage, allImages]);
 
-async function getGallerySEO(): Promise<string | null> {
-  try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/seo/gallery`, { next: { revalidate: 3600 } });
-    if (!res.ok) return null;
-    const seoData: SEOData = await res.json();
-    console.log(seoData.content);
-    return seoData.content || null;
-  } catch {
-    return null;
+  const itemsToShow = useMemo(() => {
+    const images = filteredImages.slice(0, visibleItems);
+    const result: (GalleryImage | PromoCardProps)[] = [];
+
+    const totalItems = images.length;
+    const numPromos = Math.min(promoCardData.length, 3);
+
+    const promoPositions: number[] = [];
+    if (numPromos >= 1) promoPositions.push(Math.floor(totalItems * 0.3));
+    if (numPromos >= 2) promoPositions.push(Math.floor(totalItems * 0.6));
+    if (numPromos >= 3) promoPositions.push(Math.floor(totalItems * 0.95));
+
+    let promoIndex = 0;
+    images.forEach((image, index) => {
+      result.push(image);
+      if (promoPositions.includes(index) && promoIndex < promoCardData.length) {
+        result.push(promoCardData[promoIndex]);
+        promoIndex++;
+      }
+    });
+
+    return result;
+  }, [filteredImages, visibleItems]);
+
+  async function getGallerySEO(): Promise<string | null> {
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/seo/gallery`, { next: { revalidate: 3600 } });
+      if (!res.ok) return null;
+      const seoData: SEOData = await res.json();
+      console.log(seoData.content);
+      return seoData.content || null;
+    } catch {
+      return null;
+    }
   }
-}
   const [seoContent, setSeoContent] = useState<string | null>(null);
   useEffect(() => {
     getGallerySEO().then(content => setSeoContent(content));
   }, []);
 
-  const router = useRouter();
 
   return (
     <div className="bg-[#D2EBD0] min-h-screen py-12 px-4 md:px-8">
 
-      <HeroWithCarousel 
+      <HeroWithCarousel
         seoContent={seoContent}
         featuredImages={featuredImages}
         onImageClick={handleImageClick}
@@ -231,7 +264,7 @@ async function getGallerySEO(): Promise<string | null> {
         <div className="max-w-6xl mx-auto flex flex-wrap justify-center md:justify-between items-center gap-4 px-2">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="px-4 py-2 flex items-center gap-2 rounded-full text-sm md:text-base bg-white/90 text-gray-700 hover:bg-white shadow-md transition">
+              <button className="px-4 py-2 flex items-center cursor-pointer gap-2 rounded-full text-sm md:text-base bg-white/90 text-gray-700 hover:bg-white shadow-md transition">
                 <span>Categories: <strong>{activeCategory === 'all' ? 'All' : activeCategory.name}</strong></span>
                 <ChevronDown className="w-4 h-4" />
               </button>
@@ -244,16 +277,16 @@ async function getGallerySEO(): Promise<string | null> {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          <div className="flex items-center gap-2 p-1 bg-white/90 rounded-full shadow-md">
+          <div className="flex items-center gap-2 p-1  bg-white/90 rounded-full shadow-md">
             <button
               onClick={() => setActiveSmartFilter('latest')}
-              className={`px-4 py-1 text-sm rounded-full font-semibold transition ${activeSmartFilter === 'latest' ? 'bg-[#00423D] text-white' : 'text-gray-700 hover:bg-gray-200'}`}
+              className={`px-4 py-1 text-sm rounded-full font-semibold cursor-pointer transition ${activeSmartFilter === 'latest' ? 'bg-[#00423D] text-white' : 'text-gray-700 hover:bg-gray-200'}`}
             >
               Latest
             </button>
             <button
               onClick={() => setActiveSmartFilter('most_liked')}
-              className={`px-4 py-1 text-sm rounded-full font-semibold transition ${activeSmartFilter === 'most_liked' ? 'bg-[#00423D] text-white' : 'text-gray-700 hover:bg-gray-200'}`}
+              className={`px-4 py-1 text-sm rounded-full font-semibold cursor-pointer transition ${activeSmartFilter === 'most_liked' ? 'bg-[#00423D] text-white' : 'text-gray-700 hover:bg-gray-200'}`}
             >
               Popular
             </button>
@@ -262,22 +295,43 @@ async function getGallerySEO(): Promise<string | null> {
       </div>
 
       <div
-        className="columns-1 sm:columns-2 lg:columns-3  gap-6 space-y-6 max-w-6xl mx-auto"
-        style={{ columnFill: 'balance' }}
+        className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-6 space-y-6 max-w-8xl mx-auto"
       >
         <AnimatePresence>
           {isLoading
-            ? Array.from({ length: 8 }).map((_, i) => <GalleryCardSkeleton key={i} />)
-            : itemsToShow.map(image => (
-              <motion.div key={image.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} layout>
-                <GalleryCard
-                  image={image}
-                  onImageClick={handleImageClick}
-                  isLiked={likedImageIds.has(image.id)}
-                  onLike={handleLike}
-                />
-              </motion.div>
-            ))
+            ? Array.from({ length: 8 }).map((_, i) => <GalleryCardSkeleton key={`skeleton-${i}`} />)
+            : itemsToShow.map(item => {
+              if (isGalleryImage(item)) {
+                return (
+                  <motion.div
+                    key={`gallery-${item.id}`}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    layout
+                  >
+                    <GalleryCard
+                      image={item}
+                      onImageClick={handleImageClick}
+                      isLiked={likedImageIds.has(item.id)}
+                      onLike={handleLike}
+                    />
+                  </motion.div>
+                );
+              } else {
+                return (
+                  <motion.div
+                    key={`promo-${item.id}`}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    layout
+                  >
+                    <PromoCard {...item} />
+                  </motion.div>
+                );
+              }
+            })
           }
         </AnimatePresence>
       </div>
@@ -309,4 +363,5 @@ async function getGallerySEO(): Promise<string | null> {
       </AnimatePresence>
     </div>
   );
+
 }

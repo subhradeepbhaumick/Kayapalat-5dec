@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback, Fragment } from 'react';
 import Image from 'next/image';
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence, PanInfo } from 'framer-motion';
 import {
   X,
@@ -22,8 +22,8 @@ import type { GalleryImage } from '@/app/gallery/page';
 import { Popover, Transition } from '@headlessui/react';
 import confetti from 'canvas-confetti';
 import { toast } from 'react-hot-toast';
+import Link from 'next/link';
 
-// Helper slugify function
 const slugify = (text: string) =>
   text.toString().toLowerCase().trim()
     .replace(/\s+/g, '-')
@@ -49,11 +49,11 @@ function formatLikes(num: number) {
   return num.toString();
 }
 
-
 export function GalleryLightbox({ initialImage, images, onClose, likedImageIds, onLike }: GalleryLightboxProps) {
   const [currentIndex, setCurrentIndex] = useState(() => images.findIndex(img => img.id === initialImage.id));
   const [isFullscreen, setIsFullscreen] = useState(false);
   const lightboxRef = useRef<HTMLDivElement>(null);
+  const router = useRouter();
 
   useEffect(() => {
     document.body.style.overflow = 'hidden';
@@ -62,12 +62,16 @@ export function GalleryLightbox({ initialImage, images, onClose, likedImageIds, 
 
   const currentImage = images[currentIndex];
 
+  // Update URL query param for image slug instead of hash
   useEffect(() => {
     if (currentImage) {
       const slug = slugify(currentImage.title);
-      window.history.replaceState(null, '', `#${slug}`);
+      // Update URL query param `image`
+      const url = new URL(window.location.href);
+      url.searchParams.set('image', slug);
+      router.replace(url.toString(), { scroll: false });
     }
-  }, [currentIndex, currentImage]);
+  }, [currentImage, router]);
 
   const goToPrevious = useCallback(() => setCurrentIndex(prev => (prev === 0 ? images.length - 1 : prev - 1)), [images.length]);
   const goToNext = useCallback(() => setCurrentIndex(prev => (prev === images.length - 1 ? 0 : prev + 1)), [images.length]);
@@ -77,11 +81,49 @@ export function GalleryLightbox({ initialImage, images, onClose, likedImageIds, 
     else if (info.offset.x < -50) goToNext();
   };
 
-  const shareUrl = `${window.location.origin}/gallery#${slugify(currentImage.title)}`;
+  const shareUrl = `${window.location.origin}/gallery?image=${slugify(currentImage.title)}`;
 
   const handleCopyLink = () => {
-    navigator.clipboard.writeText(shareUrl);
-    toast.success('Link copied to clipboard!');
+    // Check if Clipboard API is available
+    if (typeof navigator !== 'undefined' &&
+      navigator.clipboard &&
+      typeof navigator.clipboard.writeText === 'function') {
+      navigator.clipboard.writeText(shareUrl)
+        .then(() => toast.success('Link copied to clipboard!'))
+        .catch(() => fallbackCopyTextToClipboard(shareUrl));
+    } else {
+      fallbackCopyTextToClipboard(shareUrl);
+    }
+  };
+
+  // Fallback for older/mobile/in-app browsers
+  function fallbackCopyTextToClipboard(text: string) {
+    try {
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      textArea.style.position = 'fixed';  // Prevent scrolling up
+      textArea.style.opacity = '0';
+      document.body.appendChild(textArea);
+      textArea.focus();
+      textArea.select();
+
+      const successful = document.execCommand('copy');
+      document.body.removeChild(textArea);
+
+      if (successful) {
+        toast.success('Link copied to clipboard!');
+      } else {
+        toast.error('Could not copy link. Please copy manually.');
+      }
+    } catch (err) {
+      toast.error('Could not copy link. Please copy manually.');
+    }
+  }
+
+  const handleKeyDown = (event: KeyboardEvent) => {
+    if (event.key === 'Escape') onClose();
+    else if (event.key === 'ArrowLeft') goToPrevious();
+    else if (event.key === 'ArrowRight') goToNext();
   };
 
   const handleLikeClick = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -308,9 +350,9 @@ export function GalleryLightbox({ initialImage, images, onClose, likedImageIds, 
               whileTap={{ scale: 0.95 }}
             >
               <div className="text-md flex items-center gap-2">
-              <Heart className={`w-5 h-5 ${isLiked ? 'text-red-400 fill-current' : ''}`} />
-              {isLiked ? 'Liked' : 'Like'}
-               </div>
+                <Heart className={`w-5 h-5 ${isLiked ? 'text-red-400 fill-current' : ''}`} />
+                {isLiked ? 'Liked' : 'Like'}
+              </div>
               {formatLikes(currentImage.likes)}
             </motion.button>
             <Link href="/estimate" passHref>

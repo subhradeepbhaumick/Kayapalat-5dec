@@ -6,6 +6,7 @@ import { PlusCircle, Folder, Settings } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 import { Button } from '@/components/ui/button';
+// IMPORTANT: Update the import path to match the new location
 import { GalleryImageTable } from '@/components/GalleryImageTable';
 import { ManageGalleryCategoriesModal } from '@/components/ManageGalleryCategoriesModal';
 import { GalleryImageForm } from '@/components/GalleryImageForm';
@@ -19,11 +20,11 @@ import {
 export default function ManageGalleryPage() {
   const router = useRouter();
   const [isCategoriesModalOpen, setIsCategoriesModalOpen] = useState(false);
-  const [isImageFormOpen, setIsImageFormOpen] = useState(false);
+  const [isCreateFormOpen, setIsCreateFormOpen] = useState(false);
 
-  // This function is called when the form successfully saves an image
+  // The onSave function now simply closes the create form
   const handleSaveSuccess = () => {
-    // We don't need router.refresh() here because the table component re-fetches its own data
+    setIsCreateFormOpen(false);
   };
 
   return (
@@ -41,7 +42,7 @@ export default function ManageGalleryPage() {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="bg-white border border-gray-200 shadow-lg">
-            <DropdownMenuItem onSelect={() => setIsImageFormOpen(true)} className="hover:bg-[#00423D]/10 focus:bg-[#00423D]/15 cursor-pointer">
+            <DropdownMenuItem onSelect={() => setIsCreateFormOpen(true)} className="hover:bg-[#00423D]/10 focus:bg-[#00423D]/15 cursor-pointer">
               <PlusCircle className="mr-2 h-4 w-4" />
               <span>Add New Image</span>
             </DropdownMenuItem>
@@ -53,19 +54,19 @@ export default function ManageGalleryPage() {
         </DropdownMenu>
       </div>
       
-      {/* The main table that displays all gallery images */}
+      {/* The table now manages its own data and edit state */}
       <GalleryImageTable />
 
-      {/* Modal for managing categories */}
       <ManageGalleryCategoriesModal 
         isOpen={isCategoriesModalOpen} 
         onOpenChange={setIsCategoriesModalOpen} 
       />
 
-      {/* Modal for adding a new image */}
+      {/* This form is now only for CREATING new images */}
       <GalleryImageForm 
-        isOpen={isImageFormOpen} 
-        onOpenChange={setIsImageFormOpen} 
+        mode="create"
+        isOpen={isCreateFormOpen} 
+        onOpenChange={setIsCreateFormOpen} 
         onSave={handleSaveSuccess} 
       />
     </div>

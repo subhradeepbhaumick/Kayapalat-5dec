@@ -52,11 +52,17 @@ export default function Navbar() {
       });
       
       if (response.ok) {
-        logout();
-        router.push('/login');
+        logout();            // clear client auth state
+        toast.success('Logged out successfully');
+        router.push('/');    // go to home
+        // give toast a moment to show before hard reload so user sees it
+        setTimeout(() => window.location.reload(), 600);
+      } else {
+        toast.error('Failed to logout');
       }
     } catch (error) {
       console.error('Logout failed:', error);
+      toast.error('Logout failed');
     }
   };
 

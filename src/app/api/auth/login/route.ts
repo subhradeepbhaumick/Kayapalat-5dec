@@ -32,7 +32,7 @@ export async function POST(request: Request) {
 
     // Generate JWT token
     const token = jwt.sign(
-      { userId: user.id, email: user.email },
+      { userId: user.id, email: user.email , role: user.role },
       process.env.JWT_SECRET || 'your-secret-key',
       { expiresIn: '1d' }
     );
@@ -40,10 +40,21 @@ export async function POST(request: Request) {
     // Remove password from response
     const { password: _, ...userWithoutPassword } = user;
 
-    return NextResponse.json({
+    // set HttpOnly cookie so middleware can read it
+    const res = NextResponse.json({
       user: userWithoutPassword,
       token
     });
+
+    // cookie options: httpOnly so JS can't read, path=/, maxAge 1 day
+    res.cookies.set('token', token, {
+      httpOnly: true,
+      path: '/',
+      maxAge: 60 * 60 * 24,
+      sameSite: 'lax'
+    });
+
+    return res;
   } catch (error) {
     console.error('Login error:', error);
     return NextResponse.json(
@@ -51,4 +62,4 @@ export async function POST(request: Request) {
       { status: 500 }
     );
   }
-} 
+}

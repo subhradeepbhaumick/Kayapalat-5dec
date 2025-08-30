@@ -18,98 +18,201 @@ async function ensureDirExists(directoryPath: string) {
 }
 
 // --- GET: FETCHES IMAGES FOR BOTH PUBLIC GALLERY AND ADMIN TABLE ---
+// GET function with working filters
 export async function GET(req: Request) {
   try {
     const { searchParams } = new URL(req.url);
-    // New 'filter' param for smart filters
-    const filter = searchParams.get('filter') || 'latest'; 
+    const searchTerm = searchParams.get('search') || '';
+    const categoryId = searchParams.get('category') || '';
+    const status = searchParams.get('status') || '';
+    const isFeatured = searchParams.get('is_featured');
 
-    let orderByClause = 'ORDER BY gi.is_featured DESC, gi.created_at DESC';
-
-    if (filter === 'most_liked') {
-      // Order by likes, then by views as a tie-breaker
-      orderByClause = 'ORDER BY gi.is_featured DESC, gi.likes DESC, gi.view_count DESC';
-    }
-
-    const query = `
+    let query = `
       SELECT
         gi.id, gi.title, gi.image_path, gi.is_featured, gi.likes,
         gi.designer_name, gi.designer_designation, gi.designer_dp_path,
-        gi.designer_comment, gi.view_count,
+        gi.designer_comment, gi.view_count, gi.status, gi.created_at,
         gc.id AS category_id, gc.name AS category_name
       FROM GalleryImages AS gi
       JOIN GalleryCategories AS gc ON gi.category_id = gc.id
-      WHERE gi.status = 'published'
-      ${orderByClause};
+      WHERE (gi.title LIKE ? OR gc.name LIKE ?)
     `;
-    
-    const images = await db.query(query);
-    return NextResponse.json(images);
+    const params: (string | number | boolean)[] = [`%${searchTerm}%`, `%${searchTerm}%`];
 
+    if (categoryId) {
+      query += ' AND gi.category_id = ?';
+      params.push(parseInt(categoryId));
+    }
+    if (status) {
+      query += ' AND gi.status = ?';
+      params.push(status);
+    }
+    if (isFeatured === 'true' || isFeatured === 'false') {
+        query += ' AND gi.is_featured = ?';
+        params.push(isFeatured === 'true');
+    }
+    query += ' ORDER BY gi.created_at DESC;';
+    
+    const images = await db.query(query, params);
+    return NextResponse.json(images);
   } catch (error) {
-    console.error('[GALLERY_IMAGES_GET]', error);
+    console.error('[ADMIN_GALLERY_IMAGES_GET]', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
 
-// --- POST: UPLOADS A NEW IMAGE WITH ALL DETAILS ---
+// POST function for creating new images
 export async function POST(req: Request) {
-  try {
-    const formData = await req.formData();
+    try {
+        const formData = await req.formData();
+        const file = formData.get('file') as File | null;
+        const designerDpFile = formData.get('designer_dp_file') as File | null;
+        const title = formData.get('title') as string;
+        const categoryId = formData.get('categoryId') as string;
+        
+        if (!file || !title || !categoryId) {
+          return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+        }
+
+        // Validate that the category exists
+        const categoryExists = await db.query('SELECT id FROM GalleryCategories WHERE id = ?', [parseInt(categoryId)]);
+        if (!categoryExists || categoryExists.length === 0) {
+          return NextResponse.json({ error: 'Invalid category ID. Category does not exist.' }, { status: 400 });
+        }
     
-    // Extract all fields from the form data
-    const file = formData.get('file') as File | null;
-    const designerDpFile = formData.get('designer_dp_file') as File | null;
-    const title = formData.get('title') as string;
-    const categoryId = formData.get('categoryId') as string;
-    const is_featured = formData.get('is_featured') === 'true';
-    const designer_name = formData.get('designer_name') as string;
-    const designer_designation = formData.get('designer_designation') as string;
-    const designer_comment = formData.get('designer_comment') as string;
+        const galleryDir = path.join(process.cwd(), 'public', 'gallery');
+        await ensureDirExists(galleryDir);
+        const filename = `${Date.now()}-${file.name.replace(/\s/g, '_')}`;
+        const imagePath = `/gallery/${filename}`;
+        await writeFile(path.join(galleryDir, filename), Buffer.from(await file.arrayBuffer()));
+    
+        let designerDpPath: string | null = null;
+        if (designerDpFile) {
+            const dpDir = path.join(process.cwd(), 'public', 'gallery', 'dp');
+            await ensureDirExists(dpDir);
+            const dpFilename = `${Date.now()}-${designerDpFile.name.replace(/\s/g, '_')}`;
+            designerDpPath = `/gallery/dp/${dpFilename}`;
+            await writeFile(path.join(dpDir, dpFilename), Buffer.from(await designerDpFile.arrayBuffer()));
+        } else {
+            designerDpPath = formData.get('designer_dp_path') as string;
+        }
+    
+        const insertQuery = `
+            INSERT INTO GalleryImages 
+            (title, image_path, category_id, status, is_featured, likes, designer_name, designer_designation, designer_dp_path, designer_comment) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `;
+        const insertParams = [
+            title, imagePath, parseInt(categoryId), formData.get('status'), formData.get('is_featured') === 'true',
+            parseInt(formData.get('likes') as string) || 0, formData.get('designer_name'), formData.get('designer_designation'),
+            designerDpPath, formData.get('designer_comment')
+        ];
+        await db.query(insertQuery, insertParams);
+    
+        return NextResponse.json({ message: 'Image uploaded successfully' }, { status: 201 });
+    
+      } catch (error: any) {
+        console.error('[GALLERY_IMAGES_POST]', error);
+        return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
+      }
+}
 
-    if (!file || !title || !categoryId) {
-      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+// PUT function for updating images
+export async function PUT(req: Request) {
+    try {
+        const formData = await req.formData();
+        const id = formData.get('id') as string;
+        if (!id) return NextResponse.json({ error: 'Image ID is required for update' }, { status: 400 });
+
+        // First, get the existing image data
+        const existingImageQuery = 'SELECT image_path, designer_dp_path FROM GalleryImages WHERE id = ?';
+        const result = await db.query(existingImageQuery, [id]);
+        
+        if (!result || result.length === 0) {
+            return NextResponse.json({ error: 'Image not found' }, { status: 404 });
+        }
+        
+        // Extract the first row from the result
+        const existingImage = result[0] as {
+            image_path: string;
+            designer_dp_path: string | null;
+        };
+
+        const file = formData.get('file') as File | null;
+        const designerDpFile = formData.get('designer_dp_file') as File | null;
+
+        // Handle main image update
+        let imagePath = existingImage.image_path;
+        if (file) {
+            // Delete old image file if it exists
+            if (existingImage.image_path) {
+                try { 
+                    await unlink(path.join(process.cwd(), 'public', existingImage.image_path)); 
+                } catch (error) {
+                    console.log('Old image file not found or already deleted');
+                }
+            }
+            // Upload new image
+            const galleryDir = path.join(process.cwd(), 'public', 'gallery');
+            await ensureDirExists(galleryDir);
+            const filename = `${Date.now()}-${file.name.replace(/\s/g, '_')}`;
+            imagePath = `/gallery/${filename}`;
+            await writeFile(path.join(galleryDir, filename), Buffer.from(await file.arrayBuffer()));
+        }
+
+        // Handle designer DP update
+        let designerDpPath = existingImage.designer_dp_path;
+        if (designerDpFile) {
+            // Delete old DP file if it exists and is not the default user.png
+            if (existingImage.designer_dp_path && existingImage.designer_dp_path !== '/user.png') {
+                try { 
+                    await unlink(path.join(process.cwd(), 'public', existingImage.designer_dp_path)); 
+                } catch (error) {
+                    console.log('Old DP file not found or already deleted');
+                }
+            }
+            // Upload new DP
+            const dpDir = path.join(process.cwd(), 'public', 'gallery', 'dp');
+            await ensureDirExists(dpDir);
+            const dpFilename = `${Date.now()}-${designerDpFile.name.replace(/\s/g, '_')}`;
+            designerDpPath = `/gallery/dp/${dpFilename}`;
+            await writeFile(path.join(dpDir, dpFilename), Buffer.from(await designerDpFile.arrayBuffer()));
+        }
+        
+        const updateData = {
+            title: formData.get('title') as string,
+            category_id: parseInt(formData.get('categoryId') as string),
+            status: formData.get('status') as string,
+            is_featured: formData.get('is_featured') === 'true',
+            likes: parseInt(formData.get('likes') as string) || 0,
+            designer_name: formData.get('designer_name') as string,
+            designer_designation: formData.get('designer_designation') as string,
+            designer_comment: formData.get('designer_comment') as string,
+            image_path: imagePath,
+            designer_dp_path: designerDpPath,
+        };
+
+        // Validate that the category exists before updating
+        const categoryExists = await db.query('SELECT id FROM GalleryCategories WHERE id = ?', [updateData.category_id]);
+        if (!categoryExists || categoryExists.length === 0) {
+          return NextResponse.json({ error: 'Invalid category ID. Category does not exist.' }, { status: 400 });
+        }
+
+        const query = `
+            UPDATE GalleryImages SET 
+            title = ?, category_id = ?, status = ?, is_featured = ?, likes = ?, 
+            designer_name = ?, designer_designation = ?, designer_comment = ?,
+            image_path = ?, designer_dp_path = ?
+            WHERE id = ?
+        `;
+        const params = [...Object.values(updateData), id];
+        await db.query(query, params);
+
+        return NextResponse.json({ message: 'Image updated successfully' });
+    } catch (error: any) {
+        console.error('[GALLERY_IMAGES_PUT]', error);
+        return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
     }
-
-    // 1. Handle main image upload
-    const galleryDir = path.join(process.cwd(), 'public', 'gallery');
-    await ensureDirExists(galleryDir);
-    const filename = `${Date.now()}-${file.name.replace(/\s/g, '_')}`;
-    const imagePath = `/gallery/${filename}`;
-    const fullPath = path.join(galleryDir, filename);
-    const buffer = Buffer.from(await file.arrayBuffer());
-    await writeFile(fullPath, buffer);
-
-    // 2. Handle designer DP upload (if provided)
-    let designerDpPath: string | null = null;
-    if (designerDpFile) {
-        const dpDir = path.join(process.cwd(), 'public', 'gallery', 'dp');
-        await ensureDirExists(dpDir);
-        const dpFilename = `${Date.now()}-${designerDpFile.name.replace(/\s/g, '_')}`;
-        designerDpPath = `/gallery/dp/${dpFilename}`;
-        const dpFullPath = path.join(dpDir, dpFilename);
-        const dpBuffer = Buffer.from(await designerDpFile.arrayBuffer());
-        await writeFile(dpFullPath, dpBuffer);
-    }
-
-    // 3. Save all metadata to the database
-    const insertQuery = `
-        INSERT INTO GalleryImages 
-        (title, image_path, category_id, status, is_featured, designer_name, designer_designation, designer_dp_path, designer_comment) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `;
-    const insertParams = [
-        title, imagePath, parseInt(categoryId), 'published', is_featured, 
-        designer_name, designer_designation, designerDpPath, designer_comment
-    ];
-    await db.query(insertQuery, insertParams);
-
-    return NextResponse.json({ message: 'Image uploaded successfully' }, { status: 201 });
-
-  } catch (error: any) {
-    console.error('[GALLERY_IMAGES_POST]', error);
-    return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
-  }
 }
 
 // --- DELETE: REMOVES AN IMAGE AND ITS ASSETS ---

@@ -1,4 +1,5 @@
-// File: src/app/gallery/page.tsx
+import { headers } from 'next/headers';
+import Head from 'next/head';
 import { GalleryClient } from "./GalleryClient";
 import { ScrollToTopButton } from '@/app/blogs/[slug]/ScrollToTopButton';
 
@@ -24,11 +25,18 @@ export interface Category {
   icon_name: string | null;
 }
 
-interface SEOData {
-  meta_title: string;
-  meta_description: string;
-  content?: string;
+function slugify(text: string): string {
+  return text
+    .toString()
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, '-')           // Replace spaces with -
+    .replace(/[^\w\-]+/g, '')       // Remove all non-word chars
+    .replace(/\-\-+/g, '-')         // Replace multiple - with single -
+    .replace(/^-+/, '')             // Trim - from start of text
+    .replace(/-+$/, '');            // Trim - from end of text
 }
+
 
 // --- DATA FETCHING ---
 async function getGalleryData(): Promise<{ images: GalleryImage[]; categories: Category[] }> {
@@ -64,48 +72,53 @@ async function getGalleryData(): Promise<{ images: GalleryImage[]; categories: C
   }
 }
 
-// --- DYNAMIC METADATA ---
-export async function generateMetadata() {
+// --- Helper: Get “image” query param from request headers on server
+async function getImageSlugFromSearchParams(): Promise<string | null> {
   try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/seo/gallery`, {
-      next: { revalidate: 3600 },
-    });
-
-    if (!res.ok) {
-      return {
-        title: 'Design Gallery | KayaPalat',
-        description: 'A collection of stunning interior designs.',
-      };
-    }
-
-    const seoData: SEOData = await res.json();
-
-    return {
-      title: seoData.meta_title,
-      description: seoData.meta_description,
-    };
-  } catch (error) {
-    console.error("SEO data fetch error:", error);
-    return {
-      title: 'Design Gallery | KayaPalat',
-      description: 'A collection of stunning interior designs.',
-    };
+    const headersList = await headers();  // await the Promise here
+    const referer = headersList.get('referer') || '';
+    if (!referer) return null;
+    const url = new URL(referer);
+    return url.searchParams.get('image');
+  } catch {
+    return null;
   }
 }
-
-// --- SEO Block Data Fetch ---
 
 // --- MAIN PAGE COMPONENT ---
 export default async function GalleryPage() {
   const { images, categories } = await getGalleryData();
+  const slug = await getImageSlugFromSearchParams();
+
+  // Find image from slug
+  const currentImage = slug ? images.find(img => slugify(img.title) === slug) : null;
 
   return (
-    <main>
+    <>
+      <Head>
+        <title>{currentImage ? currentImage.title : "Design Gallery | KayaPalat"}</title>
+        <meta name="description" content={currentImage ? (currentImage.designer_comment || 'Interior design') : 'A collection of stunning interior designs.'} />
 
-      <GalleryClient images={images} categories={categories} />
-      
-      {/* Scroll To Top Button */}
-      <ScrollToTopButton />
-    </main>
+        {currentImage && (
+          <>
+            {/* Open Graph / Facebook */}
+            <meta property="og:title" content={currentImage.title} />
+            <meta property="og:image" content={currentImage.image_path} />
+            <meta property="og:description" content={currentImage.designer_comment || 'Interior design'} />
+            <meta property="og:url" content={`${process.env.NEXT_PUBLIC_SITE_URL}/gallery?image=${slug}`} />
+
+            {/* Twitter */}
+            <meta name="twitter:title" content={currentImage.title} />
+            <meta name="twitter:image" content={currentImage.image_path} />
+            <meta name="twitter:description" content={currentImage.designer_comment || 'Interior design'} />
+          </>
+        )}
+      </Head>
+
+      <main>
+        <GalleryClient images={images} categories={categories} />
+        <ScrollToTopButton />
+      </main>
+    </>
   );
 }
