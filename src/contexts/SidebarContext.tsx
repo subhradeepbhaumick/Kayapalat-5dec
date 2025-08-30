@@ -18,7 +18,7 @@ export function SidebarProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const toggleSidebar = () => {
-    setIsOpen(!isOpen);
+    setIsOpen((prev) => !prev);
   };
 
   if (!mounted) {

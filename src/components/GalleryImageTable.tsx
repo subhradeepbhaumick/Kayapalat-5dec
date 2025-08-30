@@ -9,7 +9,7 @@ import Link from 'next/link';
 import { useDebounce } from 'use-debounce';
 
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue ,  } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Badge } from '@/components/ui/badge';
@@ -56,7 +56,7 @@ export function GalleryImageTable() {
 
     const [isAlertOpen, setIsAlertOpen] = useState(false);
     const [imageToDelete, setImageToDelete] = useState<AdminGalleryImage | null>(null);
-    
+
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [imageToEdit, setImageToEdit] = useState<AdminGalleryImage | null>(null);
 
@@ -66,7 +66,7 @@ export function GalleryImageTable() {
             const catRes = await fetch('/api/gallery-categories');
             if (!catRes.ok) throw new Error('Failed to fetch categories');
             setCategories(await catRes.json());
-            
+
             const params = new URLSearchParams({
                 search: debouncedSearchTerm,
                 category: selectedCategory,
@@ -75,9 +75,9 @@ export function GalleryImageTable() {
             });
             const imgRes = await fetch(`/api/gallery-images?${params.toString()}`);
             if (!imgRes.ok) throw new Error('Failed to fetch images');
-            
+
             const data = await imgRes.json();
-            
+
             if (Array.isArray(data)) {
                 setImages(data);
             } else {
@@ -108,15 +108,15 @@ export function GalleryImageTable() {
     const confirmDelete = async () => {
         if (!imageToDelete) return;
         try {
-            const response = await fetch(`/api/gallery-images`, { 
+            const response = await fetch(`/api/gallery-images`, {
                 method: 'DELETE',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 
-                    id: imageToDelete.id, 
+                body: JSON.stringify({
+                    id: imageToDelete.id,
                     image_path: imageToDelete.image_path,
-                    designer_dp_path: imageToDelete.designer_dp_path 
+                    designer_dp_path: imageToDelete.designer_dp_path
                 }),
-             });
+            });
             if (!response.ok) throw new Error('Failed to delete the image.');
             fetchData();
             toast.success("The image has been deleted.");
@@ -146,7 +146,7 @@ export function GalleryImageTable() {
                                 <SelectContent position="popper" className="bg-white border border-gray-200 shadow-lg">
                                     <SelectItem value="all" className="hover:bg-[#00423D]/10 focus:bg-[#00423D]/15 data-[state=checked]:bg-[#00423D]/20 data-[state=checked]:text-[#00423D] data-[state=checked]:font-medium transition-colors duration-150 cursor-pointer">All Categories</SelectItem>
                                     {categories.map((cat) => (<SelectItem key={cat.id} value={String(cat.id)}
-                                    className="hover:bg-[#00423D]/10 focus:bg-[#00423D]/15 data-[state=checked]:bg-[#00423D]/20 data-[state=checked]:text-[#00423D] data-[state=checked]:font-medium transition-colors duration-150 cursor-pointer"
+                                        className="hover:bg-[#00423D]/10 focus:bg-[#00423D]/15 data-[state=checked]:bg-[#00423D]/20 data-[state=checked]:text-[#00423D] data-[state=checked]:font-medium transition-colors duration-150 cursor-pointer"
                                     >{cat.name}</SelectItem>))}
                                 </SelectContent>
                             </SelectPortal>
@@ -156,16 +156,16 @@ export function GalleryImageTable() {
                                 <SelectValue placeholder="All Statuses" />
                             </SelectTrigger>
                             <SelectPortal>
-                            <SelectContent position="popper" className="bg-white border border-gray-200 shadow-lg">
-                                <SelectItem value="all" className="hover:bg-[#00423D]/10 focus:bg-[#00423D]/15 data-[state=checked]:bg-[#00423D]/20 data-[state=checked]:text-[#00423D] data-[state=checked]:font-medium transition-colors duration-150 cursor-pointer">All Statuses</SelectItem>
-                                <SelectItem value="published" className="hover:bg-[#00423D]/10 focus:bg-[#00423D]/15 data-[state=checked]:bg-[#00423D]/20 data-[state=checked]:text-[#00423D] data-[state=checked]:font-medium transition-colors duration-150 cursor-pointer">Published</SelectItem>
-                                <SelectItem value="draft" className="hover:bg-[#00423D]/10 focus:bg-[#00423D]/15 data-[state=checked]:bg-[#00423D]/20 data-[state=checked]:text-[#00423D] data-[state=checked]:font-medium transition-colors duration-150 cursor-pointer">Draft</SelectItem>
-                            </SelectContent>
+                                <SelectContent position="popper" className="bg-white border border-gray-200 shadow-lg">
+                                    <SelectItem value="all" className="hover:bg-[#00423D]/10 focus:bg-[#00423D]/15 data-[state=checked]:bg-[#00423D]/20 data-[state=checked]:text-[#00423D] data-[state=checked]:font-medium transition-colors duration-150 cursor-pointer">All Statuses</SelectItem>
+                                    <SelectItem value="published" className="hover:bg-[#00423D]/10 focus:bg-[#00423D]/15 data-[state=checked]:bg-[#00423D]/20 data-[state=checked]:text-[#00423D] data-[state=checked]:font-medium transition-colors duration-150 cursor-pointer">Published</SelectItem>
+                                    <SelectItem value="draft" className="hover:bg-[#00423D]/10 focus:bg-[#00423D]/15 data-[state=checked]:bg-[#00423D]/20 data-[state=checked]:text-[#00423D] data-[state=checked]:font-medium transition-colors duration-150 cursor-pointer">Draft</SelectItem>
+                                </SelectContent>
                             </SelectPortal>
                         </Select>
                         <Select value={selectedFeatured} onValueChange={(value) => setSelectedFeatured(value === "all" ? "" : value)}>
                             <SelectTrigger className="w-full md:w-[150px] bg-[#00423D]/15 z-10 hover:bg-[#00423D]/25 active:bg-[#00423D]/35 transition-colors duration-200">
-                            <SelectValue placeholder="Is Featured" />
+                                <SelectValue placeholder="Is Featured" />
                             </SelectTrigger>
                             <SelectPortal>
                                 <SelectContent position="popper" className="bg-white border border-gray-200 shadow-lg">
@@ -198,11 +198,16 @@ export function GalleryImageTable() {
                             ) : images.length > 0 ? (
                                 images.map((image) => (
                                     <TableRow key={image.id}>
-                                        <TableCell><Image src={image.image_path} alt={image.title} width={48} height={48} className="rounded-md object-cover aspect-square"/></TableCell>
-                                        <TableCell className="font-medium">{image.title}</TableCell>
+                                        <TableCell><Image src={image.image_path} alt={image.title} width={48} height={48} className="rounded-md object-cover aspect-square" /></TableCell>
+                                        <TableCell className="font-medium">
+                                            {image.title.length > 40
+                                                ? image.title.substring(0, 40) + " ..."
+                                                : image.title}
+                                        </TableCell>
+
                                         <TableCell>
                                             <div className="flex items-center gap-2">
-                                                <Image src={image.designer_dp_path || '/user.png'} alt={image.designer_name || ''} width={32} height={32} className="rounded-full object-cover"/>
+                                                <Image src={image.designer_dp_path || '/user.png'} alt={image.designer_name || ''} width={32} height={32} className="rounded-full object-cover" />
                                                 <div>
                                                     <p className="font-semibold text-sm">{image.designer_name}</p>
                                                     <p className="text-xs text-muted-foreground">{image.designer_designation}</p>
@@ -215,9 +220,9 @@ export function GalleryImageTable() {
                                         <TableCell><Badge className={image.status === 'published' ? "bg-green-100 text-green-800" : "bg-orange-100 text-orange-800"}>{image.status}</Badge></TableCell>
                                         <TableCell>
                                             <div className="flex items-center space-x-4">
-                                                <Link href={`/gallery?image=${slugify(image.title)}`} target="_blank" aria-label="View image on site"><Eye className="h-5 w-5 text-blue-600 cursor-pointer"/></Link>
-                                                <button onClick={() => handleEditClick(image)} aria-label="Edit image"><Pencil className="h-5 w-5 text-yellow-600 cursor-pointer"/></button>
-                                                <button onClick={() => handleDeleteClick(image)} aria-label="Delete image"><Trash2 className="h-5 w-5 text-red-600 cursor-pointer"/></button>
+                                                <Link href={`/gallery?image=${slugify(image.title)}`} target="_blank" aria-label="View image on site"><Eye className="h-5 w-5 text-blue-600 cursor-pointer" /></Link>
+                                                <button onClick={() => handleEditClick(image)} aria-label="Edit image"><Pencil className="h-5 w-5 text-yellow-600 cursor-pointer" /></button>
+                                                <button onClick={() => handleDeleteClick(image)} aria-label="Delete image"><Trash2 className="h-5 w-5 text-red-600 cursor-pointer" /></button>
                                             </div>
                                         </TableCell>
                                     </TableRow>
