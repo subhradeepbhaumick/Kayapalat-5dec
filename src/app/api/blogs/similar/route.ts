@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
     const tagIds = tagIdsParam ? tagIdsParam.split(',').map(Number).filter(id => id > 0) : [];
     
     let whereClause = `b.id != ? AND b.status = 'published' AND (b.category_id = ?`;
-    let queryParams: (string | number)[] = [currentId, categoryId];
+    const queryParams: (string | number)[] = [currentId, categoryId];
 
     // --- THIS IS THE CORRECTED LOGIC ---
     if (tagIds.length > 0) {

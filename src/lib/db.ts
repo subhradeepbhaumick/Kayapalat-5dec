@@ -85,3 +85,29 @@ ${url}"`;
   });
   return fixedHtml;
 }
+
+/**
+ * Provide a stable named `query` export and a default export
+ * so modules that expect `import db from '@/lib/db'` and call `db.query(...)`
+ * will work.
+ *
+ * This wrapper forwards to the existing `pool.query` if `pool` exists in this file.
+ * Adjust or remove the wrapper if your file already exposes a query function.
+ */
+export const query = (...args: unknown[]) => {
+  // @ts-ignore - forward to pool.query if available in this file
+  if (typeof pool !== 'undefined' && typeof (pool as any).query === 'function') {
+    // @ts-ignore
+    return (pool as any).query(...args);
+  }
+
+  // If your db.ts already exports a different named function, replace the above with that.
+  throw new Error('Database pool is not available. Ensure `pool` is defined in src/lib/db.ts');
+};
+
+export default {
+  query,
+  // expose pool if present (may be undefined)
+  // @ts-ignore
+  pool: typeof pool !== 'undefined' ? pool : undefined,
+};

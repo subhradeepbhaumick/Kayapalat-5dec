@@ -51,7 +51,7 @@ export async function GET(request: Request) {
     const email = searchParams.get('email');
     
     let query = 'SELECT * FROM project_estimates';
-    let params = [];
+    const params = [];
     
     if (email) {
       query += ' WHERE client_email = ?';

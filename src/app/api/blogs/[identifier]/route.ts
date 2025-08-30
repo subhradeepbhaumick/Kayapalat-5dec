@@ -18,13 +18,14 @@ function findImageUrls(htmlContent: string): string[] {
   return matches.map(match => match[1]).filter(url => !url.startsWith('data:image'));
 }
 
+// Add a small type for the route context so the second argument matches Next's expectation
+type BlogIdentifierRouteContext = {
+  params: { identifier: string };
+};
 
-
-
-export async function GET(
-  request: NextRequest,
-  { params }: { params: { identifier: string } }
-) {
+// Ensure your handlers use the `context` object form: (req, context: BlogIdentifierRouteContext)
+export async function GET(req: Request, context: BlogIdentifierRouteContext) {
+  const { params } = context;
   const { identifier } = params;
   const isNumericId = /^\d+$/.test(identifier);
 
