@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { FaUser, FaPen, FaSearch, FaBars, FaArrowUp, FaWhatsapp } from "react-icons/fa";
+import { FaUser, FaPen, FaSearch, FaBars, FaArrowUp, FaWhatsapp,FaBalanceScale } from "react-icons/fa";
 import { IoChatbubbleEllipses } from "react-icons/io5";
 import { useState, useEffect } from "react";
 import { X } from "lucide-react";
@@ -72,9 +72,9 @@ const HeroSection = () => {
               <FaPen className="mr-2" /> Estimate Your Cost
             </button>
           </Link>
-          <Link href="/our-designers">
-            <button className="w-60 bg-primary border-2 border-[#295A47] cursor-pointer flex items-center justify-center px-6 py-3 rounded-lg text-lg shadow-lg hover:bg-[#295A47] transition">
-              <FaUser className="mr-2" /> Hire A Designer
+          <Link href="/price-compare">
+            <button className="w-70 bg-primary border-2 border-[#295A47] cursor-pointer flex items-center justify-center px-5 py-3 rounded-lg text-lg shadow-lg hover:bg-[#295A47] transition">
+              <FaBalanceScale className="mr-2 text-2xl" /> Compare Cost Options
             </button>
           </Link>
         </div>
@@ -108,19 +108,19 @@ const HeroSection = () => {
 
       {/* Scroll to Top Button */}
       <div className="fixed bottom-20 z-10 right-5 flex group">
-  <button
-    onClick={scrollToTop}
-    className={`cursor-pointer p-4.5 rounded-full bg-[#295A47] text-white shadow-lg transition-opacity 
+        <button
+          onClick={scrollToTop}
+          className={`cursor-pointer p-4.5 rounded-full bg-[#295A47] text-white shadow-lg transition-opacity 
     ${showButton ? "opacity-100" : "hidden pointer-events-none"} hover:bg-[#1F4037] relative`}
-    aria-label="Scroll to top"
-  >
-    <FaArrowUp size={20} />
-  </button>
-  {/* Tooltip */}
-  <span className={`absolute -top-8 left-1/2 transform -translate-x-1/2 px-2 py-1 text-xs text-gray-600 bg-[#ffffff7a] rounded-md opacity-0 group-hover:opacity-100 transition whitespace-nowrap border-2 ${showButton ? "" : "hidden pointer-events-none"}`}>
-    Scroll To Top
-  </span>
-</div>
+          aria-label="Scroll to top"
+        >
+          <FaArrowUp size={20} />
+        </button>
+        {/* Tooltip */}
+        <span className={`absolute -top-8 left-1/2 transform -translate-x-1/2 px-2 py-1 text-xs text-gray-600 bg-[#ffffff7a] rounded-md opacity-0 group-hover:opacity-100 transition whitespace-nowrap border-2 ${showButton ? "" : "hidden pointer-events-none"}`}>
+          Scroll To Top
+        </span>
+      </div>
 
 
 
