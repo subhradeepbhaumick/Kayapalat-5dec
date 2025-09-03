@@ -87,7 +87,6 @@ debugger;
       secure: process.env.NODE_ENV === "production",
       maxAge: 3600, // 1 hour in seconds
       path: "/",
-      domain: process.env.NODE_ENV === "production" ? ".kayapalat.com" : "localhost"
     });
 
     // Also set a loggedIn cookie for client-side checks
@@ -98,7 +97,6 @@ debugger;
       secure: process.env.NODE_ENV === "production",
       maxAge: 3600,
       path: "/",
-      domain: process.env.NODE_ENV === "production" ? ".kayapalat.com" : "localhost"
     });
 
     return response;
