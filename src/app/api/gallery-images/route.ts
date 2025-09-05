@@ -33,8 +33,8 @@ export async function GET(req: Request) {
         gi.designer_name, gi.designer_designation, gi.designer_dp_path,
         gi.designer_comment, gi.view_count, gi.status, gi.created_at,
         gc.id AS category_id, gc.name AS category_name
-      FROM GalleryImages AS gi
-      JOIN GalleryCategories AS gc ON gi.category_id = gc.id
+      FROM galleryimages AS gi
+      JOIN gallerycategories AS gc ON gi.category_id = gc.id
       WHERE (gi.title LIKE ? OR gc.name LIKE ?)
     `;
     const params: (string | number | boolean)[] = [`%${searchTerm}%`, `%${searchTerm}%`];
@@ -75,7 +75,7 @@ export async function POST(req: Request) {
         }
 
         // Validate that the category exists
-        const categoryExists = await db.query('SELECT id FROM GalleryCategories WHERE id = ?', [parseInt(categoryId)]);
+        const categoryExists = await db.query('SELECT id FROM gallerycategories WHERE id = ?', [parseInt(categoryId)]);
         if (!categoryExists || categoryExists.length === 0) {
           return NextResponse.json({ error: 'Invalid category ID. Category does not exist.' }, { status: 400 });
         }
@@ -98,7 +98,7 @@ export async function POST(req: Request) {
         }
     
         const insertQuery = `
-            INSERT INTO GalleryImages 
+            INSERT INTO galleryimages 
             (title, image_path, category_id, status, is_featured, likes, designer_name, designer_designation, designer_dp_path, designer_comment) 
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `;
@@ -125,7 +125,7 @@ export async function PUT(req: Request) {
         if (!id) return NextResponse.json({ error: 'Image ID is required for update' }, { status: 400 });
 
         // First, get the existing image data
-        const existingImageQuery = 'SELECT image_path, designer_dp_path FROM GalleryImages WHERE id = ?';
+        const existingImageQuery = 'SELECT image_path, designer_dp_path FROM galleryimages WHERE id = ?';
         const result = await db.query(existingImageQuery, [id]);
         
         if (!result || result.length === 0) {
@@ -193,13 +193,13 @@ export async function PUT(req: Request) {
         };
 
         // Validate that the category exists before updating
-        const categoryExists = await db.query('SELECT id FROM GalleryCategories WHERE id = ?', [updateData.category_id]);
+        const categoryExists = await db.query('SELECT id FROM gallerycategories WHERE id = ?', [updateData.category_id]);
         if (!categoryExists || categoryExists.length === 0) {
           return NextResponse.json({ error: 'Invalid category ID. Category does not exist.' }, { status: 400 });
         }
 
         const query = `
-            UPDATE GalleryImages SET 
+            UPDATE galleryimages SET 
             title = ?, category_id = ?, status = ?, is_featured = ?, likes = ?, 
             designer_name = ?, designer_designation = ?, designer_comment = ?,
             image_path = ?, designer_dp_path = ?
