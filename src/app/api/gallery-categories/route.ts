@@ -10,7 +10,7 @@ interface Category {
 // GET function remains the same
 export async function GET() {
   try {
-    const query = 'SELECT id, name FROM GalleryCategories ORDER BY name ASC';
+    const query = 'SELECT id, name FROM gallerycategories ORDER BY name ASC';
     const categories = await db.query<Category[]>(query);
     return NextResponse.json(categories);
   } catch (error) {
@@ -29,7 +29,7 @@ export async function POST(req: Request) {
     }
 
     const slug = generateSlug(name); // Use your slug function
-    const query = 'INSERT INTO GalleryCategories (name, slug) VALUES (?, ?)';
+    const query = 'INSERT INTO gallerycategories (name, slug) VALUES (?, ?)';
     await db.query(query, [name, slug]);
 
     return new NextResponse('Category created successfully', { status: 201 });
@@ -51,7 +51,7 @@ export async function DELETE(req: Request) {
   
       // Note: Your database is set to ON DELETE CASCADE,
       // so deleting a category will automatically delete all images within it.
-      const query = 'DELETE FROM GalleryCategories WHERE id = ?';
+      const query = 'DELETE FROM gallerycategories WHERE id = ?';
       await db.query(query, [id]);
   
       return new NextResponse('Category deleted successfully', { status: 200 });

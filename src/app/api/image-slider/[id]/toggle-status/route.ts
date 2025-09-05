@@ -11,7 +11,7 @@ export async function POST(request: Request, { params }: { params: { id: string 
       return NextResponse.json({ error: 'Invalid status' }, { status: 400 });
     }
 
-    const query = 'UPDATE ImageSlider SET status = ? WHERE id = ?';
+    const query = 'UPDATE imageslider SET status = ? WHERE id = ?';
     await executeQuery(query, [status, sliderId]);
     
     return NextResponse.json({ message: `Slider status updated to ${status}` });

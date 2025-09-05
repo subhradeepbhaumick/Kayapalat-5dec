@@ -12,7 +12,7 @@ export async function POST(req: Request) {
 
     // This query safely increments the 'likes' count for a specific image ID.
     // The 'likes + 1' ensures the operation is atomic.
-    const query = 'UPDATE GalleryImages SET likes = likes + 1 WHERE id = ?';
+    const query = 'UPDATE galleryimages SET likes = likes + 1 WHERE id = ?';
     await db.query(query, [id]);
 
     return NextResponse.json({ message: 'Like recorded successfully' }, { status: 200 });

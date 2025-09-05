@@ -21,7 +21,7 @@ export async function GET(
     }
 
     // The query to get SEO data for a specific page
-    const query = 'SELECT meta_title, meta_description, content FROM PageSEO WHERE page_identifier = ?';
+    const query = 'SELECT meta_title, meta_description, content FROM pageseo WHERE page_identifier = ?';
 
     // Execute the query with the page identifier as a parameter
     const seoDataArray = await db.query<SEOData[]>(query, [pageIdentifier]);

@@ -5,7 +5,7 @@ import { executeQuery, pool} from '@/lib/db';
 
 export async function GET() {
   try {
-    const [categories] = await executeQuery('SELECT * FROM SliderCategories ORDER BY display_order ASC, name ASC');
+    const [categories] = await executeQuery('SELECT * FROM slidercategories ORDER BY display_order ASC, name ASC');
     return NextResponse.json(categories);
   } catch (error: any) {
     console.error('API Error fetching slider categories:', error);
@@ -26,10 +26,10 @@ export async function POST(request: NextRequest) {
     await executeQuery('START TRANSACTION', [], connection);
 
     // Get the current max display order
-    const [[{ maxOrder }]] = await executeQuery('SELECT MAX(display_order) as maxOrder FROM SliderCategories', [], connection) as any[];
+    const [[{ maxOrder }]] = await executeQuery('SELECT MAX(display_order) as maxOrder FROM slidercategories', [], connection) as any[];
     const newOrder = (maxOrder || 0) + 1;
 
-    const query = 'INSERT INTO SliderCategories (name, icon_name, display_order) VALUES (?, ?, ?)';
+    const query = 'INSERT INTO slidercategories (name, icon_name, display_order) VALUES (?, ?, ?)';
     const [result]: any = await executeQuery(query, [name, icon_name, newOrder], connection);
     
     await executeQuery('COMMIT', [], connection);

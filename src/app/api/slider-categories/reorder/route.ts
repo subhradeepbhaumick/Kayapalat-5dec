@@ -17,7 +17,7 @@ export async function PUT(request: NextRequest) {
     // Create a series of UPDATE statements
     const updatePromises = orderedIds.map((id, index) => {
       const displayOrder = index + 1;
-      return executeQuery('UPDATE SliderCategories SET display_order = ? WHERE id = ?', [displayOrder, id], connection);
+      return executeQuery('UPDATE slidercategories SET display_order = ? WHERE id = ?', [displayOrder, id], connection);
     });
 
     await Promise.all(updatePromises);

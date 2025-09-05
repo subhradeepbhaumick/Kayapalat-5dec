@@ -5,7 +5,7 @@ import { executeQuery } from '@/lib/db';
 export async function DELETE(request: Request, { params }: { params: { id: string } }) {
   try {
     const categoryId = parseInt(params.id, 10);
-    const query = 'DELETE FROM SliderCategories WHERE id = ?';
+    const query = 'DELETE FROM slidercategories WHERE id = ?';
     await executeQuery(query, [categoryId]);
 
     return NextResponse.json({ message: 'Category deleted successfully.' });

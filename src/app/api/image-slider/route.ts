@@ -15,9 +15,9 @@ export async function GET(request: NextRequest) {
       s.*, 
       c.name as category_name,
       p.name as page_name
-    FROM ImageSlider s
-    LEFT JOIN SliderCategories c ON s.category_id = c.id
-    LEFT JOIN SliderPages p ON s.page_id = p.id
+    FROM imageslider s
+    LEFT JOIN slidercategories c ON s.category_id = c.id
+    LEFT JOIN sliderpages p ON s.page_id = p.id
   `;
     const queryParams: (string | number)[] = [];
     const whereConditions: string[] = [];
@@ -58,7 +58,7 @@ export async function POST(request: Request) {
     }
 
     const query = `
-        INSERT INTO ImageSlider (before_image, after_image, testimonial_name, designation, rating, comment, testimonial_dp, category_id, page_id ,status) 
+        INSERT INTO imageslider (before_image, after_image, testimonial_name, designation, rating, comment, testimonial_dp, category_id, page_id ,status) 
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ? ,?)
     `;
     const [result]: any = await executeQuery(query, [before_image, after_image, testimonial_name, designation, rating, comment, testimonial_dp, category_id, page_id, status]);

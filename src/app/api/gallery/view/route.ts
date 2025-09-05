@@ -10,7 +10,7 @@ export async function POST(req: Request) {
     }
 
     // Atomically increment the view_count for the given image
-    const query = 'UPDATE GalleryImages SET view_count = view_count + 1 WHERE id = ?';
+    const query = 'UPDATE galleryimages SET view_count = view_count + 1 WHERE id = ?';
     await db.query(query, [id]);
 
     return NextResponse.json({ message: 'View count updated' }, { status: 200 });

@@ -238,7 +238,7 @@ export async function DELETE(req: Request) {
       }
   
       // 3. Delete the image record from the database
-      const query = 'DELETE FROM GalleryImages WHERE id = ?';
+      const query = 'DELETE FROM galleryimages WHERE id = ?';
       await db.query(query, [id]);
   
       return NextResponse.json({ message: 'Image deleted successfully' }, { status: 200 });

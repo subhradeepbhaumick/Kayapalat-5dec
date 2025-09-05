@@ -5,7 +5,7 @@ import { executeQuery } from '@/lib/db';
 // UPDATED: This function now correctly queries the SliderPages table
 export async function GET() {
   try {
-    const query = 'SELECT id, name FROM SliderPages ORDER BY name ASC';
+    const query = 'SELECT id, name FROM sliderpages ORDER BY name ASC';
     const [pages] = await executeQuery(query);
     return NextResponse.json(pages);
   } catch (error: any) {
@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
     if (!name || name.trim() === '') {
       return NextResponse.json({ error: 'Page name is required.' }, { status: 400 });
     }
-    const query = 'INSERT INTO SliderPages (name) VALUES (?)';
+    const query = 'INSERT INTO sliderpages (name) VALUES (?)';
     const [result]: any = await executeQuery(query, [name.trim()]);
     return NextResponse.json({ id: result.insertId, name: name.trim() }, { status: 201 });
   } catch (error: any) {

@@ -11,7 +11,7 @@ const getImagesFromSlider = (slider: any): string[] => {
 
 // GET a single slider by ID
 export async function GET(request: Request, { params }: { params: { id: string } }) {
-    const [sliders] = await executeQuery('SELECT * FROM ImageSlider WHERE id = ?', [params.id]);
+    const [sliders] = await executeQuery('SELECT * FROM imageslider WHERE id = ?', [params.id]);
     if (sliders.length === 0) {
         return NextResponse.json({ error: 'Slider not found' }, { status: 404 });
     }
@@ -27,12 +27,12 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
         await executeQuery('START TRANSACTION', [], connection);
         
         // 1. Get the slider data to find its images before deleting
-        const [sliders]: any[] = await executeQuery('SELECT * FROM ImageSlider WHERE id = ?', [sliderId], connection);
+        const [sliders]: any[] = await executeQuery('SELECT * FROM imageslider WHERE id = ?', [sliderId], connection);
         if (sliders.length === 0) throw new Error('Slider not found');
         const sliderToDelete = sliders[0];
         
         // 2. Delete the database record
-        await executeQuery('DELETE FROM ImageSlider WHERE id = ?', [sliderId], connection);
+        await executeQuery('DELETE FROM imageslider WHERE id = ?', [sliderId], connection);
         
         // 3. Delete the associated image files from the server
         const imagesToDelete = getImagesFromSlider(sliderToDelete);
@@ -68,7 +68,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
         await executeQuery('START TRANSACTION', [], connection);
         
         // 1. Get the old slider data before updating
-        const [oldSliders]: any[] = await executeQuery('SELECT * FROM ImageSlider WHERE id = ?', [sliderId], connection);
+        const [oldSliders]: any[] = await executeQuery('SELECT * FROM imageslider WHERE id = ?', [sliderId], connection);
         if (oldSliders.length === 0) throw new Error('Slider not found');
         const oldSlider = oldSliders[0];
         
@@ -77,7 +77,7 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 
         // 2. Update the database record
         const query = `
-            UPDATE ImageSlider 
+            UPDATE imageslider 
             SET before_image = ?, after_image = ?, testimonial_name = ?, designation = ?, 
                 rating = ?, comment = ?, testimonial_dp = ?, category_id = ?, page_id = ?, status = ? 
             WHERE id = ?

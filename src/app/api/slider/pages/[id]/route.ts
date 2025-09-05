@@ -9,7 +9,7 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
         return NextResponse.json({ error: 'Invalid page ID.' }, { status: 400 });
     }
 
-    const [result]: any = await executeQuery('DELETE FROM SliderPages WHERE id = ?', [pageId]);
+    const [result]: any = await executeQuery('DELETE FROM sliderpages WHERE id = ?', [pageId]);
 
     if (result.affectedRows === 0) {
         return NextResponse.json({ error: 'Page not found.' }, { status: 404 });
