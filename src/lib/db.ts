@@ -29,19 +29,21 @@ export async function executeQuery<T = any>(
   params: any[] = [],
   existingConnection?: mysql.PoolConnection
 ): Promise<[T[], mysql.OkPacket]> {
-
   const connection = existingConnection || await pool.getConnection();
 
   try {
     const upperCaseQuery = query.toUpperCase();
     const trimmedQuery = upperCaseQuery.trim().replace(/;$/, '');
+
     const isTransactionCommand = ['START TRANSACTION', 'COMMIT', 'ROLLBACK'].includes(trimmedQuery);
     const isBulkInsert = upperCaseQuery.includes('VALUES ?');
+    const hasLimitOffset = /\b(LIMIT|OFFSET)\s+\?/i.test(query);
 
     // ✅ Ensure params are safe
     const safeParams = params.map(p => (typeof p === "boolean" ? Number(p) : p));
 
-    if (isTransactionCommand || isBulkInsert) {
+    // Use .query() if transaction, bulk insert, or LIMIT/OFFSET placeholders
+    if (isTransactionCommand || isBulkInsert || hasLimitOffset) {
       const [results, fields] = await connection.query(query, safeParams);
       return [results as T[], fields as unknown as mysql.OkPacket];
     } else {
