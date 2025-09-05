@@ -2,7 +2,7 @@ import  HeroSection  from "@/components/home/HeroSection";
 import  OurCreations  from "@/components/home/OurCreations";
 import ConceptToCompletion  from "@/components/home/ConceptToCompletion";
 import  AboutUs  from "@/components/home/AboutUs";
-import  DesignIdeas  from "@/components/home/DesignIdeas";
+import  { DesignIdeas }  from "@/components/home/DesignIdeas";
 import  ClientChronicles  from "@/components/home/ClientChronicles";
 import  HowWeWork  from "@/components/home/HowWeWork";
 import  OurBlogs  from "@/components/home/OurBlogs";

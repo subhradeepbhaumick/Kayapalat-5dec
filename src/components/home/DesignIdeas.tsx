@@ -1,222 +1,267 @@
-"use client";
-import React, { useState, useEffect } from "react";
-import { ChevronLeft, ChevronRight, Heart } from "lucide-react";
-import Image from "next/image";
-import clsx from "clsx";
-import {
-  FaCouch,
-  FaBed,
-  FaUtensils,
-  FaBath,
-  FaLaptopHouse,
-} from "react-icons/fa";
+// File: src/components/DesignIdeas.tsx
+'use client';
 
-// Category list
-const categories: (keyof typeof designData)[] = ["Living Room", "Bedroom", "Kitchen", "Bathroom", "Workspace"];
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import Image from 'next/image';
+import { ChevronLeft, ChevronRight, Heart } from 'lucide-react';
+import confetti from 'canvas-confetti';
+import { AnimatePresence } from 'framer-motion';
+import { GalleryLightbox } from '@/components/gallery/GalleryLightbox';
+// *** FIX: Import the correct, app-wide GalleryImage type ***
+import type { GalleryImage } from '@/app/gallery/page';
 
-// Icon map
-const categoryIcons = {
-  "Living Room": <FaCouch className="text-[#00423D]" />,
-  Bedroom: <FaBed className="text-[#00423D]" />,
-  Kitchen: <FaUtensils className="text-[#00423D]" />,
-  Bathroom: <FaBath className="text-[#00423D]" />,
-  Workspace: <FaLaptopHouse className="text-[#00423D]" />,
-};
+// *** FIX: The local, incomplete definition has been removed. ***
 
-const designData = {
-  "Living Room": [
-    {
-      url: "https://plus.unsplash.com/premium_photo-1706140675031-1e0548986ad1?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8bGl2aW5ncm9vbXxlbnwwfHwwfHx8MA%3D%3D",
-      designer: "Aarav Mehta",
-      avatar: "https://i.pravatar.cc/40?img=1",
-      description: "A cozy yet luxurious living room that brings warmth and elegance.",
-      likes: 68
-    },
-    {
-      url: "https://plus.unsplash.com/premium_photo-1676968002767-1f6a09891350?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MXx8bGl2aW5nJTIwcm9vbXxlbnwwfHwwfHx8MA%3D%3D",
-      designer: "Naina Kapoor",
-      avatar: "https://i.pravatar.cc/40?img=2",
-      description: "Modern sofa setup with an inviting atmosphere for guests.",
-      likes: 57
-    }
-  ],
-  Bedroom: [
-    {
-      url: "https://images.unsplash.com/photo-1598928636135-d146006ff4be?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTV8fGJlZHJvb218ZW58MHx8MHx8fDA%3D",
-      designer: "Ishaan Roy",
-      avatar: "https://i.pravatar.cc/40?img=3",
-      description: "Minimalist design offering tranquility and peace.",
-      likes: 88
-    },
-    {
-      url: "https://images.unsplash.com/photo-1566665797739-1674de7a421a?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTB8fGJlZHJvb218ZW58MHx8MHx8fDA%3D",
-      designer: "Meera Sharma",
-      avatar: "https://i.pravatar.cc/40?img=4",
-      description: "A cozy nook with ambient lighting perfect for reading.",
-      likes: 112
-    }
-  ],
-  Kitchen: [
-    {
-      url: "https://plus.unsplash.com/premium_photo-1687697861242-03e99059e833?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      designer: "Kabir Anand",
-      avatar: "https://i.pravatar.cc/40?img=5",
-      description: "Sleek modular kitchen design for the modern chef.",
-      likes: 73
-    },
-    {
-      url: "https://images.unsplash.com/photo-1556911220-bff31c812dba?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8a2l0Y2hlbnxlbnwwfHwwfHx8MA%3D%3D",
-      designer: "Sanya Bhatia",
-      avatar: "https://i.pravatar.cc/40?img=6",
-      description: "A compact yet stylish kitchen setup for the perfect home.",
-      likes: 62
-    }
-  ],
-  Bathroom: [
-    {
-      url: "https://plus.unsplash.com/premium_photo-1661902468735-eabf780f8ff6?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NXx8YmF0aHJvb218ZW58MHx8MHx8fDA%3D",
-      designer: "Rohit Khanna",
-      avatar: "https://i.pravatar.cc/40?img=7",
-      description: "Spacious bathroom with clean aesthetics and modern utils.",
-      likes: 55
-    }
-  ],
-  Workspace: [
-    {
-      url: "https://images.unsplash.com/photo-1669723009423-6c1b3d11dd92?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTB8fHdvcmtzcGFjZSUyMGhvbWV8ZW58MHx8MHx8fDA%3D",
-      designer: "Diya Verma",
-      avatar: "https://i.pravatar.cc/40?img=8",
-      description: "Productivity meets style in this home-office design.",
-      likes: 98
-    },
-    {
-      url: "https://images.unsplash.com/photo-1629317337201-2e7189bbdfac?q=80&w=2188&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      designer: "Ayaan Joshi",
-      avatar: "https://i.pravatar.cc/40?img=9",
-      description: "Clean desk setup for focused work hours and less distractions.",
-      likes: 110
-    }
-  ]
-};
+// This is your complete, self-contained component
+export function DesignIdeas() {
+  // --- All state is managed inside this component ---
+  const [allImages, setAllImages] = useState<GalleryImage[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [likedImageIds, setLikedImageIds] = useState(new Set<number>());
+  const [selectedImage, setSelectedImage] = useState<GalleryImage | null>(null);
 
-export default function DesignIdeas() {
-  const [selectedCategory, setSelectedCategory] = useState<keyof typeof designData>("Living Room");
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [likedImages, setLikedImages] = useState<Record<string, boolean>>({});
+  const [isHovering, setIsHovering] = useState(false);
+  const heartButtonRef = useRef<HTMLButtonElement>(null);
+  
+  // --- Data Fetching ---
+  useEffect(() => {
+    const fetchAndSetImages = async () => {
+      try {
+        const res = await fetch('/api/gallery-images'); // Fetches all images
+        if (!res.ok) {
+          throw new Error('Failed to fetch images');
+        }
+        const data: GalleryImage[] = await res.json();
+        setAllImages(data);
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchAndSetImages();
+  }, []); // The empty array [] means this runs only once when the component mounts
 
-  const images = designData[selectedCategory];
+  // --- State Management and Handlers ---
+  const handleLike = (imageId: number) => {
+    if (likedImageIds.has(imageId)) return;
+
+    setLikedImageIds(prev => new Set(prev).add(imageId));
+    setAllImages(prevImages =>
+      prevImages.map(img => (img.id === imageId ? { ...img, likes: img.likes + 1 } : img))
+    );
+
+    fetch('/api/gallery-likes', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: imageId }),
+    }).catch(console.error);
+  };
+
+  const handleImageClick = (image: GalleryImage) => setSelectedImage(image);
+  const closeLightbox = () => setSelectedImage(null);
+
+  function formatLikes(num: number) {
+  if (num >= 1_000_000) {
+    return (num / 1_000_000).toFixed(1).replace(/\.0$/, '') + ' M';
+  }
+  if (num >= 1_000) {
+    return (num / 1_000).toFixed(1).replace(/\.0$/, '') + ' K';
+  }
+  return num.toString();
+}
+
+
+  // --- Derived Data (Calculations based on state) ---
+  const featuredImages = useMemo(() => allImages.filter(img => img.is_featured), [allImages]);
+  const allImagesForLightbox = useMemo(() => {
+    if (!selectedImage) return [];
+    return allImages.filter(img => img.category_id === selectedImage.category_id);
+  }, [selectedImage, allImages]);
+
+  const availableCategories = useMemo(() => {
+    const categories = new Map<string, boolean>();
+    featuredImages.forEach(image => {
+      if (!categories.has(image.category_name)) {
+        categories.set(image.category_name, true);
+      }
+    });
+    return Array.from(categories.keys());
+  }, [featuredImages]);
+
+  useEffect(() => {
+    if (!selectedCategory && availableCategories.length > 0) {
+      setSelectedCategory(availableCategories[0]);
+    }
+  }, [availableCategories, selectedCategory]);
+
+  const imagesForCategory = useMemo(() => {
+    if (!selectedCategory) return [];
+    return featuredImages.filter(img => img.category_name === selectedCategory);
+  }, [selectedCategory, featuredImages]);
+
+
+  // --- Logic for the Slider ---
+  const handleNext = useCallback(() => {
+    setCurrentSlide(prev => (prev === imagesForCategory.length - 1 ? 0 : prev + 1));
+  }, [imagesForCategory.length]);
 
   const handlePrev = () => {
-    setCurrentSlide((prev) => (prev === 0 ? images.length - 1 : prev - 1));
-  };
-
-  const handleNext = () => {
-    setCurrentSlide((prev) => (prev === images.length - 1 ? 0 : prev + 1));
-  };
-
-  const toggleLike = (url: string) => {
-    setLikedImages((prev) => ({ ...prev, [url]: !prev[url] }));
+    setCurrentSlide(prev => (prev === 0 ? imagesForCategory.length - 1 : prev - 1));
   };
 
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "ArrowLeft") handlePrev();
-      else if (e.key === "ArrowRight") handleNext();
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [images]);
+    if (isHovering || imagesForCategory.length <= 1) return;
+    const interval = setInterval(handleNext, 2000);
+    return () => clearInterval(interval);
+  }, [isHovering, imagesForCategory.length, handleNext]);
+
+  const handleLikeClick = (e: React.MouseEvent, imageId: number) => {
+    e.stopPropagation();
+    if (likedImageIds.has(imageId)) {
+        handleLike(imageId);
+        return;
+    }
+
+    if (heartButtonRef.current) {
+      const rect = heartButtonRef.current.getBoundingClientRect();
+      const origin = {
+        x: (rect.left + rect.width / 2) / window.innerWidth,
+        y: (rect.top + rect.height / 2) / window.innerHeight,
+      };
+      confetti({ particleCount: 100, spread: 70, origin, colors: ['#00423D', '#D2EBD0', '#F8FDF8', '#ff7aa2'] });
+    }
+    handleLike(imageId);
+  };
+
+  if (isLoading) {
+    return <div className="text-center p-10">Loading Design Ideas...</div>;
+  }
+
+  if (featuredImages.length === 0 || !selectedCategory) {
+    return null;
+  }
+  
+  const currentImage = imagesForCategory[currentSlide];
+  if (!currentImage) return null;
+
+  const isLiked = likedImageIds.has(currentImage.id);
 
   return (
-    <div className="p-4 bg-[#D2EBD0] md:px-6 space-y-4">
-      <h1
-        className="text-4xl md:text-7xl text-center text-[#00423D]"
-        style={{ fontFamily: "'Abril Fatface', cursive", WebkitTextStroke: "1px black" }}
-      >
-        Our Designs
-      </h1>
+    <>
+      <div className="p-4 bg-[#D2EBD0] md:px-6 space-y-4">
+        <h1
+          className="text-4xl md:text-7xl text-center text-[#00423D]"
+          style={{ fontFamily: "'Abril Fatface', cursive", WebkitTextStroke: "1px black" }}
+        >
+          Our Design Ideas
+        </h1>
 
-      {/* Category Buttons */}
-      <div className="flex gap-2 overflow-x-auto pb-2 pt-5 md:justify-center">
-        {categories.map((category) => (
-          <button
-            key={category}
-            onClick={() => {
-              setSelectedCategory(category);
-              setCurrentSlide(0);
-            }}
-            className={clsx(
-              "flex items-center gap-2 whitespace-nowrap px-4 py-2 cursor-pointer border-[#00423D] rounded-full text-sm font-semibold border transition-transform hover:scale-105 active:scale-95 duration-200",
-              selectedCategory === category ? "border-2" : "text-[#00423D]"
-            )}
+        <div className="flex gap-2 overflow-x-auto pb-2 pt-5 md:justify-center">
+          {availableCategories.map((category) => (
+            <button
+              key={category}
+              onClick={() => {
+                setSelectedCategory(category);
+                setCurrentSlide(0);
+              }}
+              className={`flex items-center gap-2 whitespace-nowrap px-4 py-2 cursor-pointer border-[#00423D] rounded-full text-sm font-semibold border transition-transform hover:scale-105 active:scale-95 duration-200 ${
+                selectedCategory === category ? 'border-2' : 'text-[#00423D]'
+              }`}
+            >
+              {category}
+            </button>
+          ))}
+        </div>
+
+        <div
+          className="relative md:px-6 max-w-3xl mx-auto"
+          onMouseEnter={() => setIsHovering(true)}
+          onMouseLeave={() => setIsHovering(false)}
+        >
+          <div
+            className="rounded-2xl overflow-hidden shadow-md bg-white cursor-pointer"
+            onClick={() => handleImageClick(currentImage)}
           >
-            {categoryIcons[category]} {category}
-          </button>
-        ))}
-      </div>
+            <Image
+              src={currentImage.image_path}
+              alt={currentImage.title}
+              width={800}
+              height={500}
+              className="w-full h-80 md:h-100 object-cover"
+              draggable="false"
+              priority
+            />
 
-      {/* Slider Card */}
-      <div className="relative md:px-6 max-w-3xl mx-auto">
-        <div className="rounded-2xl overflow-hidden shadow-md bg-white">
-          <Image
-            src={images[currentSlide].url}
-            alt="Design Preview"
-            width={800}
-            height={500}
-            className="w-full h-80 md:h-100 object-cover"
-            draggable="false"
-          />
-
-          <div className="p-4 flex items-start justify-between">
-            <div>
-              <div className="absolute italic pl-10 text-xs bottom-14 md:bottom-9">Designer | Architect </div>
-              <div className="flex items-center gap-2">
-                <Image src={images[currentSlide].avatar} alt="Designer" width={32} height={32} className="rounded-full" />
-                <div className="text-md font-bold text-teal-800">{images[currentSlide].designer}</div>
+            <div className="p-4 flex items-start justify-between">
+              <div>
+                
+                <div className="absolute italic pl-10 text-xs bottom-14 md:bottom-9">{currentImage.designer_designation || 'Designer | Architect'}</div>
+                <div className="flex items-center gap-2">
+                  <Image
+                    src={currentImage.designer_dp_path || '/default-avatar.png'}
+                    alt={currentImage.designer_name || 'Designer'}
+                    width={32}
+                    height={32}
+                    className="rounded-full object-cover"
+                  />
+                  <div className="text-md font-bold text-teal-800">{currentImage.designer_name || 'KayaPalat Team'}</div>
+                </div>
+                <p className="text-sm text-gray-600 mt-2 max-w-md pl-10">{currentImage.title}</p>
               </div>
-              <p className="text-sm text-gray-600 mt-2 max-w-md pl-10">{images[currentSlide].description}</p>
-            </div>
 
-            <div className="flex flex-col items-center gap-1">
-              <button onClick={() => toggleLike(images[currentSlide].url)}>
-                <Heart
-                  className={clsx(
-                    "transition-all cursor-pointer",
-                    likedImages[images[currentSlide].url] ? "fill-red-500 text-red-500" : "text-teal-500"
-                  )}
-                />
-              </button>
-              <div className="text-xs text-teal-700">
-                {likedImages[images[currentSlide].url] ? images[currentSlide].likes + 1 : images[currentSlide].likes}
+              <div className="flex flex-col items-center gap-1">
+                <button ref={heartButtonRef} onClick={(e) => handleLikeClick(e, currentImage.id)}>
+                  <Heart
+                    className={`transition-all cursor-pointer ${
+                      isLiked ? "fill-red-500 text-red-500" : "text-teal-500"
+                    }`}
+                  />
+                </button>
+                <div className="text-xs text-teal-700">{formatLikes(currentImage.likes)}</div>
               </div>
             </div>
           </div>
+
+          <button
+            onClick={handlePrev}
+            className="absolute left-0 md:-left-10 top-2/5 -translate-y-1/2 bg-white/70 p-2 rounded-full shadow hover:border-teal-800 hover:border-2 cursor-pointer"
+          >
+            <ChevronLeft size={20} />
+          </button>
+          <button
+            onClick={handleNext}
+            className="absolute right-0 md:-right-10 top-2/5 -translate-y-1/2 bg-white/70 p-2 rounded-full shadow hover:border-teal-800 hover:border-2 cursor-pointer"
+          >
+            <ChevronRight size={20} />
+          </button>
         </div>
 
-        {/* Arrows */}
-        <button
-          onClick={handlePrev}
-          className="absolute left-0 md:-left-10 top-2/5 -translate-y-1/2 bg-white/70 p-2 rounded-full shadow  hover:border-teal-800 hover:border-2 cursor-pointer"
-        >
-          <ChevronLeft size={20} />
-        </button>
-        <button
-          onClick={handleNext}
-          className="absolute right-0 md:-right-10 top-2/5 -translate-y-1/2 bg-white/70 p-2 rounded-full shadow hover:border-teal-800 hover:border-2 cursor-pointer"
-        >
-          <ChevronRight size={20} />
-        </button>
+        {imagesForCategory.length > 1 && (
+          <div className="flex justify-center gap-1 mt-2">
+            {imagesForCategory.map((_, i) => (
+              <div
+                key={i}
+                className={`w-2 h-2 rounded-full ${i === currentSlide ? "bg-teal-700" : "bg-gray-400"}`}
+              />
+            ))}
+          </div>
+        )}
       </div>
 
-      {/* Dot Indicators */}
-      <div className="flex justify-center gap-1 mt-2">
-        {images.map((_, i) => (
-          <div
-            key={i}
-            className={clsx("w-2 h-2 rounded-full", i === currentSlide ? "bg-teal-700" : "bg-gray-400")}
+      <AnimatePresence>
+        {selectedImage && (
+          <GalleryLightbox
+            initialImage={selectedImage}
+            images={allImagesForLightbox}
+            onClose={closeLightbox}
+            likedImageIds={likedImageIds}
+            onLike={handleLike}
           />
-        ))}
-      </div>
-    </div>
+        )}
+      </AnimatePresence>
+    </>
   );
 }

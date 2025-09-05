@@ -1,9 +1,11 @@
 'use client';
 
+import ComingSoon from '@/components/ComingSoon';
 import React from 'react'
+
 
 export default function Branding() {
   return (
-    <div>Branding Partners Page</div>
+   <ComingSoon />
   );
 }

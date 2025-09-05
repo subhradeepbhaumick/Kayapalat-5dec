@@ -131,7 +131,7 @@ export default function Navbar() {
         </li>
 
         {/* Cities Hover Dropdown */}
-        <li
+        {/* <li
           className="relative group"
           onMouseEnter={() => {
             if (citiesTimeout) clearTimeout(citiesTimeout);
@@ -170,13 +170,14 @@ export default function Navbar() {
               </motion.ul>
             )}
           </AnimatePresence>
-        </li>
+        </li> */}
 
 
         {/* Other Links */}
         {[
           "Gallery",
-          "How it Works",
+          // "How it Works",
+          "Price Compare",
           "Our Designers",
           "Careers",
           "Blogs",
@@ -300,7 +301,7 @@ export default function Navbar() {
                 </li>
 
                 {/* Cities Dropdown in Sidebar */}
-                <li className="border-b border-white/50 pb-1">
+                {/* <li className="border-b border-white/50 pb-1">
                   <button
                     onClick={() => setCitiesOpen(!citiesOpen)}
                     className="block w-full text-left px-3 py-2 hover:text-[#D7E7D0] transition-transform relative group"
@@ -329,12 +330,13 @@ export default function Navbar() {
                       ))}
                     </ul>
                   )}
-                </li>
+                </li> */}
 
                 {/* Sidebar Links */}
                 {[
                   "Gallery",
-                  "How it Works",
+                  // "How it Works",
+                  "Price Compare",
                   "Our Designers",
                   "Careers",
                   "Blogs",
