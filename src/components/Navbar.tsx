@@ -181,9 +181,9 @@ export default function Navbar() {
           "Our Designers",
           "Careers",
           "Blogs",
-          "Branding Partners",
+          // "Branding Partners",
           "Contact Us",
-          "Shop",
+          // "Shop",
         ].map((name, index) => {
           const linkPath = `/${name.toLowerCase().replace(/ /g, "-")}`;
           const isActive =
@@ -340,9 +340,9 @@ export default function Navbar() {
                   "Our Designers",
                   "Careers",
                   "Blogs",
-                  "Branding Partners",
+                  // "Branding Partners",
                   "Contact Us",
-                  "Shop",
+                  // "Shop",
                 ].map((name, index) => {
                   const linkPath = `/${name
                     .toLowerCase()

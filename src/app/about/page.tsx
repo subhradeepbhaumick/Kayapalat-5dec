@@ -9,6 +9,7 @@ import { useState, useEffect, useRef } from "react";
 import { FaArrowUp } from "react-icons/fa";
 
 
+
 // Simple window width hook
 function useWindowWidth() {
   const [width, setWidth] = useState<number | null>(null);
@@ -212,8 +213,8 @@ const DesignersCarousel = ({ designers }: { designers: any[] }) => {
             key={index}
             onClick={() => setCurrentIndex(index)}
             className={`w-3 h-3 rounded-full transition-all ${currentIndex === index
-                ? "bg-[#00423D] w-6"
-                : "bg-gray-300 hover:bg-gray-400"
+              ? "bg-[#00423D] w-6"
+              : "bg-gray-300 hover:bg-gray-400"
               }`}
           />
         ))}
@@ -291,8 +292,8 @@ const TestimonialsCarousel = ({ testimonials }: { testimonials: any[] }) => {
             key={index}
             onClick={() => setCurrentIndex(index)}
             className={`w-3 h-3 rounded-full transition-all ${currentIndex === index
-                ? "bg-[#00423D] w-6"
-                : "bg-gray-300 hover:bg-gray-400"
+              ? "bg-[#00423D] w-6"
+              : "bg-gray-300 hover:bg-gray-400"
               }`}
           />
         ))}
@@ -779,8 +780,8 @@ export default function AboutUsPage() {
           >
             <div>
               <div className="relative z-10 text-center ">
-                <Image src="/founder.jpg" alt="John Tanmoy Bor ( Founder & CEO )" width={350} height={350} className=" rounded-full mx-auto mb-4 object-cover border-4 border-white shadow-lg" />
-                <h3 className="text-lg md:text-xl font-bold text-gray-900">John Tanmoy Bor</h3>
+                <Image src="/founder.jpg" alt="JohnBor ( Founder & CEO )" width={350} height={350} className=" rounded-full max-h-[350px] max-w-[350px] mx-auto mb-4 object-cover  shadow-lg border-4 border-white" />
+                <h3 className="text-lg md:text-xl font-bold text-gray-900">John Bor</h3>
                 <p className="text-gray-600" style={{ fontFamily: "'Abril Fatface', cursive" }}>Founder & CEO</p>
               </div>
             </div>
@@ -921,7 +922,7 @@ export default function AboutUsPage() {
 
                 <div className="text-2xl font-bold text-[#00423D] mb-4">{service.price}</div>
 
-                <Link href="/turnkey">
+                <Link href="/contact-us">
                   <Button
                     className="w-full bg-[#00423D] hover:bg-[#063F3C] text-white rounded-full transition transform hover:scale-105 active:scale-95"
                   >

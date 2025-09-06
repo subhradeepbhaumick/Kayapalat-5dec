@@ -258,9 +258,9 @@ const RoomSelector: React.FC<RoomSelectorProps> = ({
         key={roomKey}
         initial={{ opacity: 0, scale: 0.9 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="bg-white border-2 border-gray-200 rounded-xl p-6 shadow-lg min-h-[600px] w-full max-w-md mx-auto"
+        className="bg-white border-2 border-gray-200 rounded-xl p-1 shadow-lg max-h-[700px] pb-5 overflow-y-auto w-full max-w-xl mx-auto"
       >
-        <h4 className="font-bold text-xl mb-4 text-[#00423D] capitalize text-center">
+        <h4 className="font-bold text-xl mt-1 mb-4 text-[#00423D] capitalize text-center">
           {roomType === 'livingRoom' ? 'Living Room' : roomType.replace(/([A-Z])/g, ' $1').trim()} {getRoomCount(roomType) > 1 ? ` ${roomIndex + 1}` : ""}
         </h4>
 
@@ -724,7 +724,7 @@ const RoomSelector: React.FC<RoomSelectorProps> = ({
                     transition={{ duration: 0.3 }}
                     className="overflow-hidden"
                   >
-                    <div className="p-6 bg-gray-50">
+                    <div className=" bg-gray-50">
                       {renderRoomCarousel(room.id)}
                     </div>
                   </motion.div>
