@@ -495,11 +495,11 @@ const RoomSelector: React.FC<RoomSelectorProps> = ({
                         >
                           <div className="flex-1 min-w-0">
                             <div className="text-sm font-medium truncate">{acc}</div>
-                            {price > 0 && (
+                            {/* {price > 0 && (
                               <div className="text-xs text-gray-500">
                                 ₹{price.toLocaleString('en-IN')} each
                               </div>
-                            )}
+                            )} */}
                           </div>
                           <div className="flex items-center gap-2">
                             <button

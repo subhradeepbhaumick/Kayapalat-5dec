@@ -613,7 +613,8 @@ const EstimatePage = () => {
                                         </button>
                                     </div>
                                 </div>
-                                <div className="w-full lg:w-1/2 lg:flex-none lg:max-w-[500px] flex items-center justify-center mb-8 lg:mb-0">
+                                <div className="w-full lg:w-1/2 lg:flex-none lg:max-w-[500px] flex-col items-center justify-center mb-8 lg:mb-0">
+                                    <h2 className=' text-2xl md:text-5xl text-[#00423D] text-center stroke-text mb-5' style={{ fontFamily: "'Abril Fatface', cursive" }} >Real Images</h2>
                                     <ImageCarousel images={BHK_SELECTION_IMAGES} aspectRatio="4/3" />
                                 </div>
                             </div>
@@ -657,8 +658,9 @@ const EstimatePage = () => {
                                         </button>
                                     </div>
                                 </div>
-                                <div className="w-full lg:w-1/2 lg:flex-none lg:max-w-[500px] flex items-center justify-center mb-8 lg:mb-0">
-                                    <ImageCarousel images={ROOM_DESIGN_IMAGES} aspectRatio="4/3" />
+                                <div className="w-full lg:w-1/2 lg:flex-none lg:max-w-[500px] flex-col items-center justify-center mb-8 lg:mb-0">
+                                    <h2 className=' text-2xl md:text-5xl text-[#00423D] text-center stroke-text mb-5' style={{ fontFamily: "'Abril Fatface', cursive" }} >Real Images</h2>
+                                    <ImageCarousel images={BHK_SELECTION_IMAGES} aspectRatio="4/3" />
                                 </div>
                             </div>
                         )}
@@ -695,8 +697,9 @@ const EstimatePage = () => {
                                         </button>
                                     </div>
                                 </div>
-                                <div className="w-full lg:w-1/2 lg:flex-none lg:max-w-[500px] flex items-center justify-center mb-8 lg:mb-0">
-                                    <ImageCarousel images={PROJECT_DETAILS_IMAGES} aspectRatio="4/3" />
+                                <div className="w-full lg:w-1/2 lg:flex-none lg:max-w-[500px] flex-col items-center justify-center mb-8 lg:mb-0">
+                                    <h2 className=' text-2xl md:text-5xl text-[#00423D] text-center stroke-text mb-5' style={{ fontFamily: "'Abril Fatface', cursive" }} >Real Images</h2>
+                                    <ImageCarousel images={BHK_SELECTION_IMAGES} aspectRatio="4/3" />
                                 </div>
                             </div>
                         )}
@@ -725,8 +728,9 @@ const EstimatePage = () => {
                                         </button>
                                     </div>
                                 </div>
-                                <div className="w-full lg:w-1/2 lg:flex-none lg:max-w-[500px] flex items-center justify-center mb-8 lg:mb-0">
-                                    <ImageCarousel images={CONTACT_INFO_IMAGES} aspectRatio="4/3" />
+                                <div className="w-full lg:w-1/2 lg:flex-none lg:max-w-[500px] flex-col items-center justify-center mb-8 lg:mb-0">
+                                    <h2 className=' text-2xl md:text-5xl text-[#00423D] text-center stroke-text mb-5' style={{ fontFamily: "'Abril Fatface', cursive" }} >Real Images</h2>
+                                    <ImageCarousel images={BHK_SELECTION_IMAGES} aspectRatio="4/3" />
                                 </div>
                             </div>
                         )}
