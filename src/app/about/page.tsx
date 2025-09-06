@@ -211,11 +211,10 @@ const DesignersCarousel = ({ designers }: { designers: any[] }) => {
           <button
             key={index}
             onClick={() => setCurrentIndex(index)}
-            className={`w-3 h-3 rounded-full transition-all ${
-              currentIndex === index
+            className={`w-3 h-3 rounded-full transition-all ${currentIndex === index
                 ? "bg-[#00423D] w-6"
                 : "bg-gray-300 hover:bg-gray-400"
-            }`}
+              }`}
           />
         ))}
       </div>
@@ -291,11 +290,10 @@ const TestimonialsCarousel = ({ testimonials }: { testimonials: any[] }) => {
           <button
             key={index}
             onClick={() => setCurrentIndex(index)}
-            className={`w-3 h-3 rounded-full transition-all ${
-              currentIndex === index
+            className={`w-3 h-3 rounded-full transition-all ${currentIndex === index
                 ? "bg-[#00423D] w-6"
                 : "bg-gray-300 hover:bg-gray-400"
-            }`}
+              }`}
           />
         ))}
       </div>
@@ -604,19 +602,19 @@ export default function AboutUsPage() {
           <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
             <defs>
               <pattern id="heroPattern" width="20" height="20" patternUnits="userSpaceOnUse">
-                <circle cx="10" cy="10" r="1" fill="currentColor" opacity="0.5"/>
-                <rect x="5" y="5" width="10" height="10" fill="none" stroke="currentColor" strokeWidth="0.5" opacity="0.3"/>
+                <circle cx="10" cy="10" r="1" fill="currentColor" opacity="0.5" />
+                <rect x="5" y="5" width="10" height="10" fill="none" stroke="currentColor" strokeWidth="0.5" opacity="0.3" />
               </pattern>
             </defs>
-            <rect width="100%" height="100%" fill="url(#heroPattern)" style={{color: '#D2EBD0'}}/>
+            <rect width="100%" height="100%" fill="url(#heroPattern)" style={{ color: '#D2EBD0' }} />
           </svg>
         </div>
 
         {/* Floating Elements */}
         <div className="absolute inset-0 overflow-hidden">
           <div className="absolute top-20 left-10 w-24 h-24 bg-white rounded-full opacity-10 animate-pulse"></div>
-          <div className="absolute top-40 right-20 w-32 h-32 bg-white rounded-full opacity-8 animate-pulse" style={{animationDelay: '1s'}}></div>
-          <div className="absolute bottom-40 left-20 w-28 h-28 bg-white rounded-full opacity-15 animate-pulse" style={{animationDelay: '2s'}}></div>
+          <div className="absolute top-40 right-20 w-32 h-32 bg-white rounded-full opacity-8 animate-pulse" style={{ animationDelay: '1s' }}></div>
+          <div className="absolute bottom-40 left-20 w-28 h-28 bg-white rounded-full opacity-15 animate-pulse" style={{ animationDelay: '2s' }}></div>
         </div>
 
         <div className="relative z-10 text-center px-4 md:px-6 max-w-6xl mx-auto">
@@ -741,7 +739,7 @@ export default function AboutUsPage() {
       {/* Our Story */}
       <section id="our-story-section" ref={storyRef} className="max-w-7xl mx-auto px-4 md:px-6 py-16 relative ">
         {/* Dot Pattern Background */}
-        <div className="absolute inset-0 opacity-5">
+        {/* <div className="absolute inset-0 opacity-5">
           <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
             <defs>
               <pattern id="storyPattern" width="15" height="15" patternUnits="userSpaceOnUse">
@@ -750,7 +748,7 @@ export default function AboutUsPage() {
             </defs>
             <rect width="100%" height="100%" fill="url(#storyPattern)"/>
           </svg>
-        </div>
+        </div> */}
 
         <div className={`grid md:grid-cols-2 gap-12 items-center relative z-10 ${isMobile ? 'flex flex-col' : 'grid'}`}>
           <motion.div
@@ -760,7 +758,7 @@ export default function AboutUsPage() {
             className={isMobile ? 'order-1' : 'order-2 md:order-1'}
           >
             <h2 className="text-3xl md:text-5xl mb-6 text-[#00423D] font-bold"
-            style={{ fontFamily: "'Abril Fatface', cursive" }}>
+              style={{ fontFamily: "'Abril Fatface', cursive" }}>
               Our Story
             </h2>
             <p className="text-base md:text-lg leading-relaxed mb-6 text-gray-700">
@@ -779,14 +777,10 @@ export default function AboutUsPage() {
             transition={{ duration: 0.8 }}
             className={isMobile ? 'order-2' : 'order-1 md:order-2'}
           >
-            <div className="bg-white rounded-3xl shadow-xl p-6 md:p-8 relative overflow-hidden border border-gray-100">
-              <div className="absolute top-0 right-0 w-24 md:w-32 h-24 md:h-32 bg-[#D2EBD0] rounded-full -translate-y-12 md:-translate-y-16 translate-x-12 md:translate-x-16 opacity-50"></div>
-              <div className="absolute -bottom-30 -left-30 w-24 md:w-32 h-24 md:h-32 bg-[#D2EBD0] rounded-full -translate-y-12 md:-translate-y-16 translate-x-12 md:translate-x-16 opacity-50"></div>
-              <div className="relative z-10 text-center">
-                <div className="w-32 h-32 md:w-40 md:h-40 bg-[#D2EBD0] rounded-2xl mx-auto mb-4 flex items-center justify-center">
-                  <User className="w-16 h-16 md:w-20 md:h-20 text-[#00423D]" />
-                </div>
-                <h3 className="text-lg md:text-xl font-bold text-gray-900">John Bor</h3>
+            <div>
+              <div className="relative z-10 text-center ">
+                <Image src="/founder.jpg" alt="John Tanmoy Bor ( Founder & CEO )" width={350} height={350} className=" rounded-full mx-auto mb-4 object-cover border-4 border-white shadow-lg" />
+                <h3 className="text-lg md:text-xl font-bold text-gray-900">John Tanmoy Bor</h3>
                 <p className="text-gray-600" style={{ fontFamily: "'Abril Fatface', cursive" }}>Founder & CEO</p>
               </div>
             </div>
@@ -801,10 +795,10 @@ export default function AboutUsPage() {
           <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
             <defs>
               <pattern id="valuesPattern" width="10" height="10" patternUnits="userSpaceOnUse">
-                <polygon points="5,1 8,3 8,7 5,9 2,7 2,3" fill="none" stroke="#00423D" strokeWidth="0.5"/>
+                <polygon points="5,1 8,3 8,7 5,9 2,7 2,3" fill="none" stroke="#00423D" strokeWidth="0.5" />
               </pattern>
             </defs>
-            <rect width="100%" height="100%" fill="url(#valuesPattern)"/>
+            <rect width="100%" height="100%" fill="url(#valuesPattern)" />
           </svg>
         </div>
 
@@ -815,7 +809,7 @@ export default function AboutUsPage() {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <h2 className="text-3xl md:text-5xl mb-6 text-[#00423D] font-bold"style={{ fontFamily: "'Abril Fatface', cursive" }}>
+            <h2 className="text-3xl md:text-5xl mb-6 text-[#00423D] font-bold" style={{ fontFamily: "'Abril Fatface', cursive" }}>
               Our Mission & Values
             </h2>
             <p className="text-lg md:text-xl text-gray-700 max-w-3xl mx-auto">
@@ -848,10 +842,10 @@ export default function AboutUsPage() {
           <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
             <defs>
               <pattern id="designersPattern" width="20" height="10" patternUnits="userSpaceOnUse">
-                <path d="M0,5 Q5,0 10,5 T20,5" fill="none" stroke="#00423D" strokeWidth="0.5"/>
+                <path d="M0,5 Q5,0 10,5 T20,5" fill="none" stroke="#00423D" strokeWidth="0.5" />
               </pattern>
             </defs>
-            <rect width="100%" height="100%" fill="url(#designersPattern)"/>
+            <rect width="100%" height="100%" fill="url(#designersPattern)" />
           </svg>
         </div>
 
@@ -877,10 +871,10 @@ export default function AboutUsPage() {
           <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
             <defs>
               <pattern id="servicePattern" width="12" height="12" patternUnits="userSpaceOnUse">
-                <polygon points="6,1 7,4 10,4 8,6 9,9 6,7 3,9 4,6 2,4 5,4" fill="#EC4899" opacity="0.3"/>
+                <polygon points="6,1 7,4 10,4 8,6 9,9 6,7 3,9 4,6 2,4 5,4" fill="#EC4899" opacity="0.3" />
               </pattern>
             </defs>
-            <rect width="100%" height="100%" fill="url(#servicePattern)"/>
+            <rect width="100%" height="100%" fill="url(#servicePattern)" />
           </svg>
         </div>
 
@@ -899,9 +893,8 @@ export default function AboutUsPage() {
             {serviceModels.map((service, index) => (
               <motion.div
                 key={index}
-                className={`bg-[#F8FDF8] rounded-2xl p-6 md:p-8 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 relative border-2 border-[#00423D]${
-                  service.popular ? 'md:scale-110 md:z-10 ' : '' // Added scale-110 for popular card
-                }`}
+                className={`bg-[#F8FDF8] rounded-2xl p-6 md:p-8 shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105 relative border-2 border-[#00423D]${service.popular ? 'md:scale-110 md:z-10 ' : '' // Added scale-110 for popular card
+                  }`}
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: index * 0.1 }}
@@ -948,10 +941,10 @@ export default function AboutUsPage() {
           <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
             <defs>
               <pattern id="uspPattern" width="12" height="12" patternUnits="userSpaceOnUse">
-                <polygon points="6,2 10,8 2,8" fill="#00423D" opacity="0.3"/>
+                <polygon points="6,2 10,8 2,8" fill="#00423D" opacity="0.3" />
               </pattern>
             </defs>
-            <rect width="100%" height="100%" fill="url(#uspPattern)"/>
+            <rect width="100%" height="100%" fill="url(#uspPattern)" />
           </svg>
         </div>
 
@@ -984,7 +977,7 @@ export default function AboutUsPage() {
         </div>
       </section>
 
-       {/* How It Works */}
+      {/* How It Works */}
       <section className="max-w-7xl mx-auto px-6 py-16 text-center bg-white"> {/* Changed background to white */}
         <motion.h2
           className="text-4xl md:text-5xl mb-10 text-[#00423D] font-bold"
@@ -1017,11 +1010,11 @@ export default function AboutUsPage() {
           <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
             <defs>
               <pattern id="testimonialPattern" width="16" height="16" patternUnits="userSpaceOnUse">
-                <circle cx="8" cy="8" r="3" fill="none" stroke="#00423D" strokeWidth="0.5"/>
-                <circle cx="8" cy="8" r="1" fill="#00423D" opacity="0.3"/>
+                <circle cx="8" cy="8" r="3" fill="none" stroke="#00423D" strokeWidth="0.5" />
+                <circle cx="8" cy="8" r="1" fill="#00423D" opacity="0.3" />
               </pattern>
             </defs>
-            <rect width="100%" height="100%" fill="url(#testimonialPattern)"/>
+            <rect width="100%" height="100%" fill="url(#testimonialPattern)" />
           </svg>
         </div>
 
@@ -1047,10 +1040,10 @@ export default function AboutUsPage() {
           <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
             <defs>
               <pattern id="brandingPattern" width="12" height="12" patternUnits="userSpaceOnUse">
-                <polygon points="6,2 10,6 6,10 2,6" fill="#00423D" opacity="0.3"/>
+                <polygon points="6,2 10,6 6,10 2,6" fill="#00423D" opacity="0.3" />
               </pattern>
             </defs>
-            <rect width="100%" height="100%" fill="url(#brandingPattern)"/>
+            <rect width="100%" height="100%" fill="url(#brandingPattern)" />
           </svg>
         </div>
 
@@ -1061,7 +1054,7 @@ export default function AboutUsPage() {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <h2 className="text-3xl md:text-5xl mb-6 text-[#00423D] font-bold"style={{ fontFamily: "'Abril Fatface', cursive" }}>
+            <h2 className="text-3xl md:text-5xl mb-6 text-[#00423D] font-bold" style={{ fontFamily: "'Abril Fatface', cursive" }}>
               Trusted Brand Partners
             </h2>
             <p className="text-lg md:text-xl text-gray-700 max-w-3xl mx-auto mb-8">
@@ -1096,10 +1089,10 @@ export default function AboutUsPage() {
           <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
             <defs>
               <pattern id="faqPattern" width="20" height="10" patternUnits="userSpaceOnUse">
-                <path d="M0,5 L5,0 L10,5 L15,0 L20,5 L15,10 L10,5 L5,10 Z" fill="none" stroke="#00423D" strokeWidth="0.5"/>
+                <path d="M0,5 L5,0 L10,5 L15,0 L20,5 L15,10 L10,5 L5,10 Z" fill="none" stroke="#00423D" strokeWidth="0.5" />
               </pattern>
             </defs>
-            <rect width="100%" height="100%" fill="url(#faqPattern)"/>
+            <rect width="100%" height="100%" fill="url(#faqPattern)" />
           </svg>
         </div>
 
@@ -1182,11 +1175,11 @@ export default function AboutUsPage() {
           <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
             <defs>
               <pattern id="careersPattern" width="16" height="16" patternUnits="userSpaceOnUse">
-                <path d="M8,2 Q12,6 8,10 Q4,6 8,2" fill="#00423D" opacity="0.3"/>
-                <path d="M8,2 L8,10" stroke="#00423D" strokeWidth="0.5"/>
+                <path d="M8,2 Q12,6 8,10 Q4,6 8,2" fill="#00423D" opacity="0.3" />
+                <path d="M8,2 L8,10" stroke="#00423D" strokeWidth="0.5" />
               </pattern>
             </defs>
-            <rect width="100%" height="100%" fill="url(#careersPattern)"/>
+            <rect width="100%" height="100%" fill="url(#careersPattern)" />
           </svg>
         </div>
 
@@ -1197,7 +1190,7 @@ export default function AboutUsPage() {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
-            <h2 className="text-3xl md:text-5xl mb-6 text-[#00423D] font-bold"style={{ fontFamily: "'Abril Fatface', cursive" }}>
+            <h2 className="text-3xl md:text-5xl mb-6 text-[#00423D] font-bold" style={{ fontFamily: "'Abril Fatface', cursive" }}>
               Join Our Growing Team
             </h2>
             <p className="text-lg md:text-xl text-gray-700 max-w-3xl mx-auto mb-8">
@@ -1241,15 +1234,15 @@ export default function AboutUsPage() {
           <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
             <defs>
               <pattern id="contactPattern" width="20" height="20" patternUnits="userSpaceOnUse">
-                <circle cx="10" cy="10" r="3" fill="none" stroke="#EC4899" strokeWidth="0.5"/>
-                <circle cx="10" cy="10" r="1" fill="#EC4899" opacity="0.3"/>
-                <circle cx="10" cy="7" r="1" fill="#EC4899" opacity="0.2"/>
-                <circle cx="10" cy="13" r="1" fill="#EC4899" opacity="0.2"/>
-                <circle cx="7" cy="10" r="1" fill="#EC4899" opacity="0.2"/>
-                <circle cx="13" cy="10" r="1" fill="#EC4899" opacity="0.2"/>
+                <circle cx="10" cy="10" r="3" fill="none" stroke="#EC4899" strokeWidth="0.5" />
+                <circle cx="10" cy="10" r="1" fill="#EC4899" opacity="0.3" />
+                <circle cx="10" cy="7" r="1" fill="#EC4899" opacity="0.2" />
+                <circle cx="10" cy="13" r="1" fill="#EC4899" opacity="0.2" />
+                <circle cx="7" cy="10" r="1" fill="#EC4899" opacity="0.2" />
+                <circle cx="13" cy="10" r="1" fill="#EC4899" opacity="0.2" />
               </pattern>
             </defs>
-            <rect width="100%" height="100%" fill="url(#contactPattern)"/>
+            <rect width="100%" height="100%" fill="url(#contactPattern)" />
           </svg>
         </div>
 
@@ -1313,10 +1306,10 @@ export default function AboutUsPage() {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
           >
-             <Clock className="w-12 h-12 text-[#00423D] mx-auto mb-4" />
+            <Clock className="w-12 h-12 text-[#00423D] mx-auto mb-4" />
             <h3 className="text-xl font-bold text-gray-900 mb-2" >Operating Hours:</h3>
             <p className="flex items-center justify-center text-lg text-gray-700 mb-2">
-             
+
               Monday - Saturday: 10:00 AM to 6:00 PM
             </p>
             <p className="flex items-center justify-center text-lg text-red-500">

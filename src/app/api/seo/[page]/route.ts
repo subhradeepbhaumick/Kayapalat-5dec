@@ -13,7 +13,9 @@ export async function GET(
   { params }: { params: { page: string } }
 ) {
   try {
-    const pageIdentifier = params.page;
+
+    const { page } = await params;
+    const pageIdentifier = page;
 
     // Basic validation
     if (!pageIdentifier) {
