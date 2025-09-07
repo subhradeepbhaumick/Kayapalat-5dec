@@ -105,27 +105,71 @@ const RES_STEPS = [
 
 // Sample images for the carousel (replace with your actual images)
 const BHK_SELECTION_IMAGES = [
-    "https://placehold.co/600x400/D2EBD0/00423D?text=1BHK+Design",
-    "https://placehold.co/600x400/A8EACF/00423D?text=2BHK+Layout",
-    "https://placehold.co/600x400/8BE1C6/00423D?text=Spacious+3BHK",
+    "/estimate_slider/IMG-20250907-WA0003.jpg",
+    "/estimate_slider/IMG-20250907-WA0004.jpg",
+    "/estimate_slider/IMG-20250907-WA0005.jpg",
+    "/estimate_slider/IMG-20250907-WA0006.jpg",
+    "/estimate_slider/IMG-20250907-WA0007.jpg",
+    "/estimate_slider/IMG-20250907-WA0008.jpg",
+    "/estimate_slider/IMG-20250907-WA0009.jpg",
+    "/estimate_slider/IMG-20250907-WA0010.jpg",
+    "/estimate_slider/IMG-20250907-WA0011.jpg",
+    "/estimate_slider/IMG-20250907-WA0012.jpg",
+    "/estimate_slider/IMG-20250907-WA0013.jpg",
+    "/estimate_slider/IMG-20250907-WA0014.jpg",
+    "/estimate_slider/IMG-20250907-WA0015.jpg",
+    "/estimate_slider/IMG-20250907-WA0016.jpg"
 ];
 
 const ROOM_DESIGN_IMAGES = [
-    "https://placehold.co/600x400/D2EBD0/00423D?text=Living+Room",
-    "https://placehold.co/600x400/A8EACF/00423D?text=Modern+Kitchen",
-    "https://placehold.co/600x400/8BE1C6/00423D?text=Cozy+Bedroom",
+    "/estimate_slider/IMG-20250907-WA0003.jpg",
+    "/estimate_slider/IMG-20250907-WA0004.jpg",
+    "/estimate_slider/IMG-20250907-WA0005.jpg",
+    "/estimate_slider/IMG-20250907-WA0006.jpg",
+    "/estimate_slider/IMG-20250907-WA0007.jpg",
+    "/estimate_slider/IMG-20250907-WA0008.jpg",
+    "/estimate_slider/IMG-20250907-WA0009.jpg",
+    "/estimate_slider/IMG-20250907-WA0010.jpg",
+    "/estimate_slider/IMG-20250907-WA0011.jpg",
+    "/estimate_slider/IMG-20250907-WA0012.jpg",
+    "/estimate_slider/IMG-20250907-WA0013.jpg",
+    "/estimate_slider/IMG-20250907-WA0014.jpg",
+    "/estimate_slider/IMG-20250907-WA0015.jpg",
+    "/estimate_slider/IMG-20250907-WA0016.jpg"
 ];
 
 const PROJECT_DETAILS_IMAGES = [
-    "https://placehold.co/600x400/D2EBD0/00423D?text=Project+Planning",
-    "https://placehold.co/600x400/A8EACF/00423D?text=Timeline+Budget",
-    "https://placehold.co/600x400/8BE1C6/00423D?text=Package+Selection",
+    "/estimate_slider/IMG-20250907-WA0003.jpg",
+    "/estimate_slider/IMG-20250907-WA0004.jpg",
+    "/estimate_slider/IMG-20250907-WA0005.jpg",
+    "/estimate_slider/IMG-20250907-WA0006.jpg",
+    "/estimate_slider/IMG-20250907-WA0007.jpg",
+    "/estimate_slider/IMG-20250907-WA0008.jpg",
+    "/estimate_slider/IMG-20250907-WA0009.jpg",
+    "/estimate_slider/IMG-20250907-WA0010.jpg",
+    "/estimate_slider/IMG-20250907-WA0011.jpg",
+    "/estimate_slider/IMG-20250907-WA0012.jpg",
+    "/estimate_slider/IMG-20250907-WA0013.jpg",
+    "/estimate_slider/IMG-20250907-WA0014.jpg",
+    "/estimate_slider/IMG-20250907-WA0015.jpg",
+    "/estimate_slider/IMG-20250907-WA0016.jpg"
 ];
 
 const CONTACT_INFO_IMAGES = [
-    "https://placehold.co/600x400/D2EBD0/00423D?text=Contact+Us",
-    "https://placehold.co/600x400/A8EACF/00423D?text=Get+in+Touch",
-    "https://placehold.co/600x400/8BE1C6/00423D?text=Your+Info",
+    "/estimate_slider/IMG-20250907-WA0003.jpg",
+    "/estimate_slider/IMG-20250907-WA0004.jpg",
+    "/estimate_slider/IMG-20250907-WA0005.jpg",
+    "/estimate_slider/IMG-20250907-WA0006.jpg",
+    "/estimate_slider/IMG-20250907-WA0007.jpg",
+    "/estimate_slider/IMG-20250907-WA0008.jpg",
+    "/estimate_slider/IMG-20250907-WA0009.jpg",
+    "/estimate_slider/IMG-20250907-WA0010.jpg",
+    "/estimate_slider/IMG-20250907-WA0011.jpg",
+    "/estimate_slider/IMG-20250907-WA0012.jpg",
+    "/estimate_slider/IMG-20250907-WA0013.jpg",
+    "/estimate_slider/IMG-20250907-WA0014.jpg",
+    "/estimate_slider/IMG-20250907-WA0015.jpg",
+    "/estimate_slider/IMG-20250907-WA0016.jpg"
 ];
 
 
