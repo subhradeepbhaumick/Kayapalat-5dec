@@ -12,6 +12,7 @@ const config: Config = {
       fontFamily: {
         sans: ['var(--font-inter)', ...defaultTheme.fontFamily.sans],
         'saira-stencil': ['var(--font-saira-stencil-one)'],
+        heading: ['var(--font-abril-fatface)', 'cursive'],
       },
     },
   },

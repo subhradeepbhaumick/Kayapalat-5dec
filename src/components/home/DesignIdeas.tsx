@@ -198,7 +198,7 @@ export function DesignIdeas() {
             <div className="p-4 flex items-start justify-between">
               <div>
                 
-                <div className="absolute italic pl-10 text-xs bottom-14 md:bottom-9">{currentImage.designer_designation || 'Designer | Architect'}</div>
+                <div className="absolute italic pl-10 text-xs bottom-8.5 md:bottom-9">{currentImage.designer_designation || 'Designer | Architect'}</div>
                 <div className="flex items-center gap-2">
                   <Image
                     src={currentImage.designer_dp_path || '/default-avatar.png'}
