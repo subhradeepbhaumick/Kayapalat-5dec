@@ -22,6 +22,13 @@ export interface CommercialFormData {
 }
 
 const CommercialForm: React.FC<CommercialFormProps> = ({ onSubmit }) => {
+
+  const handleKeyDown = (event: React.KeyboardEvent) => {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+        }
+    };
+
   const [formData, setFormData] = useState<CommercialFormData>({
     projectType: '',
     projectName: '',
@@ -49,6 +56,7 @@ const CommercialForm: React.FC<CommercialFormProps> = ({ onSubmit }) => {
 
   return (
     <motion.form
+     onKeyDown={handleKeyDown}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       onSubmit={handleSubmit}

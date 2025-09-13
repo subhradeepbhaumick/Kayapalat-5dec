@@ -1,15 +1,24 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 import { FaCheckCircle, FaTimes } from 'react-icons/fa';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogOverlay } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
-// New interfaces for clarity and type safety
+// Define the interfaces for props
 interface ResidentialProjectDetails {
     location: string;
     timeline: string;
     selectedPackage: string;
     budget: string;
     roomDetails: { [key: string]: any };
+    bhkConfiguration: { [key: string]: number };
+}
+
+interface ContactInfo {
+    name: string;
+    phone: string;
+    email: string;
+    address: string;
+    additionalNotes?: string;
 }
 
 interface CommercialProjectDetails {
@@ -25,24 +34,18 @@ interface CommercialProjectDetails {
     projectArea: string;
 }
 
-interface ContactInfo {
-    name: string;
-    phone: string;
-    email: string;
-    address: string;
-    additionalNotes?: string;
-}
-
 interface EstimateSummaryProps {
     isOpen: boolean;
     onClose: () => void;
+    onStartOver: () => void;
     projectType: 'residential' | 'commercial';
     residentialDetails?: ResidentialProjectDetails;
     commercialDetails?: CommercialProjectDetails;
     contactInfo?: ContactInfo;
-    totalEstimate: number; // Still passed, but not displayed for commercial
-    breakdown: { [key: string]: number }; // Still passed, but not displayed for commercial
+    totalEstimate: number;
+    breakdown: { [key: string]: number };
 }
+
 
 const projectTypeLabels: Record<string, string> = {
     office: "Office Space",
@@ -61,21 +64,14 @@ const projectTypeLabels: Record<string, string> = {
 const EstimateSummary: React.FC<EstimateSummaryProps> = ({
     isOpen,
     onClose,
+    onStartOver,
     projectType,
     residentialDetails,
     commercialDetails,
     contactInfo,
-    totalEstimate = 0, // Still receive, but conditionally use
-    breakdown = {}, // Still receive, but conditionally use
+    totalEstimate = 0,
+    breakdown = {},
 }) => {
-    useEffect(() => {
-        console.log('EstimateSummary - Residential Details:', residentialDetails);
-        console.log('EstimateSummary - Commercial Details:', commercialDetails);
-        console.log('EstimateSummary - Contact Info:', contactInfo);
-        console.log('EstimateSummary - Project Type:', projectType);
-        console.log('EstimateSummary - Total Estimate:', totalEstimate);
-        console.log('EstimateSummary - Breakdown:', breakdown);
-    }, [residentialDetails, commercialDetails, contactInfo, projectType, totalEstimate, breakdown]);
 
     const formatCurrency = (amount: number) => {
         if (isNaN(amount)) return '₹0';
@@ -91,10 +87,7 @@ const EstimateSummary: React.FC<EstimateSummaryProps> = ({
         visible: {
             opacity: 1,
             y: 0,
-            transition: {
-                duration: 0.5,
-                staggerChildren: 0.1,
-            },
+            transition: { staggerChildren: 0.1 },
         },
     };
 
@@ -102,6 +95,7 @@ const EstimateSummary: React.FC<EstimateSummaryProps> = ({
         hidden: { opacity: 0, x: -20 },
         visible: { opacity: 1, x: 0 },
     };
+
 
     const currentContactInfo = projectType === 'residential'
         ? (contactInfo || { name: '', phone: '', email: '', address: '', additionalNotes: '' })
@@ -119,67 +113,80 @@ const EstimateSummary: React.FC<EstimateSummaryProps> = ({
     };
 
     return (
-        <Dialog open={isOpen} onOpenChange={onClose}>
-            {/* DialogOverlay handles the backdrop-blur and prevents clicks outside */}
-            <DialogOverlay className="fixed inset-0 backdrop-blur z-40" />
-            
-            <DialogContent
-                className="mt-8 fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg md:w-full pointer-events-auto"
-                onInteractOutside={e => e.preventDefault()} // Explicitly prevent interaction outside
-            >
-                <button
-                    onClick={onClose}
-                    // Adjusted top positioning for mobile (top-5 = 20px) and larger screens (sm:top-4 = 16px)
-                    className="absolute top-5 right-4 p-2 rounded-full bg-red-500 text-white hover:bg-red-600 transition-colors z-10 sm:top-4"
-                >
-                    <FaTimes className="text-md" />
-                </button>
-                {/* The actual modal content wrapper, now with the desired styling */}
-                <div className="relative bg-white/95 rounded-xl shadow-lg p-8 w-full max-w-5xl max-h-[90vh] overflow-y-auto min-h-[400px]">
+        <Dialog open={isOpen} onOpenChange={onClose} >
+            <DialogContent className="max-w-4xl p-0 border-none bg-transparent shadow-none z-101 ">
+                <div className="relative bg-white/95 rounded-xl shadow-lg p-8 w-full max-h-[90vh] overflow-y-auto">
                     <DialogHeader>
-                        <div className="flex justify-between items-center mb-4">
-                            <DialogTitle className="text-3xl font-bold text-[#00423D] flex items-center justify-center text-center">
-                            <img src="/favicon.png" alt="KayaPalat Logo" className="h-12 mr-3" />
-                             <img src="/kayapalat-logo.png" alt="KayaPalat Logo" className="h-6 mr-3" />
-                                {/* {projectType === 'residential' ? 'Your Residential Interior Design Estimate' : 'Commercial Project Summary'} */}
-                            </DialogTitle>
-                            
-                        </div>
+                        <DialogTitle className="text-3xl font-bold text-[#00423D]">
+                            Your Estimate
+                        </DialogTitle>
+                        <button
+                            onClick={onClose}
+                            type="button"
+                            className="absolute top-4 right-4 p-2 rounded-full bg-red-500 text-white hover:bg-red-600 transition-colors z-10"
+                        >
+                            <FaTimes />
+                        </button>
                     </DialogHeader>
+
                     <motion.div
                         variants={containerVariants}
                         initial="hidden"
                         animate="visible"
                         className="space-y-8 py-3"
                     >
-                        {/* Success Message */}
-                        <motion.div
-                            variants={itemVariants}
-                            className="text-center p-4 bg-green-50 rounded-lg border border-green-200"
-                        >
+                        <motion.div variants={itemVariants} className="text-center p-4 bg-green-50 rounded-lg">
                             <FaCheckCircle className="text-5xl text-[#00423D] mx-auto mb-4" />
-                            <h3 className="text-xl font-semibold text-[#00423D] mb-2">
+                            <h3 className="text-xl font-semibold text-[#00423D]">
                                 {projectType === 'commercial' ? 'Project Submitted Successfully!' : 'Estimate Generated Successfully!'}
                             </h3>
                             {projectType === 'commercial' && (
                                 <p className="text-gray-600 mt-2"><span className="font-bold text-[#00423D]">Team KayaPalat</span> will contact you within <span className="font-bold text-[#00423D]">48 hours</span></p>
                             )}
                         </motion.div>
-
-                        {/* Total Estimate Display - Only for Residential */}
-                        {projectType === 'residential' && (
-                            <motion.div variants={itemVariants} className="text-center p-6 bg-[#00423D] text-white rounded-lg shadow-md">
+                        {/* Estimated Cost Section */}
+                        {projectType === 'residential' && residentialDetails?.selectedPackage && (
+                            <motion.div variants={itemVariants} className="text-center p-6 bg-[#00423D] text-white rounded-lg">
                                 <h3 className="text-2xl font-semibold mb-2">Your Estimated Cost</h3>
-                                <p className="text-5xl font-bold">
-                                    {formatCurrency(totalEstimate)}
+                                <p className="text-5xl font-bold">{formatCurrency(totalEstimate)}</p>
+                                {/* {residentialDetails?.selectedPackage && (
+                                <p className="text-lg mt-2">
+                                    Package: <span className="font-semibold capitalize">{residentialDetails.selectedPackage}</span>
                                 </p>
-                                {residentialDetails?.selectedPackage && (
-                                    <p className="text-lg mt-2">
-                                        Package: <span className="font-semibold capitalize">{residentialDetails.selectedPackage}</span>
-                                    </p>
-                                )}
+                            )} */}
                             </motion.div>
                         )}
+
+                        {/* Client Information Section */}
+                        <motion.div variants={itemVariants} className="bg-white p-6 rounded-lg shadow-sm border">
+                            <h3 className="text-xl font-semibold text-[#00423D] mb-4">Client Information</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <p className="text-gray-600">Name</p>
+                                    <p className="font-medium">{currentContactInfo.name || 'N/A'}</p>
+                                </div>
+                                <div>
+                                    <p className="text-gray-600">Phone</p>
+                                    <p className="font-medium">{currentContactInfo.phone || 'N/A'}</p>
+                                </div>
+                                <div>
+                                    <p className="text-gray-600">Email</p>
+                                    <p className="font-medium">{currentContactInfo.email || 'N/A'}</p>
+                                </div>
+                                {projectType === 'residential' && currentContactInfo.address && (
+                                    <div>
+                                        <p className="text-gray-600">Address</p>
+                                        <p className="font-medium">{truncateText(currentContactInfo.address, 50) || 'N/A'}</p>
+                                    </div>
+                                )}
+                                {currentContactInfo.additionalNotes && (
+                                    <div className="md:col-span-2">
+                                        <p className="text-gray-600">Additional Notes</p>
+                                        <p className="font-medium">{truncateText(currentContactInfo.additionalNotes, 100) || 'N/A'}</p>
+                                    </div>
+                                )}
+                            </div>
+                        </motion.div>
 
 
                         {/* Project Details Section */}
@@ -241,80 +248,94 @@ const EstimateSummary: React.FC<EstimateSummaryProps> = ({
                             )}
                         </motion.div>
 
-                        {/* Client Information Section */}
-                        <motion.div variants={itemVariants} className="bg-white p-6 rounded-lg shadow-sm border">
-                            <h3 className="text-xl font-semibold text-[#00423D] mb-4">Client Information</h3>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <p className="text-gray-600">Name</p>
-                                    <p className="font-medium">{currentContactInfo.name || 'N/A'}</p>
-                                </div>
-                                <div>
-                                    <p className="text-gray-600">Phone</p>
-                                    <p className="font-medium">{currentContactInfo.phone || 'N/A'}</p>
-                                </div>
-                                <div>
-                                    <p className="text-gray-600">Email</p>
-                                    <p className="font-medium">{currentContactInfo.email || 'N/A'}</p>
-                                </div>
-                                {projectType === 'residential' && currentContactInfo.address && (
-                                    <div>
-                                        <p className="text-gray-600">Address</p>
-                                        <p className="font-medium">{truncateText(currentContactInfo.address, 50) || 'N/A'}</p>
-                                    </div>
-                                )}
-                                {currentContactInfo.additionalNotes && (
-                                    <div className="md:col-span-2">
-                                        <p className="text-gray-600">Additional Notes</p>
-                                        <p className="font-medium">{truncateText(currentContactInfo.additionalNotes, 100) || 'N/A'}</p>
-                                    </div>
-                                )}
-                            </div>
-                        </motion.div>
-
-                        {/* Residential Room Details Breakdown (if applicable) */}
-                        {projectType === 'residential' && residentialDetails?.roomDetails && Object.keys(residentialDetails.roomDetails).length > 0 && (
+                        {/* --- REWRITTEN DETAILED ROOM BREAKDOWN SECTION --- */}
+                        {projectType === 'residential' && residentialDetails?.roomDetails && (
                             <motion.div variants={itemVariants} className="bg-white p-6 rounded-lg shadow-sm border">
                                 <h3 className="text-xl font-semibold text-[#00423D] mb-4">Detailed Room Breakdown</h3>
-                                <div className="space-y-4">
-                                    {Object.entries(residentialDetails.roomDetails).map(([roomKey, details]) => (
-                                        <div key={roomKey} className="border-b pb-3 last:border-b-0 last:pb-0">
-                                            <h4 className="font-semibold text-lg text-gray-800 capitalize mb-2">
-                                                {roomKey.replace(/_/g, ' ')} ({details.area} sq.ft)
-                                            </h4>
-                                            <ul className="list-disc list-inside text-sm text-gray-700 space-y-1">
-                                                {breakdown[`${roomKey}`] && (
-                                                    <li>Base Cost: {formatCurrency(breakdown[`${roomKey}`])}</li>
-                                                )}
-                                                {details.falseCeiling && breakdown[`${roomKey}_falseCeiling`] && (
-                                                    <li>False Ceiling: {formatCurrency(breakdown[`${roomKey}_falseCeiling`])}</li>
-                                                )}
-                                                {details.loft && breakdown[`${roomKey}_loft`] && (
-                                                    <li>Loft: {formatCurrency(breakdown[`${roomKey}_loft`])}</li>
-                                                )}
-                                                {details.accessories && Object.entries(details.accessories).map(([accName, quantity]) => {
-                                                    if (quantity > 0 && breakdown[`${roomKey}_${accName}`]) {
-                                                        return (
-                                                            <li key={accName}>
-                                                                {accName} (x{quantity}): {formatCurrency(breakdown[`${roomKey}_${accName}`])}
-                                                            </li>
-                                                        );
-                                                    }
-                                                    return null;
-                                                })}
-                                                {/* Add other room-specific details like material, finish, hardware if needed */}
-                                                {details.material && <li>Material: {details.material}</li>}
-                                                {details.finish && <li>Finish: {details.finish}</li>}
-                                                {details.hardware && <li>Hardware: {details.hardware}</li>}
-                                                {details.shape && <li>Shape: {details.shape}</li>}
-                                                {details.kidsRoom && <li>Kids Room: Yes</li>}
-                                                {details.additionalNotes && <li>Notes: {truncateText(details.additionalNotes, 50)}</li>}
-                                            </ul>
-                                        </div>
-                                    ))}
+                                <div className="space-y-6">
+                                    {Object.entries(residentialDetails.roomDetails).map(([roomKey, details]) => {
+                                        if (!details || !details.area) return null;
+
+                                        return (
+                                            <div key={roomKey} className="border-b pb-4 last:border-b-0 last:pb-0">
+                                                <h4 className="font-semibold text-lg capitalize mb-2">
+                                                    {(() => {
+                                                        // Extracts the base room type, e.g., "livingRoom" from "livingRoom_1"
+                                                        const roomType = roomKey.split('_')[0];
+
+                                                        // Formats the name for display, e.g., "livingRoom" -> "Living Room"
+                                                        const displayName = roomType.replace(/([A-Z])/g, ' $1').replace(/^./, str => str.toUpperCase());
+
+                                                        // Get the total count for this room type
+                                                        const count = residentialDetails?.bhkConfiguration?.[roomType] || 0;
+
+                                                        // If the count is 1, just show the name. Otherwise, show the full key.
+                                                        if (count > 1) {
+                                                            return `${roomKey.replace(/_/g, ' ')} (${details.area} Sq.Ft)`;
+                                                        } else {
+                                                            return `${displayName} (${details.area} Sq.Ft)`;
+                                                        }
+                                                    })()}
+                                                </h4>
+                                                <ul className="list-disc list-inside text-sm text-gray-700 space-y-1 pl-2">
+
+                                                    {/* Base Cost: Uses the correct key */}
+                                                    {breakdown[`${roomKey}_Base Cost`] > 0 &&
+                                                        <li>Base Cost: <span className="font-medium">{formatCurrency(breakdown[`${roomKey}_Base Cost`])}</span></li>}
+                                                    {details.kidsRoom && <li>Kids Room: Yes</li>}
+
+
+
+                                                    {/* Features: Uses correct, case-sensitive keys */}
+                                                    {details.falseCeiling && breakdown[`${roomKey}_False Ceiling`] &&
+                                                        <li>False Ceiling: <span className="font-medium">{formatCurrency(breakdown[`${roomKey}_False Ceiling`])}</span></li>}
+                                                    {details.loft && breakdown[`${roomKey}_Loft`] &&
+                                                        <li>Loft: <span className="font-medium">{formatCurrency(breakdown[`${roomKey}_Loft`])}</span></li>}
+
+                                                    {/* Options: Displays the selection AND its price */}
+                                                    {details.material && <div className="mt-2 font-semibold">Material:</div>}
+                                                    {details.material &&
+                                                        <li>{details.material}: <span className="font-medium">{formatCurrency(breakdown[`${roomKey}_Material: ${details.material}`])}</span></li>}
+                                                    {details.finish && <div className="mt-2 font-semibold">Finish:</div>}
+                                                    {details.finish &&
+                                                        <li>{details.finish}: <span className="font-medium">{formatCurrency(breakdown[`${roomKey}_Finish: ${details.finish}`])}</span></li>}
+                                                    {details.hardware && <div className="mt-2 font-semibold">Hardware:</div>}
+                                                    {details.hardware &&
+                                                        <li>{details.hardware}: <span className="font-medium">{formatCurrency(breakdown[`${roomKey}_Hardware: ${details.hardware}`])}</span></li>}
+                                                    {details.shape && <div className="mt-2 font-semibold">Shape:</div>}
+                                                    {details.shape &&
+                                                        <li>{details.shape}: <span className="font-medium">{formatCurrency(breakdown[`${roomKey}_Shape: ${details.shape}`])}</span></li>}
+                                                    {/* Accessories: Displays price for each */}
+                                                    {details.accessories && Object.keys(details.accessories).length > 0 && <div className="mt-2 font-semibold">Accessories:</div>}
+                                                    {Object.entries(details.accessories || {}).map(([accName, quantity]) => {
+                                                        const cost = breakdown[`${roomKey}_${accName}`];
+                                                        return quantity > 0 && cost ? <li key={accName}>{accName} (x{quantity}): <span className="font-medium">{formatCurrency(cost)}</span></li> : null
+                                                    })}
+                                                </ul>
+                                            </div>
+                                        );
+                                    })}
                                 </div>
                             </motion.div>
                         )}
+                        {/* --- END OF REWRITTEN SECTION --- */}
+
+                        <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-4 justify-center items-center mt-6">
+                            <button
+                                type="button"
+                                onClick={onClose}
+                                className="w-full sm:w-auto px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition"
+                            >
+                                Back to Estimate
+                            </button>
+                            <button
+                                type="button"
+                                onClick={onStartOver}
+                                className="w-full sm:w-auto px-6 py-3 bg-[#00423D] text-white rounded-lg hover:bg-[#00332D] transition"
+                            >
+                                Start New Estimate
+                            </button>
+                        </motion.div>
                     </motion.div>
                 </div>
             </DialogContent>

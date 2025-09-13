@@ -7,7 +7,6 @@ import ProjectTypeModal from '@/components/estimate/ProjectTypeModal';
 import CommercialForm from '@/components/estimate/CommercialForm';
 import BHKTypeSelector from '@/components/estimate/ResidentialFlow/BHKTypeSelector';
 import RoomSelector from '@/components/estimate/ResidentialFlow/RoomSelector';
-import RoomDetailsModal from '@/components/estimate/ResidentialFlow/RoomDetailsModal'; // This component is not directly used in the current flow, but kept for reference
 import ProjectDetailsForm from '@/components/estimate/ResidentialFlow/ProjectDetailsForm';
 import ContactInfoModal from '@/components/estimate/ResidentialFlow/ContactInfoModal';
 import EstimateSummary from '@/components/estimate/EstimateSummary';
@@ -17,7 +16,7 @@ import ImageCarousel from '@/components/ImageCarousel'; // Import the new ImageC
 interface RoomPrice {
     id: number;
     room_type: string;
-    base_price: number;
+    base_price: string;
     created_at: string;
     updated_at: string;
 }
@@ -26,7 +25,7 @@ interface AccessoryPrice {
     id: number;
     accessory_name: string;
     room_type: string;
-    price: number;
+    price: string;
     created_at: string;
     updated_at: string;
 }
@@ -34,7 +33,7 @@ interface AccessoryPrice {
 interface FeaturePrice {
     id: number;
     feature_name: string;
-    price: number;
+    price: string;
     applicable_rooms: string; // JSON string of room types
     created_at: string;
     updated_at: string;
@@ -43,7 +42,7 @@ interface FeaturePrice {
 interface PackageMultiplier {
     id: number;
     package_name: string;
-    multiplier: number;
+    multiplier: string;
     created_at: string;
     updated_at: string;
 }
@@ -173,6 +172,8 @@ const CONTACT_INFO_IMAGES = [
 ];
 
 
+
+
 const EstimatePage = () => {
     const router = useRouter();
     const [projectType, setProjectType] = useState<'residential' | 'commercial' | null>(null);
@@ -191,6 +192,18 @@ const EstimatePage = () => {
         budget: '',
     });
     const [contactInfo, setContactInfo] = useState<any>(null);
+
+
+    const handleKeyDown = (event: React.KeyboardEvent) => {
+        // Check if the key pressed was "Enter" and the source is not a textarea
+        if (
+            event.key === 'Enter' &&
+            (event.target as HTMLElement).tagName !== 'TEXTAREA'
+        ) {
+            // Prevent the default form submission (which causes the reload)
+            event.preventDefault();
+        }
+    };
 
     // State for commercial flow
     const [commercialFormData, setCommercialFormData] = useState<any>({});
@@ -234,7 +247,7 @@ const EstimatePage = () => {
 
                 const roomPriceMap: { [key: string]: number } = {};
                 roomData.forEach(room => {
-                    roomPriceMap[room.room_type] = room.base_price;
+                    roomPriceMap[room.room_type] = parseFloat(room.base_price);
                 });
                 setRoomPrices(roomPriceMap);
 
@@ -243,19 +256,20 @@ const EstimatePage = () => {
                     if (!accessoryPriceMap[accessory.room_type]) {
                         accessoryPriceMap[accessory.room_type] = {};
                     }
-                    accessoryPriceMap[accessory.room_type][accessory.accessory_name] = accessory.price;
+                    accessoryPriceMap[accessory.room_type][accessory.accessory_name] = parseFloat(accessory.price);
                 });
                 setAccessoryPrices(accessoryPriceMap);
 
                 const featurePriceMap: { [key: string]: number } = {};
                 featureData.forEach(feature => {
-                    featurePriceMap[feature.feature_name] = feature.price;
+                    // This parseFloat is essential to prevent calculation errors
+                    featurePriceMap[feature.feature_name] = parseFloat(feature.price);
                 });
                 setFeaturePrices(featurePriceMap);
 
                 const packageMap: { [key: string]: number } = {};
                 packageData.forEach(pkg => {
-                    packageMap[pkg.package_name] = pkg.multiplier;
+                    packageMap[pkg.package_name] = parseFloat(pkg.multiplier);
                 });
                 setPackageMultipliers(packageMap);
 
@@ -295,80 +309,86 @@ const EstimatePage = () => {
         }));
     };
 
+    // In EstimatePage.tsx
+
     const calculateTotalEstimate = () => {
         let total = 0;
         const breakdown: { [key: string]: number } = {};
 
-        // Added a default return for when projectType is null or undefined
-        if (projectType === null) {
+        if (projectType !== 'residential') {
             return { total: 0, breakdown: {} };
         }
 
-        if (projectType === 'residential') {
-            Object.entries(roomDetails).forEach(([roomKey, details]) => {
-                if (details && details.area && !isNaN(parseFloat(details.area))) {
-                    const area = parseFloat(details.area);
-                    const roomType = roomKey.split('_')[0];
-                    const basePricePerSqFt = roomPrices[roomType] || 0;
-                    const roomBaseCost = basePricePerSqFt * area;
-                    breakdown[roomKey] = roomBaseCost;
-                    total += roomBaseCost;
+        Object.entries(roomDetails).forEach(([roomKey, details]) => {
+            // This check is critical to prevent non-numeric area values from causing NaN
+            if (details && details.area && !isNaN(parseFloat(details.area))) {
+                const area = parseFloat(details.area);
+                const roomType = roomKey.split('_')[0];
 
-                    if (details.accessories) {
-                        Object.entries(details.accessories).forEach(([accName, quantity]) => {
-                            if (quantity && quantity > 0) {
-                                const accessoryPrice = accessoryPrices[roomType]?.[accName] || 0;
-                                if (roomType === 'bedroom' && details.kidsRoom) {
-                                    const kidsAccPrice = accessoryPrices['kids']?.[accName] || 0;
-                                    const finalAccPrice = accessoryPrice > 0 ? accessoryPrice : kidsAccPrice;
-                                    if (finalAccPrice > 0) {
-                                        const accCost = finalAccPrice * quantity;
-                                        breakdown[`${roomKey}_${accName}`] = accCost;
-                                        total += accCost;
-                                    }
-                                } else if (accessoryPrice > 0) {
-                                    const accCost = accessoryPrice * quantity;
-                                    breakdown[`${roomKey}_${accName}`] = accCost;
-                                    total += accCost;
-                                }
-                            }
-                        });
-                    }
+                // 1. Base Cost
+                const basePrice = roomPrices[roomType] || 0;
+                if (basePrice > 0) {
 
-                    if (details.falseCeiling) {
-                        const falseCeilingPrice = featurePrices['falseCeiling'] || 0;
-                        const falseCeilingCost = falseCeilingPrice * area;
-                        breakdown[`${roomKey}_falseCeiling`] = falseCeilingCost;
-                        total += falseCeilingCost;
-                    }
-                    if (details.loft) {
-                        const loftPrice = featurePrices['loft'] || 0;
-                        const loftCost = loftPrice * area;
-                        breakdown[`${roomKey}_loft`] = loftCost;
-                        total += loftCost;
-                    }
+                    breakdown[`${roomKey}_Base Cost`] = basePrice * area;
+                    total += basePrice * area;
                 }
-            });
 
-            const packageMultiplier = packageMultipliers[selectedPackage] || 1;
-            total *= packageMultiplier;
+                // 2. Per Square Foot Features (False Ceiling, Loft)
+                if (details.falseCeiling) {
+                    // SAFEGUARD: Use || 0 to prevent NaN if price is missing from the database.
+                    // CRITICAL: Use the correct lowercase key 'falseCeiling' from your database.
+                    const pricePerSqFt = featurePrices['falseCeiling'] || 0;
+                    const cost = pricePerSqFt * area;
+                    breakdown[`${roomKey}_False Ceiling`] = cost;
+                    total += cost;
+                }
+                if (details.loft) {
+                    // SAFEGUARD & CRITICAL: Applying same fixes for 'loft'.
+                    const pricePerSqFt = featurePrices['loft'] || 0;
+                    const cost = pricePerSqFt * area;
+                    breakdown[`${roomKey}_Loft`] = cost;
+                    total += cost;
+                }
 
-            return { total, breakdown };
-        } else { // This else block handles 'commercial' projectType
-            const basePrice = 500000;
-            const area = commercialFormData?.projectArea ? parseFloat(commercialFormData.projectArea) : 0;
-            const areaMultiplier = area > 0 ? Math.ceil(area / 1000) : 1;
+                // 3. Flat Rate Additive Costs (Material, Finish, Hardware, Shape)
+                const options = ['material', 'finish', 'hardware', 'shape'];
+                options.forEach(option => {
+                    if (details[option]) {
+                        const featureName = `${option.charAt(0).toUpperCase() + option.slice(1)}: ${details[option]}`;
+                        // SAFEGUARD: Use || 0 to prevent NaN if a price lookup fails.
+                        const price = featurePrices[featureName] || 0;
 
-            const commercialTotal = basePrice * areaMultiplier;
+                        breakdown[`${roomKey}_${featureName}`] = price;
+                        total += price;
+                    }
+                });
 
-            return {
-                total: commercialTotal,
-                breakdown: {
-                    baseCommercialCost: basePrice,
-                    areaMultiplierFactor: areaMultiplier,
-                },
-            };
-        }
+                // 4. Accessories
+                if (details.accessories) {
+                    Object.entries(details.accessories).forEach(([accName, quantity]) => {
+                        if (typeof quantity === 'number' && quantity > 0) {
+                            const price = accessoryPrices[roomType]?.[accName] || 0;
+                            const accCost = price * quantity;
+                            if (accCost > 0) {
+                                breakdown[`${roomKey}_${accName}`] = accCost;
+                                total += accCost;
+                            }
+                        }
+                    });
+                }
+            }
+        });
+
+        // 5. Apply Package Multiplier
+        const packageMultiplier = packageMultipliers[selectedPackage] || 1;
+        total *= packageMultiplier;
+
+        Object.keys(breakdown).forEach(key => {
+            breakdown[key] *= packageMultiplier;
+        });
+
+        // Final safety check to ensure we never return NaN
+        return { total: isNaN(total) ? 0 : total, breakdown };
     };
 
     const handleProjectTypeSelect = (type: 'residential' | 'commercial') => {
@@ -406,29 +426,27 @@ const EstimatePage = () => {
 
     // Function to handle closing of the summary modal and resetting forms
     const handleSummaryModalClose = () => {
-        setShowEstimateSummary(false); // Close the summary modal
+        setShowEstimateSummary(false); // Only closes the modal
+    };
 
-        if (projectType === 'commercial') {
-            // Reset commercial form data and bring back to project type selection
-            setCommercialFormData({}); // Clear the commercial form data state
-            setProjectType(null); // Reset project type
-            setShowProjectTypeModal(true); // Show the initial project type selection modal
-        } else if (projectType === 'residential') {
-            // For residential, reset all residential-related states and bring back to project type selection
-            setSelectedBHK('');
-            setCustomBHKConfig(null);
-            setRoomDetails({});
-            setProjectDetails({
-                location: '',
-                timeline: '',
-                selectedPackage: 'essential',
-                budget: '',
-            });
-            setContactInfo(null);
-            setResStep(0); // Go back to the first step of residential flow
-            setProjectType(null);
-            setShowProjectTypeModal(true);
-        }
+
+    const handleResetAndStartOver = () => {
+        setShowEstimateSummary(false); // Close the modal first
+
+        // Reset all residential-related states
+        setSelectedBHK('');
+        setCustomBHKConfig(null);
+        setRoomDetails({});
+        setProjectDetails({
+            location: '',
+            timeline: '',
+            selectedPackage: 'essential',
+            budget: '',
+        });
+        setContactInfo(null);
+        setResStep(0); // Go back to the first step
+        setProjectType(null);
+        setShowProjectTypeModal(true); // Show the project type selection again
     };
 
     const handleViewBreakdown = () => {
@@ -551,17 +569,19 @@ const EstimatePage = () => {
                 <svg className="w-full h-full" viewBox="0 0 100 100" preserveAspectRatio="none">
                     <defs>
                         <pattern id={patternId} width="20" height="20" patternUnits="userSpaceOnUse">
-                            <circle cx="10" cy="10" r={circleRadius} fill="currentColor" opacity={circleOpacity}/>
-                            <rect x="5" y="5" width={rectSize} height={rectSize} fill="none" stroke="currentColor" strokeWidth={strokeWidth} opacity={rectOpacity}/>
+                            <circle cx="10" cy="10" r={circleRadius} fill="currentColor" opacity={circleOpacity} />
+                            <rect x="5" y="5" width={rectSize} height={rectSize} fill="none" stroke="currentColor" strokeWidth={strokeWidth} opacity={rectOpacity} />
                         </pattern>
                     </defs>
-                    <rect width="100%" height="100%" fill={`url(#${patternId})`} style={{color: patternColor}}/>
+                    <rect width="100%" height="100%" fill={`url(#${patternId})`} style={{ color: patternColor }} />
                 </svg>
             </div>
         );
     };
 
     const { total: calculatedTotalEstimate, breakdown: calculatedBreakdown } = calculateTotalEstimate();
+
+    console.log('Calculated Estimate:', calculatedTotalEstimate, calculatedBreakdown);
 
     return (
         <div className="min-h-screen bg-gradient-to-b from-[#D2EBD0] to-white py-24 px-4 sm:px-6 lg:px-8">
@@ -581,9 +601,8 @@ const EstimatePage = () => {
                         initial={{ opacity: 0, y: -20 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -20 }}
-                        className={`fixed top-4 left-1/2 -translate-x-1/2 p-4 rounded-lg shadow-lg z-50 ${
-                            message.type === 'error' ? 'bg-red-500 text-white' : 'bg-blue-500 text-white'
-                        }`}
+                        className={`fixed top-4 left-1/2 -translate-x-1/2 p-4 rounded-lg shadow-lg z-50 ${message.type === 'error' ? 'bg-red-500 text-white' : 'bg-blue-500 text-white'
+                            }`}
                     >
                         {message.text}
                     </motion.div>
@@ -615,6 +634,7 @@ const EstimatePage = () => {
                 {/* Residential Flow Stepper Cards */}
                 {projectType === 'residential' && (
                     <motion.form
+                        onKeyDown={handleKeyDown}
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         // Dynamically apply background class based on resStep, and add border/shadow for pop-out effect
@@ -755,7 +775,7 @@ const EstimatePage = () => {
                                     <ContactInfoModal
                                         mode="card"
                                         onSubmit={(info) => {
-                                            if (!info.name || !info.email || !info.phone || !info.address) {
+                                            if (!info.name || !info.email || !info.phone) {
                                                 showMessage('error', 'Please fill in all required contact information fields.');
                                                 return;
                                             }
@@ -840,8 +860,9 @@ const EstimatePage = () => {
                 <EstimateSummary
                     isOpen={showEstimateSummary}
                     onClose={handleSummaryModalClose}
+                    onStartOver={handleResetAndStartOver}
                     projectType={projectType || 'residential'}
-                    residentialDetails={projectType === 'residential' ? { ...projectDetails, roomDetails } : undefined}
+                    residentialDetails={projectType === 'residential' ? { ...projectDetails, roomDetails, selectedPackage, bhkConfiguration: getBHKConfiguration() } : undefined}
                     commercialDetails={projectType === 'commercial' ? commercialFormData : undefined}
                     contactInfo={contactInfo}
                     totalEstimate={calculatedTotalEstimate}

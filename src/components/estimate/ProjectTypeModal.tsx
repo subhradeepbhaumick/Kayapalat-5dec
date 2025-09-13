@@ -24,13 +24,13 @@ const ProjectTypeModal: React.FC<ProjectTypeModalProps> = ({
 }) => {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogOverlay className="fixed inset-0 backdrop-blur" />
+      <DialogOverlay className="fixed inset-0 backdrop-blur z-150" />
       <DialogContent
-        className="max-w-2xl bg-white/95"
+        className="max-w-2xl bg-white/95 z-151"
         onInteractOutside={e => e.preventDefault()}
       >
         <DialogHeader>
-          <div className="flex justify-between items-center">
+          <div className="flex justify-between items-center ">
             <DialogTitle className="text-2xl font-semibold text-[#00423D]">
               Select Project Type
             </DialogTitle>
