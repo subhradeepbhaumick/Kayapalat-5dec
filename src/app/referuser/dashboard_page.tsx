@@ -6,6 +6,7 @@ import SalesPage from './sales_page';
 import ClientProfile from './settings_client_profile';
 import BankDetails from './settings_bank_details';
 import HelpSupport from './settings_help&support';
+import MyProfilePage from './settings_MyProfile';
 // import EMIChart from '../../components/EMIChart';
 
 const ReferUserDashboard = () => {
@@ -162,6 +163,19 @@ const ReferUserDashboard = () => {
               <div className="ml-8 mt-1 space-y-1">
                 <div
                   className={`px-4 py-2 cursor-pointer rounded-lg transition-colors ${
+                    activeSettingsTab === 'My Profile' && activeTab === 'Settings'
+                      ? 'bg-[#D7E7D0] text-[#295A47]'
+                      : 'text-gray-600 hover:bg-gray-50'
+                  }`}
+                  onClick={() => {
+                    setActiveTab('Settings');
+                    setActiveSettingsTab('My Profile');
+                  }}
+                >
+                  <span className="text-sm">My Profile</span>
+                </div>
+                <div
+                  className={`px-4 py-2 cursor-pointer rounded-lg transition-colors ${
                     activeSettingsTab === 'Client Profile' && activeTab === 'Settings'
                       ? 'bg-[#D7E7D0] text-[#295A47]'
                       : 'text-gray-600 hover:bg-gray-50'
@@ -281,6 +295,7 @@ const ReferUserDashboard = () => {
                       <p className="text-gray-700">Rewards Claimed</p>
                     </div>
                   </div> */}
+
 
                   {/* How it Works */}
                   <div className="bg-gray-50 rounded-lg p-6">
@@ -540,6 +555,8 @@ const ReferUserDashboard = () => {
               )}
 
               {activeTab === 'Help & Support' && <HelpSupport />}
+
+              {activeTab === 'Settings' && activeSettingsTab === 'My Profile' && <MyProfilePage />}
 
               {activeTab === 'Settings' && activeSettingsTab === 'Client Profile' && <ClientProfile />}
 

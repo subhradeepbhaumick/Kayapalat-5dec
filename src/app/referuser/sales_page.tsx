@@ -11,11 +11,11 @@ const SalesPage: React.FC = () => {
   const [filterType, setFilterType] = useState<'all' | 'residential' | 'commercial'>('all');
 
   const siteVisitData = [
-    { id: 1, appId: "HD7345667", project: "Rajwada Grand", client: "Kalyan Chatterjee", address: "Kolkata", phone: "+91 9999999999", req: "3BHK", status: "Upcoming", rep: "John Bor", propertyType: "Residential" },
-    { id: 2, appId: "HD7345668", project: "Rajwada Grand", client: "Arun Kumar", address: "Delhi", phone: "+91 8888888888", req: "2BHK", status: "Upcoming", rep: "Jane Doe", propertyType: "Residential" },
-    { id: 3, appId: "HD7345669", project: "Commercial Plaza", client: "Business Corp", address: "Mumbai", phone: "+91 7777777777", req: "Office Space", status: "Upcoming", rep: "Mike Smith", propertyType: "Commercial" },
-    { id: 4, appId: "HD7345670", project: "Rajwada Grand", client: "Priya Singh", address: "Bangalore", phone: "+91 6666666666", req: "4BHK", status: "Upcoming", rep: "Alex Johnson", propertyType: "Residential" },
-    { id: 5, appId: "HD7345671", project: "Commercial Plaza", client: "Tech Solutions", address: "Pune", phone: "+91 5555555555", req: "Warehouse", status: "Upcoming", rep: "Sara Lee", propertyType: "Commercial" },
+    { id: 1, appId: "HD7345667", project: "Rajwada Grand", client: "Kalyan Chatterjee", address: "Kolkata", phone: "+91 9999999999", req: "3BHK", status: "Upcoming", rep: "John Bor", propertyType: "Residential",DateTime: "12/01/20, 4PM" },
+    { id: 2, appId: "HD7345668", project: "Rajwada Grand", client: "Arun Kumar", address: "Delhi", phone: "+91 8888888888", req: "2BHK", status: "Upcoming", rep: "Jane Doe", propertyType: "Residential",DateTime: "12/03/20, 5PM" },
+    { id: 3, appId: "HD7345669", project: "Commercial Plaza", client: "Business Corp", address: "Mumbai", phone: "+91 7777777777", req: "Office Space", status: "Upcoming", rep: "Mike Smith", propertyType: "Commercial",DateTime: "12/05/20, 3PM" },
+    { id: 4, appId: "HD7345670", project: "Rajwada Grand", client: "Priya Singh", address: "Bangalore", phone: "+91 6666666666", req: "4BHK", status: "Upcoming", rep: "Alex Johnson", propertyType: "Residential",DateTime: "12/4/20, 4PM" },
+    { id: 5, appId: "HD7345671", project: "Commercial Plaza", client: "Tech Solutions", address: "Pune", phone: "+91 5555555555", req: "Warehouse", status: "Upcoming", rep: "Sara Lee", propertyType: "Commercial",DateTime: "02/01/20, 4PM" },
   ];
 
   const filteredData = siteVisitData.filter(item => filterType === 'all' || item.propertyType.toLowerCase() === filterType);
@@ -72,6 +72,8 @@ const SalesPage: React.FC = () => {
                 <th className="p-2 border">Status</th>
                 <th className="p-2 border">Representative Name</th>
                 <th className="p-2 border">Property Type</th>
+                <th className="p-2 border">Date & Time</th>
+
               </tr>
             </thead>
             <tbody>
@@ -87,6 +89,8 @@ const SalesPage: React.FC = () => {
                   <td className="p-2 border">{item.status}</td>
                   <td className="p-2 border">{item.rep}</td>
                   <td className="p-2 border">{item.propertyType}</td>
+                  <td className="p-2 border">{item.DateTime}</td>
+
                 </tr>
               ))}
             </tbody>
@@ -110,6 +114,7 @@ const SalesPage: React.FC = () => {
                 <th className="p-2 border">Property Type</th>
                 <th className="p-2 border">Payment Amount</th>
                 <th className="p-2 border">Payment Status</th>
+                <th className="p-2 border">Date & Time</th>
               </tr>
             </thead>
             <tbody>
@@ -126,6 +131,7 @@ const SalesPage: React.FC = () => {
                 <td className="p-2 border">Residential</td>
                 <td className="p-2 border">₹10,00,000</td>
                 <td className="p-2 border">Paid</td>
+                <td className="p-2 border">12/01/21, 12PM</td>
               </tr>
             </tbody>
           </table>
