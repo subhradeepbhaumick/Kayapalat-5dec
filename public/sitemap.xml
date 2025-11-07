@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+
+  <!-- Homepage -->
+  <url>
+    <loc>https://www.kayapalat.co/</loc>
+    <priority>1.0</priority>
+  </url>
+
+  <!-- Main Navigation Pages -->
+  <url>
+    <loc>https://www.kayapalat.co/about</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.kayapalat.co/gallery</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.kayapalat.co/price-compare</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.kayapalat.co/our-designers</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.kayapalat.co/careers</loc>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://www.kayapalat.co/blogs</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.kayapalat.co/branding-partners</loc>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://www.kayapalat.co/contact-us</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.kayapalat.co/shop</loc>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Functional Pages -->
+  <url>
+    <loc>https://www.kayapalat.co/signup</loc>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://www.kayapalat.co/login</loc>
+    <priority>0.5</priority>
+  </url>
+  <url>
+    <loc>https://www.kayapalat.co/estimate-cost</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.kayapalat.co/hire-designer</loc>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Our Creations Section -->
+  <url>
+    <loc>https://www.kayapalat.co/living-room</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.kayapalat.co/bedroom</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.kayapalat.co/false-ceiling</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.kayapalat.co/commercial</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.kayapalat.co/tv-unit</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.kayapalat.co/wardrobe</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://www.kayapalat.co/kitchen-design</loc>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://www.kayapalat.co/explore-more</loc>
+    <priority>0.6</priority>
+  </url>
+
+</urlset>

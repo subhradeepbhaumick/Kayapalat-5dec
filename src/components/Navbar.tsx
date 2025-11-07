@@ -87,20 +87,24 @@ export default function Navbar() {
 
   if (!isClient) return null;
 
+  const isReferUserPage = pathname.startsWith("/referuser");
+
   return (
-    <nav 
+    <nav
       className={`fixed top-0 w-full bg-[#D7E7D0] shadow-md px-4 py-2 flex items-center justify-between z-50 h-14 transition-transform duration-300 ease-out ${
         isVisible ? 'translate-y-0' : '-translate-y-full'
       }`}
     >
       {/* Logo and Sidebar Button */}
       <div className="flex items-center gap-3">
-        <button
-          onClick={() => setSidebarOpen(true)}
-          className="lg:hidden text-[#295A47]"
-        >
-          <Menu size={24} />
-        </button>
+        {!isReferUserPage && (
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="lg:hidden text-[#295A47]"
+          >
+            <Menu size={24} />
+          </button>
+        )}
         <Link href="/">
           <Image
             src="/kayapalat-logo.png"
@@ -264,7 +268,7 @@ export default function Navbar() {
 
       {/* Sidebar */}
       <AnimatePresence>
-        {sidebarOpen && (
+        {sidebarOpen && !isReferUserPage && (
           <motion.div
             className="fixed inset-0 bg-black/30 backdrop-blur-sm z-50 h-screen"
             initial={{ opacity: 0 }}

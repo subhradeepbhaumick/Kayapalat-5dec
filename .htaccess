@@ -1,0 +1,30 @@
+# Enable Rewrite Engine
+RewriteEngine On
+
+# Force www to non-www (optional)
+# RewriteCond %{HTTP_HOST} ^www\.kayapalat\.co [NC]
+# RewriteRule ^(.*)$ https://kayapalat.co/$1 [L,R=301]
+
+#############################################
+# ✅ 301 Redirects (Old → New)
+#############################################
+
+Redirect 301 /about-us.php https://kayapalat.co/about
+Redirect 301 /about-us https://kayapalat.co/about
+
+Redirect 301 /blog/false-ceiling-design-for-office https://kayapalat.co/blogs/false-ceiling-design-for-office
+Redirect 301 /how-to-choose-the-perfect-wardrobe.php https://kayapalat.co/blog/how-to-choose-the-perfect-wardrobe
+Redirect 301 /how-to-design-a-room-that-grows-with-your-child.php https://kayapalat.co/blog/how-to-design-a-room-that-grows-with-your-child
+Redirect 301 /simple-kitchen-design-ideas.php https://kayapalat.co/blog/simple-kitchen-design-ideas
+Redirect 301 /blog/space-saving-furniture-designs/ https://kayapalat.co/blogs/space-saving-furniture-designs
+
+#############################################
+# ✅ SPA Fallback (for React/Next.js static export)
+#############################################
+
+# Don’t rewrite existing files or directories
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# Redirect everything else to index.html
+RewriteRule ^ /index.html [L]

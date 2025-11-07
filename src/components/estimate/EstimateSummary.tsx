@@ -287,23 +287,27 @@ const EstimateSummary: React.FC<EstimateSummaryProps> = ({
 
 
                                                     {/* Features: Uses correct, case-sensitive keys */}
-                                                    {details.falseCeiling && breakdown[`${roomKey}_False Ceiling`] &&
+                                                    {details.falseCeiling && breakdown[`${roomKey}_False Ceiling`] && (formatCurrency(breakdown[`${roomKey}_False Ceiling`]) !== '₹0') &&
                                                         <li>False Ceiling: <span className="font-medium">{formatCurrency(breakdown[`${roomKey}_False Ceiling`])}</span></li>}
-                                                    {details.loft && breakdown[`${roomKey}_Loft`] &&
+                                                    {details.loft && breakdown[`${roomKey}_Loft`] && (formatCurrency(breakdown[`${roomKey}_Loft`]) !== '₹0') &&
                                                         <li>Loft: <span className="font-medium">{formatCurrency(breakdown[`${roomKey}_Loft`])}</span></li>}
 
                                                     {/* Options: Displays the selection AND its price */}
-                                                    {details.material && <div className="mt-2 font-semibold">Material:</div>}
-                                                    {details.material &&
+                                                    {details.material && (formatCurrency(breakdown[`${roomKey}_Material: ${details.material}`]) !== '₹0') &&
+                                                     <div className="mt-2 font-semibold">Material:</div>}
+                                                    {details.material && (formatCurrency(breakdown[`${roomKey}_Material: ${details.material}`]) !== '₹0') &&
                                                         <li>{details.material}: <span className="font-medium">{formatCurrency(breakdown[`${roomKey}_Material: ${details.material}`])}</span></li>}
-                                                    {details.finish && <div className="mt-2 font-semibold">Finish:</div>}
-                                                    {details.finish &&
+                                                    {details.finish &&  (formatCurrency(breakdown[`${roomKey}_Material: ${details.finish}`]) !== '₹0') &&
+                                                    <div className="mt-2 font-semibold">Finish:</div>}
+                                                    {details.finish && (formatCurrency(breakdown[`${roomKey}_Finish: ${details.finish}`]) !== '₹0') &&
                                                         <li>{details.finish}: <span className="font-medium">{formatCurrency(breakdown[`${roomKey}_Finish: ${details.finish}`])}</span></li>}
-                                                    {details.hardware && <div className="mt-2 font-semibold">Hardware:</div>}
-                                                    {details.hardware &&
+                                                    {details.hardware && (formatCurrency(breakdown[`${roomKey}_Material: ${details.hardware}`]) !== '₹0') &&
+                                                    <div className="mt-2 font-semibold">Hardware:</div>}
+                                                    {details.hardware && (formatCurrency(breakdown[`${roomKey}_Hardware: ${details.hardware}`]) !== '₹0') &&
                                                         <li>{details.hardware}: <span className="font-medium">{formatCurrency(breakdown[`${roomKey}_Hardware: ${details.hardware}`])}</span></li>}
-                                                    {details.shape && <div className="mt-2 font-semibold">Shape:</div>}
-                                                    {details.shape &&
+                                                    {details.shape && (formatCurrency(breakdown[`${roomKey}_Material: ${details.shape}`]) !== '₹0') &&
+                                                    <div className="mt-2 font-semibold">Shape:</div>}
+                                                    {details.shape && (formatCurrency(breakdown[`${roomKey}_Shape: ${details.shape}`]) !== '₹0') &&
                                                         <li>{details.shape}: <span className="font-medium">{formatCurrency(breakdown[`${roomKey}_Shape: ${details.shape}`])}</span></li>}
                                                     {/* Accessories: Displays price for each */}
                                                     {details.accessories && Object.keys(details.accessories).length > 0 && <div className="mt-2 font-semibold">Accessories:</div>}

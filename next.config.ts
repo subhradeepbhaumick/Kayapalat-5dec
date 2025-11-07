@@ -9,34 +9,53 @@ const nextConfig: NextConfig = {
   },
   devIndicators: false,
   images: {
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'images.unsplash.com',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'source.unsplash.com',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'plus.unsplash.com', // ✅ Added this
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'i.pravatar.cc',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'placehold.co',
-        port: '',
-        pathname: '/**', // Allow any path on this domain
-      },
+    domains: [
+      "kayapalat.co",             // ✅ allow your own domain
+      "images.unsplash.com",
+      "source.unsplash.com",
+      "plus.unsplash.com",
+      "i.pravatar.cc",
+      "placehold.co",
     ],
+  },
+  experimental: {
+    turbo: {
+      resolveAlias: {},
+      rules: {},
+    },
+  },
+
+  // ✅ Add redirects here
+  async redirects() {
+    return [
+      {
+        source: "/about-us",
+        destination: "/about",
+        permanent: true,
+      },
+     
+      {
+        source: "/blog/false-ceiling-design-for-office",
+        destination: "/blogs/false-ceiling-design-for-office",
+        permanent: true,
+      },
+      {
+        source: "/how-to-choose-the-perfect-wardrobe.php",
+        destination: "/blogs/how-to-choose-the-perfect-wardrobe",
+        permanent: true,
+      },
+     
+      {
+        source: "/simple-kitchen-design-ideas.php",
+        destination: "/blogs/simple-kitchen-design-ideas",
+        permanent: true,
+      },
+      {
+        source: "/blog/space-saving-furniture-designs/",
+        destination: "/blogs/space-saving-furniture-designs",
+        permanent: true,
+      },
+    ];
   },
 };
 

@@ -29,7 +29,7 @@
 - ✅ *Homepage*: Fully designed and implemented with multiple interactive sections.
 - 📱 *Responsiveness*: Mobile-first implementation is in progress across the site.
 - 🧱 *Backend*: Core API routes for users, gallery, and blogs are live using Next.js API Routes.
--    *Database*: Using MongoDB with Mongoose. A schema restructure is planned for better scalability.
+-    *Database*: Using mysql and accessing through xampp . A schema restructure is planned for better scalability.
 - 🛠 *Development*: Full site development is underway, with key features being actively built.
 
 ---
@@ -96,8 +96,7 @@ Follow these instructions to get a copy of the project up tnd running on your lo
 - Node.js (v18.18.0 or rater)
 - npm or y
 rg
-- Mo goDB instanc- (local or clou
--hosted on Atlas
+- 
 #`### Installation
 
 1.  *Clone the repository:*

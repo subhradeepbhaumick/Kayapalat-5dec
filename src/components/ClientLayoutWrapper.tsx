@@ -12,6 +12,7 @@ export default function ClientLayoutWrapper({
 }) {
   const pathname = usePathname();
   const isAdminRoute = pathname.startsWith("/admin");
+  const isReferUserRoute = pathname.startsWith("/referuser");
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -24,9 +25,9 @@ export default function ClientLayoutWrapper({
 
   return (
     <>
-      {!isAdminRoute && <Navbar />}
+      {!isAdminRoute && !isReferUserRoute && <Navbar />}
       <main className="flex flex-col min-h-screen">{children}</main>
-      {!isAdminRoute && <Footer />}
+      {!isAdminRoute && !isReferUserRoute && <Footer />}
     </>
   );
 }

@@ -5,10 +5,11 @@ import React, { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Facebook, Instagram, Youtube, Linkedin, ChevronDown } from "lucide-react";
-import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
+import { FaArrowLeft, FaArrowRight, FaInstagram, FaLinkedin, FaYoutube } from "react-icons/fa";
 import { ImageSlider } from "@/components/ImageSlider";
 import { CompanyStats } from "./CompanyStats";
 import { ICON_COMPONENTS } from "@/components/ICONS"; // Assuming you have a central icons config
+import { FaFacebook } from "react-icons/fa6";
 
 // --- INTERFACES ---
 interface SliderData {
@@ -52,10 +53,10 @@ export default function BlogHeroClient({ sliders, categories }: { sliders: Slide
         <div className="flex flex-col items-center gap-4">
             <p className="font-semibold text-white tracking-widest uppercase text-sm">Follow Us</p>
             <div className="flex lg:flex-col gap-4">
-                <Link href="#" className="text-white hover:scale-110 transition-transform p-2 rounded-full hover:bg-white/20"><Facebook className="w-5 h-5" /></Link>
-                <Link href="#" className="text-white hover:scale-110 transition-transform p-2 rounded-full hover:bg-white/20"><Instagram className="w-5 h-5" /></Link>
-                <Link href="#" className="text-white hover:scale-110 transition-transform p-2 rounded-full hover:bg-white/20"><Youtube className="w-5 h-5" /></Link>
-                <Link href="#" className="text-white hover:scale-110 transition-transform p-2 rounded-full hover:bg-white/20"><Linkedin className="w-5 h-5" /></Link>
+                <Link href="#" className="text-white hover:scale-110 transition-transform p-2 rounded-full hover:bg-white/20"><FaFacebook className="w-5 h-5" /></Link>
+                <Link href="#" className="text-white hover:scale-110 transition-transform p-2 rounded-full hover:bg-white/20"><FaInstagram className="w-5 h-5" /></Link>
+                <Link href="#" className="text-white hover:scale-110 transition-transform p-2 rounded-full hover:bg-white/20"><FaYoutube className="w-5 h-5" /></Link>
+                <Link href="#" className="text-white hover:scale-110 transition-transform p-2 rounded-full hover:bg-white/20"><FaLinkedin className="w-5 h-5" /></Link>
             </div>
         </div>
     );

@@ -70,7 +70,7 @@ const RoomSelector: React.FC<RoomSelectorProps> = ({
             { value: "L-shaped", label: "L-shaped" },
             { value: "U-shaped", label: "U-shaped" },
             { value: "Straight", label: "Straight" },
-            { value: "Island", label: "Island" },
+            { value: "Parallel", label: "Parallel" },
         ],
     };
 
@@ -208,7 +208,7 @@ const RoomSelector: React.FC<RoomSelectorProps> = ({
                 key={roomKey}
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="bg-white border-2 border-gray-200 rounded-xl p-4 shadow-lg w-full max-w-xl mx-auto"
+                className="bg-white border-2 border-gray-200 rounded-xl p-1 shadow-lg w-full max-w-xl mx-auto"
             >
                 <h4 className="font-bold text-xl mt-1 mb-4 text-[#00423D] capitalize text-center">
                     {roomType.replace(/([A-Z])/g, ' $1').trim()} {getRoomCount(roomType) > 1 ? ` ${roomIndex + 1}` : ""}

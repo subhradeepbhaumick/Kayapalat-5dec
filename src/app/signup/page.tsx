@@ -14,7 +14,7 @@ export default function SignupPage() {
         username: "",
         phone: "",
         about: "",
-        joinAs: "client", // Default value
+        joinAs: "", // Default value
     });
     const [buttonDisabled, setButtonDisabled] = useState(true);
     const [loading, setLoading] = useState(false);
@@ -35,22 +35,18 @@ export default function SignupPage() {
     const phonePattern = /^\d{10}$/;
 
     const options = [
-        { value: "client", label: "Client", icon: (
-            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-            </svg>
-        )},
-        { value: "designer", label: "Designer", icon: (
-            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01"></path>
-            </svg>
-        )},
-        { value: "business_partner", label: "Business Partner", icon: (
-            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-            </svg>
-        )},
+        { value: "", label: "Select your role", icon: null },
         { value: "refer_earn_partner", label: "Refer & Earn Partner", icon: (
+            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+        )},
+        { value: "Admin", label: "Admin", icon: (
+            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+        )},
+        { value: "Super Admin", label: "Super Admin", icon: (
             <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
             </svg>
@@ -82,6 +78,7 @@ export default function SignupPage() {
             user.confirmPassword &&
             user.username &&
             user.phone &&
+            user.joinAs &&
             !passwordMismatch &&
             !passwordTooShort &&
             termsAccepted &&
@@ -198,13 +195,13 @@ export default function SignupPage() {
                         Join As <span className="text-red-500">*</span>
                     </label>
                     <div className="relative mb-4 group">
-                        <div 
+                        <div
                             className="appearance-none p-3 pr-10 border border-gray-300 rounded-lg bg-white text-black focus:outline-none focus:border-teal-500 w-full cursor-pointer transition-all duration-300 hover:border-teal-500 hover:shadow-md"
                             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                         >
                             <div className="flex items-center">
                                 {selectedOption?.icon}
-                                <span>{selectedOption?.label}</span>
+                                <span className={user.joinAs === "" ? "text-gray-500" : "text-black"}>{selectedOption?.label}</span>
                             </div>
                         </div>
                         <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
@@ -276,7 +273,7 @@ export default function SignupPage() {
                             type={showPassword ? "text" : "password"}
                             value={user.password}
                             onChange={(e) => setUser({ ...user, password: e.target.value })}
-                            placeholder="Enter password"
+                            placeholder="Use at least 6 characters and special symbols"
                         />
                         <button
                             type="button"

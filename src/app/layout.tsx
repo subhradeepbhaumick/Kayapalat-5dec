@@ -23,7 +23,7 @@ const sairaStencil = Saira_Stencil_One({
 });
 
 export const metadata: Metadata = {
-  title: "Kayapalat Interiors: Free 3D Design+ Upto 25 Years Warranty",
+  title: "Kayapalat Desi Interior | Transform Your Home in Style",
   description: "Kayapalat  Interior Designing brand offering free 3D design, up to 25 yrs warranty & flat 5% off on 2BHK, 10% off on 3BHK & bungalows.",
 };
 

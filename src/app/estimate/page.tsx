@@ -326,12 +326,12 @@ const EstimatePage = () => {
                 const roomType = roomKey.split('_')[0];
 
                 // 1. Base Cost
-                const basePrice = roomPrices[roomType] || 0;
-                if (basePrice > 0) {
+                // const basePrice = roomPrices[roomType] || 0;
+                // if (basePrice > 0) {
 
-                    breakdown[`${roomKey}_Base Cost`] = basePrice * area;
-                    total += basePrice * area;
-                }
+                //     breakdown[`${roomKey}_Base Cost`] = basePrice * area;
+                //     total += basePrice * area;
+                // }
 
                 // 2. Per Square Foot Features (False Ceiling, Loft)
                 if (details.falseCeiling) {
@@ -345,18 +345,33 @@ const EstimatePage = () => {
                 if (details.loft) {
                     // SAFEGUARD & CRITICAL: Applying same fixes for 'loft'.
                     const pricePerSqFt = featurePrices['loft'] || 0;
-                    const cost = pricePerSqFt * area;
+                    const cost = pricePerSqFt * area * 0.25; // Assuming loft covers 25% of the room area
                     breakdown[`${roomKey}_Loft`] = cost;
                     total += cost;
                 }
 
                 // 3. Flat Rate Additive Costs (Material, Finish, Hardware, Shape)
-                const options = ['material', 'finish', 'hardware', 'shape'];
+                // const options = ['material', 'finish', 'hardware', 'shape'];
+                const options = ['shape'];
                 options.forEach(option => {
                     if (details[option]) {
                         const featureName = `${option.charAt(0).toUpperCase() + option.slice(1)}: ${details[option]}`;
                         // SAFEGUARD: Use || 0 to prevent NaN if a price lookup fails.
-                        const price = featurePrices[featureName] || 0;
+                        let addonarea = area;
+                        if(featureName == "Shape: L-shaped"){
+                            addonarea = area * 1.5;
+                        }
+                        else if(featureName == "Shape: U-shaped"){
+                            addonarea = area * 2;
+                        }
+                        else if(featureName == "Shape: Parallel"){
+                            addonarea = area * 1.75;
+                        }
+                        else{
+                            addonarea = area;
+                        }
+
+                        const price = featurePrices[featureName] * addonarea || 0;
 
                         breakdown[`${roomKey}_${featureName}`] = price;
                         total += price;
@@ -584,7 +599,7 @@ const EstimatePage = () => {
     console.log('Calculated Estimate:', calculatedTotalEstimate, calculatedBreakdown);
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-[#D2EBD0] to-white py-24 px-4 sm:px-6 lg:px-8">
+        <div className="min-h-screen bg-gradient-to-b from-[#D2EBD0] to-white py-24 px-1 sm:px-6 lg:px-8">
             <div className="max-w-7xl mx-auto">
                 <div className="text-center mb-12">
                     <h1 className="text-4xl md:text-6xl font-bold text-[#00423D] mb-4">
@@ -638,7 +653,7 @@ const EstimatePage = () => {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         // Dynamically apply background class based on resStep, and add border/shadow for pop-out effect
-                        className={`relative backdrop-blur-sm rounded-xl border-2 border-gray-200 shadow-xl p-8 transition-all duration-500 ease-in-out ${getFormBackgroundClass()}`}
+                        className={`relative backdrop-blur-sm rounded-xl border-2 border-gray-200 shadow-xl p-2 transition-all duration-500 ease-in-out ${getFormBackgroundClass()}`}
                     >
                         {/* Render the SVG pattern for the current step */}
                         {getSvgPattern(resStep)}

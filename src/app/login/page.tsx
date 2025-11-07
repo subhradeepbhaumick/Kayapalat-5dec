@@ -39,7 +39,7 @@ export default function LoginPage() {
       
       if (response.data.success) {
         // Update auth state
-        login(response.data.user); // Removed incorrect boolean parameter
+        login(response.data.user);
         // Show welcome toast
         toast.success("🎉 Welcome back to Kayapalat family!");
         // Add a small delay to ensure state updates
