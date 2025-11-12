@@ -1,10 +1,4 @@
-# TODO: Make Sidebar Interactive for Notifications
-
-## Tasks
-- [x] Add state for activeTab in ReferUserDashboard component
-- [x] Update sidebarItems to include unique keys
-- [x] Make sidebar items clickable to change activeTab
-- [x] Update active styling in sidebar based on activeTab
-- [x] Add conditional rendering in hero section for different tabs
-- [x] Create placeholder content for Notifications tab in hero section
-- [x] Test the interactivity
+- [x] Add showPopup state to ClientPage component
+- [x] Modify handleSubmit to set showPopup(true) after adding client
+- [x] Add congratulations popup JSX with CSS styling
+- [x] Add close functionality to popup

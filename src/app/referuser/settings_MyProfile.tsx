@@ -11,6 +11,7 @@ interface ProfileData {
   whatsapp: string;
   address: string;
   occupation: string;
+  representativeId: string;
   password: string;
   confirmPassword: string;
 }
@@ -27,6 +28,7 @@ const MyProfilePage: React.FC = () => {
     whatsapp: '',
     address: '',
     occupation: '',
+    representativeId: '',
     password: '',
     confirmPassword: '',
   });
@@ -48,7 +50,7 @@ const MyProfilePage: React.FC = () => {
 
   const handleSave = () => {
     // Validation: Check if all required fields are filled
-    if (!formData.name || !formData.email || !formData.phone || !formData.whatsapp || !formData.address || !formData.occupation || !formData.password || !formData.confirmPassword) {
+    if (!formData.name || !formData.email || !formData.phone || !formData.whatsapp || !formData.address || !formData.occupation || !formData.representativeId || !formData.password || !formData.confirmPassword) {
       alert("Please fill in all required fields.");
       return;
     }
@@ -171,7 +173,7 @@ const MyProfilePage: React.FC = () => {
                   required
                 />
               </div>
-              <div className="md:col-span-2">
+              <div className="md:col-span-1">
                 <label className="block text-sm text-gray-600 mb-1">Address<span className="text-red-500">*</span></label>
                 <textarea
                   name="address"
@@ -180,6 +182,18 @@ const MyProfilePage: React.FC = () => {
                   className="w-full border rounded-md p-2"
                   placeholder="Enter your address"
                   rows={3}
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm text-gray-600 mb-1">Representative Id<span className="text-red-500">*</span></label>
+                <input
+                  name="representativeId"
+                  type="text"
+                  value={formData.representativeId}
+                  onChange={handleChange}
+                  className="w-full border rounded-md p-2"
+                  placeholder="Enter your Representative ID"
                   required
                 />
               </div>
@@ -234,10 +248,12 @@ const MyProfilePage: React.FC = () => {
                 <img src={formData.profilePic} alt="Profile" className="w-35 h-35 rounded-full" />
               ) : (
                 <div className="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center">
-                  <span className="text-gray-500">No Image</span>
+                  <span className=" text-gray-500">
+                    {formData.name ? formData.name.split(' ').map(n => n[0]).join('').toUpperCase() : 'N/A'}
+                  </span>
                 </div>
               )}
-              
+
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <h2><strong>Name:</strong> {formData.name || 'N/A'}</h2>
@@ -247,6 +263,7 @@ const MyProfilePage: React.FC = () => {
               <p><strong>Address:</strong> {formData.address || 'N/A'}</p>
               <p><strong>Password:</strong> {'*'.repeat(formData.password.length) || 'N/A'}</p>
               <p><strong>Occupation:</strong> {formData.occupation || 'N/A'}</p>
+              <p><strong>Representative ID:</strong> {formData.representativeId || 'N/A'}</p>
             </div>
           </div>
         )}

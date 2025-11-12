@@ -2,29 +2,24 @@
 
 import React, { useState } from 'react';
 import { Menu, Bell, LayoutDashboard, Users, UserPlus, BarChart3, ClipboardList, Search, LogOut, User,Settings } from 'lucide-react';
-import AgentsTab from './sales_agents';
-import LeadsTab from './sales_leads';
-import PaymentsTab from './sales_payments';
-import InvoicesTab from './sales_invoices';
-import BusinessInsightsTab from './sales_businessInsights';
-import NotificationsTab from './sales_notifications';
-import TodoTab from './sales_todo';
-import SettingsTab from './sales_settings';
+import AdminTab from './superadmin_admin';
+import AgentTab from './superadmin_agent';
+import PaymentTab from './superadmin_payment';
 
-const SalesAdmin = () => {
+const SuperAdmin = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [activeTab, setActiveTab] = useState('Dashboard');
 
   // Mock user data (since no backend)
   const user = {
-    name: "Ragini Sarkar",
-    profilePicture: "/Screenshot 2025-11-07 174332.png" // Using existing image from public folder
+    name: "John Bor",
+    profilePicture: "/founder.jpg" // Using existing image from public folder
   };
 
   const sidebarItems = [
     { icon: LayoutDashboard, label: 'Dashboard', key: 'Dashboard' },
-    { icon: Users, label: 'Agents', key: 'Agents' },
-    { icon: UserPlus, label: 'Leads', key: 'Leads' },
+    { icon: Users, label: 'Admin', key: 'Admin' },
+    { icon: Users, label: 'Agent', key: 'Agent' },
     { icon: UserPlus, label: 'Payments', key: 'Payments' },
     { icon: UserPlus, label: 'Invoices', key: 'Invoices' },
     { icon: BarChart3, label: 'Business Insights', key: 'Business Insights' },
@@ -60,7 +55,7 @@ const SalesAdmin = () => {
                 </div>
                 <div>
                   <h3 className="font-semibold text-[#DC0835]">{user.name}</h3>
-                  <p className="text-sm text-gray-600">Sales Administrator</p>
+                  <p className="text-sm text-gray-600">Super Admin</p>
                   <p className="text-sm text-black-600">ID: <strong>A123</strong></p>
                 </div>
               </div>
@@ -130,7 +125,7 @@ const SalesAdmin = () => {
         {/* Welcome Bar */}
         <div className="bg-[#295A47] text-white py-3 px-8">
           <div className="max-w-4xl mx-auto">
-            <h4 className="text-lg font-semibold text-center">Welcome to Sales Admin Dashboard</h4>
+            <h4 className="text-lg font-semibold text-center">Welcome to Super Admin Dashboard</h4>
           </div>
         </div>
 
@@ -142,7 +137,7 @@ const SalesAdmin = () => {
                 <>
                   <div className="text-center mb-8">
                     <h1 className="text-4xl font-bold text-[#295A47] mb-4">
-                      Sales Admin Dashboard
+                      Super Admin Dashboard
                     </h1>
                     <p className="text-gray-600 text-lg">
                       Manage your sales operations, agents, leads, and business insights.
@@ -169,36 +164,16 @@ const SalesAdmin = () => {
                   </div>
                 </>
               )}
-
-              {activeTab === 'Agents' && (
-                <AgentsTab />
+              {activeTab === 'Admin' && (
+                <AdminTab />
               )}
-
-              {activeTab === 'Leads' && (
-                <LeadsTab />
+              {activeTab === 'Agent' && (
+                <AgentTab />
+              )}
+              {activeTab === 'Payments' && (
+                <PaymentTab />
               )}
               
-              {activeTab === 'Payments' && (
-                <PaymentsTab />
-              )}
-
-              {activeTab === 'Invoices' && (
-                <InvoicesTab />
-              )}
-              {activeTab === 'Business Insights' && (
-                <BusinessInsightsTab />
-              )}
-
-              {activeTab === 'Notifications' && (
-                <NotificationsTab />
-              )}
-
-              {activeTab === 'To Do' && (
-                <TodoTab />
-              )}
-              {activeTab === 'Settings' && (
-                <SettingsTab />
-              )}
             </div>
           </div>
         </div>
@@ -215,4 +190,4 @@ const SalesAdmin = () => {
   );
 };
 
-export default SalesAdmin;
+export default SuperAdmin;

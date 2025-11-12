@@ -11,7 +11,7 @@ export default function ClientLayoutWrapper({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const isAdminRoute = pathname.startsWith("/admin") || pathname.startsWith("/sales-admin");
+  const isAdminRoute = pathname.startsWith("/admin") || pathname.startsWith("/sales-admin") || pathname.startsWith("/superadmin");
   const isReferUserRoute = pathname.startsWith("/referuser");
   const [mounted, setMounted] = useState(false);
 
