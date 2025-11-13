@@ -70,7 +70,6 @@ const SalesPage: React.FC = () => {
                 <th className="p-2 border">Client Name</th>
                 <th className="p-2 border">Address</th>
                 <th className="p-2 border">Phone Number</th>
-                <th className="p-2 border">Requirements</th>
                 <th className="p-2 border">Status</th>
                 <th className="p-2 border">Representative Name</th>
                 <th className="p-2 border">Property Type</th>
@@ -88,7 +87,6 @@ const SalesPage: React.FC = () => {
                   <td className="p-2 border">{item.client}</td>
                   <td className="p-2 border">{item.address}</td>
                   <td className="p-2 border">{item.phone}</td>
-                  <td className="p-2 border">{item.req}</td>
                   <td className="p-2 border">{item.status}</td>
                   <td className="p-2 border">{item.rep}</td>
                   <td className="p-2 border">{item.propertyType}</td>
@@ -108,15 +106,15 @@ const SalesPage: React.FC = () => {
               <tr>
                 <th className="p-2 border">Sl.No</th>
                 <th className="p-2 border">Appointment ID</th>
+                <th className="p-2 border">Commission</th>
                 <th className="p-2 border">Project Name</th>
                 <th className="p-2 border">Client Name</th>
                 <th className="p-2 border">Address</th>
                 <th className="p-2 border">Phone Number</th>
-                <th className="p-2 border">Requirements</th>
                 <th className="p-2 border">Booking Status</th>
                 <th className="p-2 border">Representative Name</th>
                 <th className="p-2 border">Property Type</th>
-                <th className="p-2 border">Client Estimate</th>
+                <th className="p-2 border">Project Value</th>
                 <th className="p-2 border">Payment Status</th>
                 <th className="p-2 border">Date</th>
                 <th className="p-2 border">Time</th>
@@ -126,11 +124,11 @@ const SalesPage: React.FC = () => {
               <tr>
                 <td className="p-2 border text-center">1</td>
                 <td className="p-2 border">BK456321</td>
+                <td className="p-2 border">5%</td>
                 <td className="p-2 border">Rajwada Grand</td>
                 <td className="p-2 border">Kalyan Chatterjee</td>
                 <td className="p-2 border">Kolkata</td>
                 <td className="p-2 border">+91 9999999999</td>
-                <td className="p-2 border">3BHK</td>
                 <td className="p-2 border">Confirmed</td>
                 <td className="p-2 border">John Bor</td>
                 <td className="p-2 border">Residential</td>
@@ -150,15 +148,15 @@ const SalesPage: React.FC = () => {
                 <tr>
                   <th className="p-2 border">Sl.No</th>
                   <th className="p-2 border">Appointment ID</th>
+                  <th className="p-2 border">Commission</th>
                   <th className="p-2 border">Project Name</th>
+                  <th className="p-2 border">Project Value</th>
                   <th className="p-2 border">Client Name</th>
                   <th className="p-2 border">Address</th>
                   <th className="p-2 border">Phone Number</th>
-                  <th className="p-2 border">Requirements</th>
                   <th className="p-2 border">Booking Status</th>
                   <th className="p-2 border">Representative Name</th>
                   <th className="p-2 border">Property Type</th>
-                  <th className="p-2 border">Client Estimate</th>
                   <th className="p-2 border">Payment Status</th>
                   <th className="p-2 border">Date</th>
                   <th className="p-2 border">Time</th>
@@ -169,15 +167,15 @@ const SalesPage: React.FC = () => {
                 <tr>
                   <td className="p-2 border text-center">1</td>
                   <td className="p-2 border">BK456321</td>
+                  <td className="p-2 border">5%</td>
                   <td className="p-2 border">Rajwada Grand</td>
+                  <td className="p-2 border">₹10,00,000</td>
                   <td className="p-2 border">Kalyan Chatterjee</td>
                   <td className="p-2 border">Kolkata</td>
                   <td className="p-2 border">+91 9999999999</td>
-                  <td className="p-2 border">3BHK</td>
                   <td className="p-2 border">Confirmed</td>
                   <td className="p-2 border">John Bor</td>
                   <td className="p-2 border">Residential</td>
-                  <td className="p-2 border">₹10,00,000</td>
                   <td className="p-2 border">Paid</td>
                   <td className="p-2 border">12/01/21</td>
                   <td className="p-2 border">12:00</td>
@@ -220,7 +218,7 @@ const SalesPage: React.FC = () => {
             }`}
             onClick={() => setActiveTab("booking")}
           >
-            Bookings
+            Prospect
           </button>
           <button
             className={`px-4 py-2 rounded-3xl ${

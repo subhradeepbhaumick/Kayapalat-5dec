@@ -137,7 +137,7 @@ const AgentsTab = () => {
               <th className="px-4 py-2 border">Phone</th>
               <th className="px-4 py-2 border">WhatsApp</th>
               <th className="px-4 py-2 border">Address</th>
-              <th className="px-4 py-2 border">Date</th>
+              <th className="px-4 py-2 border">Lead Date</th>
             </tr>
           </thead>
           <tbody>
@@ -154,11 +154,11 @@ const AgentsTab = () => {
                       className="w-10 h-10 rounded-full mx-auto object-cover"
                     />
                   </td>
-                  <td className="px-4 py-2 border">{agent.name}</td>
-                  <td className="px-4 py-2 border">{agent.phone}</td>
-                  <td className="px-4 py-2 border">{agent.whatsapp}</td>
-                  <td className="px-4 py-2 border">{agent.address}</td>
-                  <td className="px-4 py-2 border">{agent.date}</td>
+                  <td className="px-4 py-2 border text-center">{agent.name}</td>
+                  <td className="px-4 py-2 border text-center">{agent.phone}</td>
+                  <td className="px-4 py-2 border text-center">{agent.whatsapp}</td>
+                  <td className="px-4 py-2 border text-center">{agent.address}</td>
+                  <td className="px-4 py-2 border text-center">{agent.date}</td>
                 </tr>
               ))
             ) : (

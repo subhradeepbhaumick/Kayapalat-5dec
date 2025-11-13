@@ -31,7 +31,11 @@ const LeadsTab = () => {
       agentName: 'Rohit Das',
       clientName: 'Amit Sharma',
       clientContact: '9876543210',
+      AppoinmentID: 'AP123456',
       projectName: 'Green Valley Residency',
+      projectvalue: '₹50,00,000',
+      agentshare: '2,50,000',
+      Commission: '5',
       propertyAddress: 'Kolkata, Sector 5',
       details: '3BHK Flat Enquiry',
       coldCallDate: '2025-11-10',
@@ -43,6 +47,7 @@ const LeadsTab = () => {
       bookingDate: '2025-11-15',
       bookingTime: '16:00',
       bookingStatus: 'Booked',
+      BookedInNext: '',
       bookingId: 'BK001',
       propertyType: 'Residential',
       remarks: [],
@@ -53,7 +58,11 @@ const LeadsTab = () => {
       agentName: 'Priya Sen',
       clientName: 'Rakesh Gupta',
       clientContact: '9123456780',
+      AppoinmentID: 'AP123457',
       projectName: 'Skyline Heights',
+      projectvalue: '₹50,00,000',
+      agentshare: '₹2,50,000',
+      Commission: '5',
       propertyAddress: 'New Town, Kolkata',
       details: '2BHK Flat Lead',
       coldCallDate: '2025-11-09',
@@ -61,10 +70,11 @@ const LeadsTab = () => {
       coldCallStatus: 'No Show',
       siteVisitDate: '',
       siteVisitTime: '',
-      siteVisitStatus: 'Not Interested',
+      siteVisitStatus: 'Booked Somewhere Else',
       bookingDate: '',
       bookingTime: '',
       bookingStatus: '',
+      BookedInNext: '',
       bookingId: '',
       propertyType: 'Residential',
       remarks: [],
@@ -75,7 +85,11 @@ const LeadsTab = () => {
       agentName: 'Vikram Singh',
       clientName: 'Business Corp',
       clientContact: '7777777777',
+      AppoinmentID: 'AP123458',
       projectName: 'Commercial Plaza',
+      projectvalue: '₹50,00,000',
+      agentshare: '₹2,50,000',
+      Commission: '5',
       propertyAddress: 'Mumbai',
       details: 'Office Space',
       coldCallDate: '2025-11-11',
@@ -84,6 +98,7 @@ const LeadsTab = () => {
       siteVisitDate: '2025-11-13',
       siteVisitTime: '10:00',
       siteVisitStatus: 'Upcoming',
+      BookedInNext: '',
       bookingDate: '',
       bookingTime: '',
       bookingStatus: '',
@@ -216,6 +231,33 @@ const LeadsTab = () => {
     })
   );
 };
+  const handleShareChange = (id: number, field: string, value: string) => {
+  setLeads((prevLeads) =>
+    prevLeads.map((lead) => {
+      if (lead.id === id) {
+        let updatedLead = { ...lead, [field]: value };
+
+        // Clean inputs: remove ₹, %, commas, and spaces
+        const cleanValue = (v: string) =>
+          parseFloat(v.replace(/[₹,%\s]/g, '').replace(/,/g, '') || '0');
+
+        const projectValue = cleanValue(updatedLead.projectvalue);
+        const commission = cleanValue(updatedLead.Commission);
+
+        // Auto-calculate if both are valid numbers
+        if (projectValue > 0 && commission > 0) {
+          updatedLead.agentshare = ((projectValue * commission) / 100).toFixed(2);
+        } else {
+          updatedLead.agentshare = '';
+        }
+
+        return updatedLead;
+      }
+      return lead;
+    })
+  );
+};
+
 
   // Handle save remark
   const handleSaveRemark = () => {
@@ -276,7 +318,7 @@ const LeadsTab = () => {
         {/* Tabs */}
         <div className="flex gap-4">
           <button
-            className={`px-4 py-2 rounded-3xl ${
+            className={`px-2  rounded-3xl ${
               activeTab === "cold" ? "bg-green-900 text-white" : "bg-white border"
             }`}
             onClick={() => setActiveTab("cold")}
@@ -284,7 +326,7 @@ const LeadsTab = () => {
             Cold Calling
           </button>
           <button
-            className={`px-4 py-2 rounded-3xl ${
+            className={`px-2 py-1 rounded-3xl ${
               activeTab === "site" ? "bg-green-900 text-white" : "bg-white border"
             }`}
             onClick={() => setActiveTab("site")}
@@ -292,7 +334,7 @@ const LeadsTab = () => {
             Site Visit
           </button>
           <button
-            className={`px-4 py-2 rounded-3xl ${
+            className={`px-2 py-1 rounded-3xl ${
               activeTab === "booking"
                 ? "bg-green-900 text-white"
                 : "bg-white border"
@@ -302,7 +344,7 @@ const LeadsTab = () => {
             Hot Client
           </button>
           <button
-            className={`px-4 py-2 rounded-3xl ${
+            className={`px-2 py-1 rounded-3xl ${
               activeTab === "booked"
                 ? "bg-green-900 text-white"
                 : "bg-white border"
@@ -342,7 +384,7 @@ const LeadsTab = () => {
               <option value="upcoming">Upcoming</option>
               <option value="not_responding">Not Responding</option>
               <option value="no_show">No Show</option>
-              <option value="not_interested">Not Interested</option>
+              <option value="not_interested">Booked Somewhere Else</option>
               <option value="booked">Booked</option>
               <option value="time_asc">By Time Ascending</option>
               <option value="time_desc">By Time Descending</option>
@@ -411,7 +453,11 @@ const LeadsTab = () => {
               <th className="p-3 border border-gray-300 min-w-[120px] font-semibold">Agent Name</th>
               <th className="p-3 border border-gray-300 min-w-[120px] font-semibold">Client Name</th>
               <th className="p-3 border border-gray-300 min-w-[120px] font-semibold">Client Contact</th>
+              <th className="p-3 border border-gray-300 min-w-[120px] font-semibold">Appointment ID</th>
               <th className="p-3 border border-gray-300 min-w-[120px] font-semibold">Project Name</th>
+              <th className="p-3 border border-gray-300 min-w-[120px] font-semibold">Project Value</th>
+              <th className="p-3 border border-gray-300 min-w-[120px] font-semibold">Commission(%)</th>
+              <th className="p-3 border border-gray-300 min-w-[120px] font-semibold">Agent Share</th>
               <th className="p-3 border border-gray-300 min-w-[120px] font-semibold">Property Address</th>
               <th className="p-3 border border-gray-300 min-w-[120px] font-semibold">Details</th>
               {activeTab === 'cold' && (
@@ -439,6 +485,7 @@ const LeadsTab = () => {
                   <th className="p-3 border border-gray-300 min-w-[120px] font-semibold">Booking Date</th>
                   <th className="p-3 border border-gray-300 min-w-[120px] font-semibold">Booking Time</th>
                   <th className="p-3 border border-gray-300 min-w-[120px] font-semibold">Booking Status</th>
+                  <th className="p-3 border border-gray-300 min-w-[120px] font-semibold">Booked In Next</th>
                   <th className="p-3 border border-gray-300 min-w-[120px] font-semibold">Booking ID</th>
                   <th className="p-3 border border-gray-300 min-w-[120px] font-semibold">Remarks</th>
                   <th className="p-3 border border-gray-300 min-w-[120px] font-semibold">To Book</th>
@@ -465,11 +512,70 @@ const LeadsTab = () => {
                   <td className="border px-4 py-2">{highlightText(lead.agentName)}</td>
                   <td className="border px-4 py-2">{highlightText(lead.clientName)}</td>
                   <td className="border px-4 py-2">{highlightText(lead.clientContact)}</td>
-                  <td className="border px-4 py-2">{highlightText(lead.projectName)}</td>
+                  <td className="border px-4 py-2">{highlightText(lead.AppoinmentID)}</td>
+                  {/* <td className="border px-4 py-2">{highlightText(lead.projectName)}</td>
+                  <td className="border px-4 py-2">{highlightText(lead.projectvalue)}</td>
+                  <td className="border px-4 py-2">{highlightText(lead.agentshare)}</td>
+                  <td className="border px-4 py-2">{highlightText(lead.Commission)}</td>
                   <td className="border px-4 py-2">{highlightText(lead.propertyAddress)}</td>
-                  <td className="border px-4 py-2">{lead.details}</td>
+                  <td className="border px-4 py-2">{lead.details}</td> */}
                   {activeTab === 'cold' && (
                     <>
+                    <td className="border px-4 py-2">
+                        <input
+                          type="text"
+                          value={lead.projectName}
+                          onChange={(e) => handleChange(lead.id, 'projectName', e.target.value)}
+                          className="border p-1 rounded w-full"
+                        />
+                      </td>
+                      <td className="border px-4 py-2">
+                        <input
+                          type="text"
+                          value={lead.projectvalue}
+                          onChange={(e) => handleShareChange(lead.id, 'projectvalue', e.target.value)}
+                          className="border p-1 rounded w-full"
+                        />
+                      </td>
+
+                      <td className="border px-4 py-2"> 
+                        <input
+                          type="text"
+                          value={lead.Commission}
+                          onChange={(e) => handleShareChange(lead.id, 'Commission', e.target.value)}
+                          className="border p-1 rounded w-full"
+                        />
+                      </td>
+
+                      <td className="border px-4 py-2">
+                        <input
+                          type="text"
+                          value={
+                            lead.projectvalue && lead.Commission
+                              ? ((parseFloat(lead.projectvalue) * parseFloat(lead.Commission)) / 100).toFixed(2)
+                              : ''
+                          }
+                          readOnly
+                          className="border p-1 rounded w-full bg-gray-100 cursor-not-allowed"
+                        />
+                      </td>
+
+                      <td className="border px-4 py-2">
+                        <input
+                          type="text"
+                          value={lead.propertyAddress}
+                          onChange={(e) => handleChange(lead.id, 'propertyAddress', e.target.value)}
+                          className="border p-1 rounded w-full"
+                        />
+                      </td>
+                      <td className="border px-4 py-2">
+                        <input
+                          type="text"
+                          value={lead.details}
+                          onChange={(e) => handleChange(lead.id, 'details', e.target.value)}
+                          className="border p-1 rounded w-full"
+                        />
+                      </td>
                       <td className="border px-4 py-2">
                         <select
                           value={lead.propertyType}
@@ -485,8 +591,8 @@ const LeadsTab = () => {
                       <td className="border px-4 py-2">
                         <input
                           type="date"
-                          value={lead.siteVisitDate}
-                          onChange={(e) => handleChange(lead.id, 'siteVisitDate', e.target.value)}
+                          value={lead.coldCallDate}
+                          onChange={(e) => handleChange(lead.id, 'coldcallDate', e.target.value)}
                           className="border p-1 rounded w-full"
                         />
                       </td>
@@ -494,22 +600,22 @@ const LeadsTab = () => {
                       <td className="border px-4 py-2">
                         <input
                           type="time"
-                          value={lead.siteVisitTime}
-                          onChange={(e) => handleChange(lead.id, 'siteVisitTime', e.target.value)}
+                          value={lead.coldCallTime}
+                          onChange={(e) => handleChange(lead.id, 'coldcallTime', e.target.value)}
                           className="border p-1 rounded w-full"
                         />
                       </td>
 
                       <td className="border px-4 py-2">
                         <select
-                          value={lead.siteVisitStatus}
-                          onChange={(e) => handleChange(lead.id, 'siteVisitStatus', e.target.value)}
+                          value={lead.coldCallStatus}
+                          onChange={(e) => handleChange(lead.id, 'coldcallStatus', e.target.value)}
                           className="border p-1 rounded w-full"
                         >
                           <option>Upcoming</option>
                           <option>Not Responding</option>
                           <option>No Show</option>
-                          <option>Not Interested</option>
+                          <option>Booked Somewhere Else</option>
                           <option>Booked</option>
                           <option>By Time Ascending</option>
                           <option>By Time Descending</option>
@@ -529,6 +635,39 @@ const LeadsTab = () => {
                   )}
                   {activeTab === 'site' && (
                     <>
+                      <td className="border px-4 py-2">{highlightText(lead.projectName)}</td>
+                      <td className="border px-4 py-2">
+                        <input
+                          type="text"
+                          value={lead.projectvalue}
+                          onChange={(e) => handleShareChange(lead.id, 'projectvalue', e.target.value)}
+                          className="border p-1 rounded w-full"
+                        />
+                      </td>
+
+                      <td className="border px-4 py-2"> 
+                        <input
+                          type="text"
+                          value={lead.Commission}
+                          onChange={(e) => handleShareChange(lead.id, 'Commission', e.target.value)}
+                          className="border p-1 rounded w-full"
+                        />
+                      </td>
+
+                      <td className="border px-4 py-2">
+                        <input
+                          type="text"
+                          value={
+                            lead.projectvalue && lead.Commission
+                              ? ((parseFloat(lead.projectvalue) * parseFloat(lead.Commission)) / 100).toFixed(2)
+                              : ''
+                          }
+                          readOnly
+                          className="border p-1 rounded w-full bg-gray-100 cursor-not-allowed"
+                        />
+                      </td>
+                      <td className="border px-4 py-2">{highlightText(lead.propertyAddress)}</td>
+                      <td className="border px-4 py-2">{lead.details}</td>
                       <td className="border px-4 py-2">
                         <select
                           value={lead.propertyType}
@@ -567,7 +706,7 @@ const LeadsTab = () => {
                           <option>Upcoming</option>
                           <option>Not Responding</option>
                           <option>No Show</option>
-                          <option>Not Interested</option>
+                          <option>Booked Somewhere Else</option>
                           <option>Booked</option>
                           <option>By Time Ascending</option>
                           <option>By Time Descending</option>
@@ -588,6 +727,39 @@ const LeadsTab = () => {
 
                   {activeTab === 'booking' && (
                     <>
+                      <td className="border px-4 py-2">{highlightText(lead.projectName)}</td>
+                      <td className="border px-4 py-2">
+                        <input
+                          type="text"
+                          value={lead.projectvalue}
+                          onChange={(e) => handleShareChange(lead.id, 'projectvalue', e.target.value)}
+                          className="border p-1 rounded w-full"
+                        />
+                      </td>
+
+                      <td className="border px-4 py-2"> 
+                        <input
+                          type="text"
+                          value={lead.Commission}
+                          onChange={(e) => handleShareChange(lead.id, 'Commission', e.target.value)}
+                          className="border p-1 rounded w-full"
+                        />
+                      </td>
+
+                      <td className="border px-4 py-2">
+                        <input
+                          type="text"
+                          value={
+                            lead.projectvalue && lead.Commission
+                              ? ((parseFloat(lead.projectvalue) * parseFloat(lead.Commission)) / 100).toFixed(2)
+                              : ''
+                          }
+                          readOnly
+                          className="border p-1 rounded w-full bg-gray-100 cursor-not-allowed"
+                        />
+                      </td>
+                      <td className="border px-4 py-2">{highlightText(lead.propertyAddress)}</td>
+                      <td className="border px-4 py-2">{lead.details}</td>
                       <td className="border px-4 py-2">
                         <select
                           value={lead.propertyType}
@@ -627,14 +799,27 @@ const LeadsTab = () => {
                           <option>Upcoming</option>
                           <option>Not Responding</option>
                           <option>No Show</option>
-                          <option>Not Interested</option>
+                          <option>Booked Somewhere Else</option>
                           <option>Booked</option>
                           <option>By Time Ascending</option>
                           <option>By Time Descending</option>
                           <option>Confirmed</option>
                         </select>
                       </td>
+                      <td className="border px-4 py-2">
+                        <select
+                          value={lead.BookedInNext}
+                          onChange={(e) => handleChange(lead.id, 'BookedInNext', e.target.value)}
+                          className="border p-1 rounded w-full"
+                        >
+                          <option value="">Select</option>
+                          <option value="3days">3 days</option>
+                          <option value="5days">5 days</option>
+                          <option value="7days">7 days</option>
+                          <option value="10days">10 days</option>
 
+                        </select>
+                      </td>
                       <td className="border px-4 py-2">
                         <input
                           type="text"
@@ -664,6 +849,12 @@ const LeadsTab = () => {
                   )}
                   {activeTab === 'booked' && (
                   <>
+                    <td className="border px-4 py-2">{highlightText(lead.projectName)}</td>
+                    <td className="border px-4 py-2">{highlightText(lead.projectvalue)}</td>
+                    <td className="border px-4 py-2">{highlightText(lead.Commission)}</td>
+                    <td className="border px-4 py-2">{highlightText(lead.agentshare)}</td>
+                    <td className="border px-4 py-2">{highlightText(lead.propertyAddress)}</td>
+                    <td className="border px-4 py-2">{lead.details}</td>
                     <td className="border px-4 py-2">
                       <select
                         value={lead.propertyType}
@@ -698,13 +889,13 @@ const LeadsTab = () => {
                       <select
                         value={lead.bookingStatus}
                         disabled
-                        className="bg-green-500 text-white w-20 py-1 rounded opacity-70 cursor-not-allowed"
+                        className="bg-green-500 text-red-500 w-20 py-1 rounded opacity-980 cursor-not-allowed"
                       >
                         <option value="">Select</option>
                         <option>Upcoming</option>
                         <option>Not Responding</option>
                         <option>No Show</option>
-                        <option>Not Interested</option>
+                        <option>Booked Somewhere Else</option>
                         <option>Booked</option>
                         <option>By Time Ascending</option>
                         <option>By Time Descending</option>

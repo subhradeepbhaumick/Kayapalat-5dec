@@ -14,7 +14,7 @@ interface Client {
   city: string;
   state: string;
   pincode: string;
-  date: string;
+  LeadDate: string;
 }
 
 const ClientPage: React.FC = () => {
@@ -30,7 +30,7 @@ const ClientPage: React.FC = () => {
     city: "",
     state: "",
     pincode: "",
-    date: "",
+    LeadDate: "",
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -41,7 +41,7 @@ const ClientPage: React.FC = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.phone) return;
-    const newClient = { ...formData, date: new Date().toLocaleDateString('en-GB') };
+    const newClient = { ...formData, Date: new Date().toLocaleDateString('en-GB') };
     setClients((prev) => [...prev, newClient]);
     setFormData({
       name: "",
@@ -52,7 +52,7 @@ const ClientPage: React.FC = () => {
       city: "",
       state: "",
       pincode: "",
-      date: "",
+      LeadDate: "",
     });
     setShowForm(false);
     setShowPopup(true);
@@ -69,7 +69,7 @@ const ClientPage: React.FC = () => {
       city: "",
       state: "",
       pincode: "",
-      date: "",
+      LeadDate: "",
     });
   };
 
@@ -229,7 +229,7 @@ const ClientPage: React.FC = () => {
                 <th className="border px-4 py-2 text-left">City</th>
                 <th className="border px-4 py-2 text-left">State</th>
                 <th className="border px-4 py-2 text-left">Pincode</th>
-                <th className="border px-4 py-2 text-left">Date</th>
+                <th className="border px-4 py-2 text-left">Lead Date</th>
               </tr>
             </thead>
             <tbody>
@@ -258,7 +258,7 @@ const ClientPage: React.FC = () => {
                     <td className="border px-4 py-2">{client.city}</td>
                     <td className="border px-4 py-2">{client.state}</td>
                     <td className="border px-4 py-2">{client.pincode}</td>
-                    <td className="border px-4 py-2">{client.date}</td>
+                    <td className="border px-4 py-2">{client.LeadDate}</td>
                   </tr>
                 ))
               )}

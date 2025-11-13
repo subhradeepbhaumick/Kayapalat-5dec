@@ -19,7 +19,7 @@ const PaymentsTab = () => {
     'A01': ['A101', 'A102'],
     'A02': ['A103', 'A104'],
   };
-
+  
   const [payments, setPayments] = useState([
     {
       id: 1,

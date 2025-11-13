@@ -96,6 +96,7 @@ const InvoicesTable = () => {
   const [invoiceData, setInvoiceData] = useState<InvoiceData | null>(null);
   const [invoicesList, setInvoicesList] = useState<InvoiceData[]>([]);
   const [showPreviousInvoices, setShowPreviousInvoices] = useState(false);
+  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
 
   const dropdownRef = useRef<HTMLTableDataCellElement>(null);
 
@@ -299,14 +300,14 @@ const InvoicesTable = () => {
         <table className="min-w-full text-sm text-left text-gray-700">
           <thead className="bg-gradient-to-r from-[#295A47] to-[#3a7d5f] text-white font-semibold">
             <tr>
-              <th className="h-full px-3 py-2">Agent ID / Name</th>
-              <th className="px-3 py-2">Client Name</th>
-              <th className="px-3 py-2">Project Name</th>
-              <th className="px-3 py-2">Generate Invoice</th>
+              <th className="h-full px-3 py-2 text-center">Agent ID / Name</th>
+              <th className="px-3 py-2 text-center">Client Name</th>
+              <th className="px-3 py-2 text-center">Project Name</th>
+              <th className="px-3 py-2 text-center">Generate Invoice</th>
             </tr>
           </thead>
           <tbody>
-            <tr className="h-12">
+            <tr className="h-12 ">
               {/* Agent column with compact dropdown */}
               <td className="px-2 py-1 border " ref={dropdownRef}>
                 <input
@@ -613,21 +614,62 @@ const InvoicesTable = () => {
                   </tbody>
                 </table>
               </div>
-
+              
               {/* Invoice Date & Time */}
               <div className="flex justify-between text-sm text-gray-700">
                 <div>
                   <span className="font-medium">Invoice Date:</span> 
                   {new Date(invoiceData.invoiceDate).toLocaleDateString('en-GB')} {/* Forces DD/MM/YYYY */}
                 </div>
+                
                 <div>
                   <span className="font-medium">Invoice Time:</span> {invoiceData.invoiceTime}
                 </div>
               </div>
             </div>
+            {/* Uploaded Receipt Preview with Delete Option */}
+{uploadedImage && (
+  <div className="relative flex justify-center mb-4">
+    {/* Delete (X) button */}
+    <button
+      onClick={() => setUploadedImage(null)}
+      className="absolute top-2 right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center hover:bg-red-700 transition"
+      aria-label="Remove uploaded image"
+    >
+      &times;
+    </button>
 
+    {/* Image */}
+    <img
+      src={uploadedImage}
+      alt="Uploaded Receipt"
+      className="max-h-64 w-auto rounded-lg border border-gray-300 shadow-md object-contain"
+    />
+  </div>
+)}
+
+
+                        
             {/* Footer Buttons */}
             <div className="bg-[#D7E7D0] p-6 rounded-b-lg flex justify-end space-x-4">
+              <label
+                htmlFor="receiptUpload"
+                className="px-2 ml-100 py-1 bg-[#295A47] text-white rounded-3xl hover:bg-green-900 cursor-pointer transition duration-200"
+              >
+                Upload Receipt
+              </label>
+              <input
+                type="file"
+                id="receiptUpload"
+                accept="image/*"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    console.log('Receipt uploaded:', file.name);
+                  }
+                }}
+              />
               <button
                 onClick={handleClose}
                 className="px-4 py-1 bg-gray-500 text-white rounded-2xl hover:bg-gray-600 transition duration-200"
