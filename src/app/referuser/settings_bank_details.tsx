@@ -1,8 +1,10 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { Upload } from "lucide-react";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface FormDataType {
+  agent_id: string;
   accountHolderName: string;
   upiId: string;
   bankName: string;
@@ -12,7 +14,10 @@ interface FormDataType {
 }
 
 const BankDetailsPage: React.FC = () => {
+  const { user } = useAuth();
+
   const initialFormData: FormDataType = {
+    agent_id: user?.user_id || "",
     accountHolderName: "",
     upiId: "",
     bankName: "",
@@ -26,6 +31,69 @@ const BankDetailsPage: React.FC = () => {
   );
   const [formData, setFormData] = useState<FormDataType>(initialFormData);
   const [submittedData, setSubmittedData] = useState<FormDataType | null>(null);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  // Update agent_id when user changes
+  useEffect(() => {
+    setFormData((prev) => ({ ...prev, agent_id: user?.user_id || "" }));
+  }, [user]);
+
+  // Fetch existing bank details on component mount
+  useEffect(() => {
+    const fetchBankDetails = async () => {
+      if (!user?.user_id) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          setLoading(false);
+          return;
+        }
+
+        const res = await fetch("/api/referuser/bank-details", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+          },
+        });
+
+        if (res.ok) {
+          const result = await res.json();
+          if (result.success && result.data) {
+            setFormData({
+              agent_id: result.data.agent_id,
+              accountHolderName: result.data.accountHolderName || "",
+              bankName: result.data.bankName || "",
+              accountNumber: result.data.accountNumber || "",
+              ifscCode: result.data.ifscCode || "",
+              upiId: result.data.upiId || "",
+              upiQr: result.data.upiQr || "",
+            });
+            setSubmittedData({
+              agent_id: result.data.agent_id,
+              accountHolderName: result.data.accountHolderName || "",
+              bankName: result.data.bankName || "",
+              accountNumber: result.data.accountNumber || "",
+              ifscCode: result.data.ifscCode || "",
+              upiId: result.data.upiId || "",
+              upiQr: result.data.upiQr || "",
+            });
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching bank details:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchBankDetails();
+  }, [user]);
 
   // Handle text inputs
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -38,43 +106,81 @@ const BankDetailsPage: React.FC = () => {
 
   // Handle file input
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const fileURL = URL.createObjectURL(file);
-      setFormData((prev) => ({ ...prev, upiQr: fileURL }));
-    }
-  };
+  const file = e.target.files?.[0];
+  if (file) {
+    setSelectedFile(file); // this is what backend needs
+    const fileURL = URL.createObjectURL(file);
+    setFormData((prev) => ({ ...prev, upiQr: fileURL })); // preview only
+  }
+};
 
   // Submit form
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
 
-    // Validation for Bank Account Details
-    if (selectedType === "Bank Account Details") {
-      if (!formData.accountHolderName || !formData.bankName || !formData.accountNumber || !formData.ifscCode) {
-        alert("Please fill in all required fields for Bank Account Details.");
-        return;
-      }
+  if (!user?.user_id) {
+    alert("You must be logged in to submit bank details.");
+    return;
+  }
+
+  // Validation
+  if (
+    !formData.agent_id ||
+    (selectedType === "Bank Account Details" &&
+      (!formData.accountHolderName ||
+        !formData.bankName ||
+        !formData.accountNumber ||
+        !formData.ifscCode)) ||
+    (selectedType === "UPI Details" &&
+      (!formData.accountHolderName || !formData.upiId || !selectedFile))
+  ) {
+    alert("Please fill all required fields.");
+    return;
+  }
+
+  try {
+    const fd = new FormData();
+    fd.append("agent_id", formData.agent_id);
+    fd.append("accountHolderName", formData.accountHolderName);
+    fd.append("upiId", formData.upiId);
+    fd.append("bankName", formData.bankName);
+    fd.append("accountNumber", formData.accountNumber);
+    fd.append("ifscCode", formData.ifscCode);
+
+    if (selectedFile) {
+      fd.append("upiQr", selectedFile);
     }
 
-    // Validation for UPI Details
-    if (selectedType === "UPI Details") {
-      if (!formData.accountHolderName || !formData.upiId || !formData.upiQr) {
-        alert("Please fill in all required fields for UPI Details, including uploading the QR code.");
-        return;
-      }
+    const token = localStorage.getItem("token");
+    const res = await fetch("/api/referuser/bank-details", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${token}`,
+      },
+      body: fd, // NO headers needed — browser handles it
+    });
+
+    const result = await res.json();
+
+    if (result.success) {
+      alert("Bank details saved successfully.");
+      setSubmittedData({ ...formData, upiQr: formData.upiQr });
+    } else {
+      alert("Failed to save bank details: " + (result.error || "Unknown error"));
     }
+  } catch (error) {
+    alert("Error saving bank details.");
+    console.error(error);
+  }
+};
 
-    setSubmittedData({ ...formData });
-  };
 
-  // Reset form
   const handleReset = () => {
-    setFormData(initialFormData);
+    setFormData({ ...initialFormData, agent_id: user?.user_id || "" });
     setSubmittedData(null);
   };
 
-  // Ensure formData always has all keys defined (extra safety)
+  // Keep form keys consistent
   useEffect(() => {
     setFormData((prev) => ({ ...initialFormData, ...prev }));
   }, [selectedType]);
@@ -91,7 +197,9 @@ const BankDetailsPage: React.FC = () => {
       <div className="mb-6">
         <select
           value={selectedType}
-          onChange={(e) => setSelectedType(e.target.value as "Bank Account Details" | "UPI Details")}
+          onChange={(e) =>
+            setSelectedType(e.target.value as "Bank Account Details" | "UPI Details")
+          }
           className="border border-gray-300 rounded-md p-2 w-72 shadow-sm focus:ring-2 focus:ring-[#295A47]"
         >
           <option value="Bank Account Details">Bank Account Details</option>
@@ -104,12 +212,19 @@ const BankDetailsPage: React.FC = () => {
         onSubmit={handleSubmit}
         className="max-w-4xl w-full bg-white shadow-md rounded-lg p-6 mb-8"
       >
-        <h2 className="text-lg font-semibold text-gray-700 mb-4">
-          {selectedType}
-        </h2>
+        <h2 className="text-lg font-semibold text-gray-700 mb-4">{selectedType}</h2>
 
         {selectedType === "Bank Account Details" ? (
           <div className="grid grid-cols-2 gap-6">
+            <InputField
+              label="Agent ID"
+              name="agent_id"
+              value={formData.agent_id}
+              onChange={handleChange}
+              placeholder="Agent ID"
+              required
+              disabled // prevent manual edits
+            />
             <InputField
               label="Account Holder Name"
               name="accountHolderName"
@@ -145,6 +260,15 @@ const BankDetailsPage: React.FC = () => {
           </div>
         ) : (
           <div className="grid grid-cols-2 gap-6">
+            <InputField
+              label="Agent ID"
+              name="agent_id"
+              value={formData.agent_id}
+              onChange={handleChange}
+              placeholder="Agent ID"
+              required
+              disabled
+            />
             <InputField
               label="Account Holder Name"
               name="accountHolderName"
@@ -197,7 +321,8 @@ const BankDetailsPage: React.FC = () => {
         <div className="flex justify-center gap-4 mt-6">
           <button
             type="submit"
-            className="bg-[#295A47] text-white px-6 py-2 rounded-md hover:bg-[#1e3d32] transition"
+            disabled={!user?.user_id}
+            className="bg-green-900 text-white px-6 py-2 rounded-md hover:bg-green-700 transition"
           >
             Submit
           </button>
@@ -220,7 +345,7 @@ const BankDetailsPage: React.FC = () => {
           <table className="min-w-full border border-gray-300 text-center">
             <thead className="bg-[#295A47] text-white">
               <tr>
-                <th className="px-4 py-2 border">Sl No</th>
+                <th className="px-4 py-2 border">Agent ID</th>
                 <th className="px-4 py-2 border">Account Holder Name</th>
                 <th className="px-4 py-2 border">UPI ID</th>
                 <th className="px-4 py-2 border">Bank Name</th>
@@ -231,7 +356,9 @@ const BankDetailsPage: React.FC = () => {
             </thead>
             <tbody>
               <tr className="border-t">
-                <td className="px-4 py-2 border">1</td>
+                <td className="px-4 py-2 border italic text-gray-500">
+                  {displayData.agent_id || "null"}
+                </td>
                 <td className="px-4 py-2 border italic text-gray-500">
                   {displayData.accountHolderName || "null"}
                 </td>
@@ -270,7 +397,7 @@ const BankDetailsPage: React.FC = () => {
   );
 };
 
-// ✅ Reusable InputField component
+// Reusable InputField
 interface InputFieldProps {
   label: string;
   name: keyof FormDataType;
@@ -278,6 +405,7 @@ interface InputFieldProps {
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   placeholder?: string;
   required?: boolean;
+  disabled?: boolean;
 }
 
 const InputField: React.FC<InputFieldProps> = ({
@@ -287,10 +415,12 @@ const InputField: React.FC<InputFieldProps> = ({
   onChange,
   placeholder,
   required = false,
+  disabled = false,
 }) => (
   <div>
     <label className="block text-sm text-gray-600 mb-1">
-      {label}{required && <span className="text-red-500">*</span>}
+      {label}
+      {required && <span className="text-red-500">*</span>}
     </label>
     <input
       name={name}
@@ -299,6 +429,7 @@ const InputField: React.FC<InputFieldProps> = ({
       onChange={onChange}
       placeholder={placeholder}
       required={required}
+      disabled={disabled}
       className="w-full border rounded-md p-2"
     />
   </div>

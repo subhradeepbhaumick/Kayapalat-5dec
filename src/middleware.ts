@@ -1,65 +1,61 @@
-// File: middleware.ts
-import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import jwt from "jsonwebtoken";
 
-function decodeJwtPayload(token: string | undefined) {
-  if (!token) return null;
-  try {
-    const base64Url = token.split('.')[1];
-    if (!base64Url) return null;
-    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    // atob is available in Edge runtime
-    const jsonPayload = decodeURIComponent(
-      Array.prototype.map.call(atob(base64), (c: string) =>
-        '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
-      ).join('')
-    );
-    return JSON.parse(jsonPayload);
-  } catch {
-    return null;
+export async function middleware(req: NextRequest) {
+  const { pathname } = req.nextUrl;
+
+  // List of paths that don't require authentication
+  const publicPaths = [
+    "/api/auth/login",
+    "/api/users/login",
+    "/api/users/signup",
+    "/api/users/logout",
+    "/",
+    "/client_login",
+    "/referuser/login",
+    "/signup",
+    "/favicon.ico",
+    "/_next", // Next.js internals
+    "/public",
+  ];
+
+  if (publicPaths.some(path => pathname.startsWith(path))) {
+    return NextResponse.next();
   }
+
+  // Get token from Authorization header
+  const authHeader = req.headers.get("authorization");
+  const token = authHeader?.startsWith("Bearer ") ? authHeader.substring(7) : null;
+
+  if (!token) {
+    if (pathname.startsWith("/api")) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    // Redirect to login page
+    return NextResponse.redirect(new URL("/referuser/login", req.url));
+  }
+
+  // Verify JWT token
+  try {
+    jwt.verify(token, process.env.JWT_SECRET!);
+  } catch (err) {
+    if (pathname.startsWith("/api")) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    return NextResponse.redirect(new URL("/referuser/login", req.url));
+  }
+
+  return NextResponse.next();
 }
 
-export default withAuth(
-  function middleware(req) {
-    const pathname = req.nextUrl.pathname;
-
-    // read token from next-auth (if present) or from our login cookie
-    const nextAuthToken = (req as any).nextauth?.token;
-    const cookieToken = req.cookies.get('token')?.value;
-    const payload = nextAuthToken ?? decodeJwtPayload(cookieToken);
-
-    // /simple: block all access
-    if (pathname.startsWith("/simple")) {
-      return NextResponse.rewrite(new URL("/unauthorized", req.url));
-    }
-
-    // /admin: only allow users with role === "admin"
-    if (pathname.startsWith("/admin")) {
-      const role = payload?.role;
-      if (!payload || role !== "admin") {
-        return NextResponse.rewrite(new URL("/unauthorized", req.url));
-      }
-      return;
-    }
-
-    // protect other routes (profile, dashboard, etc.) — require login
-    const protectedPrefixes = ["/profile", "/dashboard"];
-    if (protectedPrefixes.some((p) => pathname.startsWith(p))) {
-      if (!payload) {
-        return NextResponse.rewrite(new URL("/unauthorized", req.url));
-      }
-    }
-  },
-  {
-    callbacks: {
-      // always run middleware so we can check tokens from cookie or next-auth
-      authorized: () => true,
-    },
-  }
-);
-
-// This config applies the middleware to the specified routes
 export const config = {
-  matcher: ["/profile", "/simple", "/dashboard/:path*", "/admin/:path*"],
+  matcher: [
+    /*
+      Apply middleware to all API routes and protected pages except public paths
+    */
+    "/api/:path*",
+    "/referuser/:path*",
+    // add more protected routes as needed
+  ],
 };

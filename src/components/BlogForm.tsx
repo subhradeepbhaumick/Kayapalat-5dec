@@ -62,8 +62,8 @@ export function BlogForm({ mode, blog, isOpen, onOpenChange, onSave }: BlogFormP
     const fetchDropdownData = async () => {
       try {
         const [catRes, tagRes] = await Promise.all([
-          fetch('/api/blogs/blog_categories'),
-          fetch('/api/blogs/tags')
+          fetch('/api/blogs/blog_categories', { credentials: 'include' }),
+          fetch('/api/blogs/tags', { credentials: 'include' })
         ]);
         setAllCategories(await catRes.json());
         setAllTags(await tagRes.json());
@@ -76,7 +76,7 @@ export function BlogForm({ mode, blog, isOpen, onOpenChange, onSave }: BlogFormP
     const fetchBlogForEdit = async (blogId: number) => {
       setIsLoadingData(true);
       try {
-        const res = await fetch(`/api/blogs/${blogId}`);
+        const res = await fetch(`/api/blogs/${blogId}`, { credentials: 'include' });
         if (!res.ok) throw new Error('Failed to fetch blog details');
         const fullBlogData = await res.json();
         setFormData({ ...emptyFormData, ...fullBlogData, tag_ids: fullBlogData.tag_ids || [] });
@@ -148,7 +148,7 @@ export function BlogForm({ mode, blog, isOpen, onOpenChange, onSave }: BlogFormP
       if (selectedFile) {
         const imageFormData = new FormData();
         imageFormData.append('file', selectedFile);
-        const uploadResponse = await fetch('/api/blogs/upload', { method: 'POST', body: imageFormData });
+        const uploadResponse = await fetch('/api/blogs/upload', { method: 'POST', body: imageFormData, credentials: 'include' });
         const uploadResult = await uploadResponse.json();
         if (!uploadResponse.ok) throw new Error(uploadResult.error || 'Image upload failed.');
         finalImageUrl = uploadResult.path;
@@ -163,6 +163,7 @@ export function BlogForm({ mode, blog, isOpen, onOpenChange, onSave }: BlogFormP
         method: apiMethod,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(finalBlogData),
+        credentials: 'include',
       });
 
       if (!response.ok) {

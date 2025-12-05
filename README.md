@@ -147,8 +147,7 @@ kayapalat-db/rk/
 ├── testimonials/       # Stores client testimonials including video links
 │   └── { _id, client_name, quote, video_url, ... }
 └── callbacks/          # Stores requests from the "Request a Callback" form
- └── { _am_id, e, phone, message,t
-,`timestamp ``
+ └── { _am_id, e, phone, message,t,`timestamp ``
 ℹ > ℹ *Note:* This is the target structure. Some data might currently residt in c flaeter str ctuaidand will be uigrated as mles are stabilized.
 
 -
@@ -163,17 +162,8 @@ tails> <summary><strong>📌 Upcoming Features</strong></summary>
 etails>
 
 
-## 📸 thoraor
-
-Made with 💙 by *DHIMAN MAJUMDER (Coder_Dhiman)*
-
-- Aspiring AI/ML Engineer
-- Full-Stack Developer
--ilder of beautiful & scalable platforms.
-
 ## 🔗 License
 © 2
 © 2025 Kayapalat. All Rights Rrved.
-Th
-is website and its source code are the intellectual property of Kayapalat. Unauthorized use, copying, redistribution, or modification of any part of this repository is strictly prohibited.
+This website and its source code are the intellectual property of Kayapalat. Unauthorized use, copying, redistribution, or modification of any part of this repository is strictly prohibited.
 This project is not open-source and is protected under copyright law. For inquiries regarding usage or collaboration, please contact the project owner.

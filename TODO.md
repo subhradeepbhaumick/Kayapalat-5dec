@@ -1,4 +1,1 @@
-- [x] Add showPopup state to ClientPage component
-- [x] Modify handleSubmit to set showPopup(true) after adding client
-- [x] Add congratulations popup JSX with CSS styling
-- [x] Add close functionality to popup
+- [x] Fix destructuring in appointmentList query in src/app/api/sales-admin/invoice/route.ts

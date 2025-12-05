@@ -416,7 +416,8 @@ const BlogsPage = () => {
                     <Menu.Items className="absolute left-0 z-30 mt-2 w-56 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                       <div className="py-1">
                         <Menu.Item>{({ active }) => (<button onClick={() => setSelectedCategory(null)} className={`${active ? 'bg-gray-100 text-gray-900' : 'text-gray-700'} block w-full text-left px-4 py-2 text-sm cursor-pointer`}>All Stories</button>)}</Menu.Item>
-                        {categories.map(cat => (<Menu.Item key={cat.id}>{({ active }) => (<button onClick={() => setSelectedCategory(cat)} className={`${active ? 'bg-gray-100 text-gray-900' : 'text-gray-700'} block w-full text-left px-4 py-2 text-sm cursor-pointer`}>{cat.name}</button>)}</Menu.Item>))}
+                        {categories.map(cat => (<Menu.Item key={`cat-${cat.id}`}>
+{({ active }) => (<button onClick={() => setSelectedCategory(cat)} className={`${active ? 'bg-gray-100 text-gray-900' : 'text-gray-700'} block w-full text-left px-4 py-2 text-sm cursor-pointer`}>{cat.name}</button>)}</Menu.Item>))}
                       </div>
                     </Menu.Items>
                   </Transition>
@@ -441,7 +442,7 @@ const BlogsPage = () => {
               columnClassName="pl-6 bg-clip-padding"
             >
               {itemsToDisplay.map((item) => {
-                if (item.type === 'promo') {
+                if ('type' in item && item.type === 'promo') {
                   const PromoComponent = item.component;
                   return <div key={item.id} className="mb-6"><PromoComponent /></div>;
                 }
@@ -451,7 +452,7 @@ const BlogsPage = () => {
                 return (
                   <div key={blog.id} className={`bg-white rounded-xl group flex flex-col shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 border border-gray-200/80 mb-6`}>
                     <div className={`relative w-full ${isFeatured ? 'h-80' : 'h-52'} rounded-t-xl overflow-hidden border-b-2 border-[#00423D]`}>
-                      <Image src={blog.image || 'https://placehold.co/600x400/d2ebd0/00423d?text=Image'} alt={blog.title} fill style={{ objectFit: 'cover' }} className="transition-transform duration-300 group-hover:scale-105" />
+                      <Image src={blog.image || 'https://placehold.co/600x400/d2ebd0/00423d?text=Image'} alt={blog.title || 'Blog image'} fill style={{ objectFit: 'cover' }} className="transition-transform duration-300 group-hover:scale-105" />
                     </div>
                     <div className="p-6 flex flex-col flex-grow">
                       {blog.category_name && (<p className="text-sm font-bold text-[#2e8b57] mb-2 uppercase tracking-wider">{blog.category_name}</p>)}
@@ -461,7 +462,7 @@ const BlogsPage = () => {
                           {blog.tags.map(tag => (<span key={tag.slug} className="bg-[#e0f7ef] text-xs text-[#00423D] px-2 py-1 rounded-full flex items-center gap-1"><FaTag className="opacity-70" /> {tag.name}</span>))}
                         </div>
                       )}
-                      <div className="text-sm text-gray-600 mb-5 line-clamp-3" dangerouslySetInnerHTML={{ __html: blog.excerpt || '' }} />
+                      <div className="text-sm text-gray-600 mb-5 line-clamp-3" dangerouslySetInnerHTML={{ __html: typeof blog.excerpt === 'string' ? blog.excerpt : '' }} />
                       <div className="mt-auto pt-4 border-t border-gray-200">
                         <button onClick={() => router.push(`/blogs/${blog.slug}`)} className="w-full cursor-pointer rounded-full border-2 border-[#00423D] transition-all bg-[#00423D] text-white hover:bg-[#00261a] px-6 py-2 text-sm font-medium flex items-center justify-center gap-2">Read Story <FaArrowRight className="text-xs" /></button>
                       </div>
@@ -483,7 +484,7 @@ const BlogsPage = () => {
         <ContactSection router={router} />
 
         <Transition show={isFilterModalOpen} as={Fragment}>
-          <div className="fixed inset-0 z-50 flex items-end" onClose={() => setIsFilterModalOpen(false)}>
+          <div className="fixed inset-0 z-50 flex items-end">
             <Transition.Child as={Fragment} enter="ease-out duration-300" enterFrom="opacity-0" enterTo="opacity-100" leave="ease-in duration-200" leaveFrom="opacity-100" leaveTo="opacity-0"><div className="absolute inset-0 bg-black/50" onClick={() => setIsFilterModalOpen(false)} /></Transition.Child>
             <Transition.Child as={Fragment} enter="ease-out duration-300" enterFrom="translate-y-full" enterTo="translate-y-0" leave="ease-in duration-200" leaveFrom="translate-y-0" leaveTo="translate-y-full">
               <div className="relative w-full bg-white rounded-t-2xl p-6">

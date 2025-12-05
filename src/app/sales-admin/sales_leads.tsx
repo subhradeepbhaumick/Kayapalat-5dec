@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search, UserPlus } from 'lucide-react';
 import RemarkModal from "./RemarkModal";
 
@@ -13,6 +13,34 @@ type Remark = {
   comment: string;
 };
 
+type Lead = {
+  id: number;
+  agentId: string;
+  agentName: string;
+  clientName: string;
+  clientContact: string;
+  AppoinmentID: string;
+  projectName: string;
+  projectvalue: string;
+  agentshare: string;
+  Commission: string;
+  propertyAddress: string;
+  details: string;
+  coldCallDate: string;
+  coldCallTime: string;
+  coldCallStatus: string;
+  siteVisitDate: string;
+  siteVisitTime: string;
+  siteVisitStatus: string;
+  bookingDate: string;
+  bookingTime: string;
+  bookingStatus: string;
+  BookedInNext: string;
+  bookingId: string;
+  propertyType: string;
+  remarks: Remark[];
+};
+
 const LeadsTab = () => {
   const [activeTab, setActiveTab] = useState<Tab>('cold');
   const [status, setStatus] = useState('all');
@@ -20,93 +48,63 @@ const LeadsTab = () => {
   const [fromDate, setFromDate] = useState('');
   const [toDate, setToDate] = useState('');
   const [filterType, setFilterType] = useState<'all' | 'residential' | 'commercial'>('all');
-  
+  const [leads, setLeads] = useState<Lead[]>([]);
+  const [loading, setLoading] = useState(true);
 
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          console.warn('No token found');
+          setLoading(false);
+          return;
+        }
+        const res = await fetch('/api/sales-admin/projects', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+        const data = await res.json();
+        if (data.projects) {
+          setLeads(data.projects.map((project: any, index: number) => ({
+            id: project.appointment_id || index + 1,
+            agentId: project.agent_id || 'N/A',
+            agentName: project.agent_name || 'N/A',
+            clientName: project.client_name || 'N/A',
+            clientContact: project.client_phone || 'N/A',
+            AppoinmentID: project.appointment_id || 'N/A',
+            projectName: project.project_name || 'N/A', 
+            projectvalue: project.project_value?.toString() || 'N/A',
+            agentshare: project.agent_share?.toString() || 'N/A',
+            Commission: project.commission?.toString() || 'N/A',
+            propertyAddress: project.location || 'N/A',
+            details: project.details || 'N/A',
+            coldCallDate: project.cold_call_date || 'N/A',
+            coldCallTime: project.cold_call_time || 'N/A',
+            coldCallStatus: project.cold_call_status || 'N/A',
+            siteVisitDate: project.site_visit_date || 'N/A',
+            siteVisitTime: project.site_visit_time || 'N/A',
+            siteVisitStatus: project.site_visit_status || 'N/A',
+            bookingDate: project.booking_date || 'N/A',
+            bookingTime: project.booking_time || 'N/A',
+            bookingStatus: project.booking_status || 'N/A',
+            BookedInNext: 'N/A', // Not in projects table
+            bookingId: 'N/A', // Not in projects table
+            propertyType: project.property_type || 'N/A',
+            remarks: [], // Remarks not in projects table
+          })));
+        }
+      } catch (error) {
+        console.error('Failed to fetch projects:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  // Dummy data
-  const [leads, setLeads] = useState([
-    {
-      id: 1,
-      agentId: 'A101',
-      agentName: 'Rohit Das',
-      clientName: 'Amit Sharma',
-      clientContact: '9876543210',
-      AppoinmentID: 'AP123456',
-      projectName: 'Green Valley Residency',
-      projectvalue: '₹50,00,000',
-      agentshare: '2,50,000',
-      Commission: '5',
-      propertyAddress: 'Kolkata, Sector 5',
-      details: '3BHK Flat Enquiry',
-      coldCallDate: '2025-11-10',
-      coldCallTime: '10:30',
-      coldCallStatus: 'Upcoming',
-      siteVisitDate: '2025-11-12',
-      siteVisitTime: '14:00',
-      siteVisitStatus: 'Confirmed',
-      bookingDate: '2025-11-15',
-      bookingTime: '16:00',
-      bookingStatus: 'Booked',
-      BookedInNext: '',
-      bookingId: 'BK001',
-      propertyType: 'Residential',
-      remarks: [],
-    },
-    {
-      id: 2,
-      agentId: 'A102',
-      agentName: 'Priya Sen',
-      clientName: 'Rakesh Gupta',
-      clientContact: '9123456780',
-      AppoinmentID: 'AP123457',
-      projectName: 'Skyline Heights',
-      projectvalue: '₹50,00,000',
-      agentshare: '₹2,50,000',
-      Commission: '5',
-      propertyAddress: 'New Town, Kolkata',
-      details: '2BHK Flat Lead',
-      coldCallDate: '2025-11-09',
-      coldCallTime: '09:45',
-      coldCallStatus: 'No Show',
-      siteVisitDate: '',
-      siteVisitTime: '',
-      siteVisitStatus: 'Booked Somewhere Else',
-      bookingDate: '',
-      bookingTime: '',
-      bookingStatus: '',
-      BookedInNext: '',
-      bookingId: '',
-      propertyType: 'Residential',
-      remarks: [],
-    },
-    {
-      id: 3,
-      agentId: 'A103',
-      agentName: 'Vikram Singh',
-      clientName: 'Business Corp',
-      clientContact: '7777777777',
-      AppoinmentID: 'AP123458',
-      projectName: 'Commercial Plaza',
-      projectvalue: '₹50,00,000',
-      agentshare: '₹2,50,000',
-      Commission: '5',
-      propertyAddress: 'Mumbai',
-      details: 'Office Space',
-      coldCallDate: '2025-11-11',
-      coldCallTime: '15:00',
-      coldCallStatus: 'Confirmed',
-      siteVisitDate: '2025-11-13',
-      siteVisitTime: '10:00',
-      siteVisitStatus: 'Upcoming',
-      BookedInNext: '',
-      bookingDate: '',
-      bookingTime: '',
-      bookingStatus: '',
-      bookingId: '',
-      propertyType: 'Commercial',
-      remarks: [],
-    },
-  ]);
+    fetchProjects();
+  }, []);
 
   const [search, setSearch] = useState('');
   const [isPopupOpen, setIsPopupOpen] = useState(false);
@@ -179,7 +177,13 @@ const LeadsTab = () => {
   const filteredData = filterData();
 
   // Handle admin input changes
-  const handleChange = (id: number, field: string, value: string) => {
+  const handleChange = async (id: number, field: string, value: string) => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      console.warn('No token found');
+      return;
+    }
+
     setLeads((prev) =>
       prev.map((lead) => {
         if (lead.id === id) {
@@ -195,12 +199,52 @@ const LeadsTab = () => {
             if (!updatedLead.bookingStatus || updatedLead.bookingStatus === '') {
               updatedLead.bookingStatus = 'Upcoming';
             }
-          } 
+          }
           return updatedLead;
         }
         return lead;
       })
     );
+
+    // Prepare updates object for API
+    const updates: any = {};
+    if (field === 'projectName') updates.project_name = value;
+    else if (field === 'projectvalue') updates.project_value = parseFloat(value.replace(/[₹,%\s]/g, '').replace(/,/g, '') || '0');
+    else if (field === 'Commission') updates.commission = parseFloat(value.replace(/[₹,%\s]/g, '').replace(/,/g, '') || '0');
+    else if (field === 'agentshare') updates.agent_share = parseFloat(value.replace(/[₹,%\s]/g, '').replace(/,/g, '') || '0');
+    else if (field === 'propertyAddress') updates.location = value;
+    else if (field === 'details') updates.details = value;
+    else if (field === 'propertyType') updates.property_type = value;
+    else if (field === 'coldcallDate') updates.cold_call_date = value;
+    else if (field === 'coldcallTime') updates.cold_call_time = value;
+    else if (field === 'coldcallStatus') updates.cold_call_status = value;
+    else if (field === 'siteVisitDate') updates.site_visit_date = value;
+    else if (field === 'siteVisitTime') updates.site_visit_time = value;
+    else if (field === 'siteVisitStatus') updates.site_visit_status = value;
+    else if (field === 'bookingDate') updates.booking_date = value;
+    else if (field === 'bookingTime') updates.booking_time = value;
+    else if (field === 'bookingStatus') updates.booking_status = value;
+    else if (field === 'BookedInNext') updates.booked_in_next = value;
+    else if (field === 'bookingId') updates.booking_id = value;
+
+    try {
+      const res = await fetch('/api/sales-admin/projects', {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          appointment_id: leads.find(lead => lead.id === id)?.AppoinmentID,
+          updates,
+        }),
+      });
+      if (!res.ok) {
+        console.error('Failed to update project');
+      }
+    } catch (error) {
+      console.error('Error updating project:', error);
+    }
   };
 
   // Stats for site visit
@@ -209,7 +253,31 @@ const LeadsTab = () => {
   const commercialCount = leads.filter(lead => lead.coldCallStatus === 'Confirmed' && lead.siteVisitStatus !== 'Confirmed' && lead.propertyType === 'Commercial').length;
 
   // Handle remark button click
-  const handleRemarkClick = (leadId: number) => {
+  const handleRemarkClick = async (leadId: number) => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      console.warn('No token found');
+      return;
+    }
+
+    const currentLead = leads.find(lead => lead.id === leadId);
+    if (!currentLead) return;
+
+    try {
+      const res = await fetch(`/api/sales-admin/remarks?appointment_id=${currentLead.AppoinmentID}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      const data = await res.json();
+      if (data.remarks) {
+        setLeads(prev => prev.map(lead => lead.id === leadId ? { ...lead, remarks: data.remarks } : lead));
+      }
+    } catch (error) {
+      console.error('Error fetching remarks:', error);
+    }
+
     setCurrentLeadId(leadId);
     setIsPopupOpen(true);
     setCurrentComment('');
@@ -231,7 +299,13 @@ const LeadsTab = () => {
     })
   );
 };
-  const handleShareChange = (id: number, field: string, value: string) => {
+  const handleShareChange = async (id: number, field: string, value: string) => {
+  const token = localStorage.getItem('token');
+  if (!token) {
+    console.warn('No token found');
+    return;
+  }
+
   setLeads((prevLeads) =>
     prevLeads.map((lead) => {
       if (lead.id === id) {
@@ -256,33 +330,87 @@ const LeadsTab = () => {
       return lead;
     })
   );
+
+  // Prepare updates object for API
+  const updates: any = {};
+  if (field === 'projectvalue') updates.project_value = parseFloat(value.replace(/[₹,%\s]/g, '').replace(/,/g, '') || '0');
+  else if (field === 'Commission') updates.commission = parseFloat(value.replace(/[₹,%\s]/g, '').replace(/,/g, '') || '0');
+
+  try {
+    const res = await fetch('/api/sales-admin/projects', {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        appointment_id: leads.find(lead => lead.id === id)?.AppoinmentID,
+        updates,
+      }),
+    });
+    if (!res.ok) {
+      console.error('Failed to update project');
+    }
+  } catch (error) {
+    console.error('Error updating project:', error);
+  }
 };
 
+  // Handle edit
+  const handleEdit = (id: number) => {
+    // Placeholder for edit functionality
+    alert(`Edit functionality for lead ${id} can be implemented here.`);
+  };
+
+  // Handle delete
+  const handleDelete = (id: number) => {
+    setLeads(prev => prev.filter(lead => lead.id !== id));
+  };
 
   // Handle save remark
-  const handleSaveRemark = () => {
+  const handleSaveRemark = async () => {
     if (currentLeadId && currentComment.trim()) {
-      const currentLead = leads.find(lead => lead.id === currentLeadId);
-      if (currentLead) {
-        const date = activeTab === 'cold' ? currentLead.coldCallDate : activeTab === 'site' ? currentLead.siteVisitDate : currentLead.bookingDate;
-        const time = activeTab === 'cold' ? currentLead.coldCallTime : activeTab === 'site' ? currentLead.siteVisitTime : currentLead.bookingTime;
-        const remarkNumber = currentLead.remarks.length + 1;
-        const newRemark = {
-          id: remarkNumber,
-          date,
-          time,
-          comment: currentComment.trim(),
-        };
-        timedate(newRemark);
-        setCurrentComment('');
+      const token = localStorage.getItem('token');
+      if (!token) {
+        console.warn('No token found');
+        return;
       }
-    }
-    
-    function timedate(newRemark: { id: number; date: string; time: string; comment: string; }) {
-      setLeads(prev => prev.map(lead => lead.id === currentLeadId
-        ? { ...lead, remarks: [...lead.remarks, newRemark] }
-        : lead
-      ));
+
+      const currentLead = leads.find(lead => lead.id === currentLeadId);
+      if (!currentLead) return;
+
+      try {
+        const res = await fetch('/api/sales-admin/remarks', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            appointment_id: currentLead.AppoinmentID,
+            remark: currentComment.trim(),
+          }),
+        });
+
+        if (res.ok) {
+          // Refetch remarks to update the modal
+          const fetchRes = await fetch(`/api/sales-admin/remarks?appointment_id=${currentLead.AppoinmentID}`, {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+            },
+          });
+          const data = await fetchRes.json();
+          if (data.remarks) {
+            setLeads(prev => prev.map(lead => lead.id === currentLeadId ? { ...lead, remarks: data.remarks } : lead));
+          }
+          setCurrentComment('');
+        } else {
+          console.error('Failed to save remark');
+        }
+      } catch (error) {
+        console.error('Error saving remark:', error);
+      }
     }
   };
 
@@ -466,7 +594,7 @@ const LeadsTab = () => {
                   <th className="p-3 border border-gray-300 min-w-[120px] font-semibold">Cold Call date</th>
                   <th className="p-3 border border-gray-300 min-w-[120px] font-semibold">Cold Call time</th>
                   <th className="p-3 border border-gray-300 min-w-[120px] font-semibold">Cold Call status</th>
-                  <th className="p-3 border border-gray-300 min-w-[120px] font-semibold">Remarks</th>
+                  <th className="p-3 border border-gray-300 min-w-[120px] font-semibold">Actions</th>
                 </>
               )}
 
@@ -513,12 +641,6 @@ const LeadsTab = () => {
                   <td className="border px-4 py-2">{highlightText(lead.clientName)}</td>
                   <td className="border px-4 py-2">{highlightText(lead.clientContact)}</td>
                   <td className="border px-4 py-2">{highlightText(lead.AppoinmentID)}</td>
-                  {/* <td className="border px-4 py-2">{highlightText(lead.projectName)}</td>
-                  <td className="border px-4 py-2">{highlightText(lead.projectvalue)}</td>
-                  <td className="border px-4 py-2">{highlightText(lead.agentshare)}</td>
-                  <td className="border px-4 py-2">{highlightText(lead.Commission)}</td>
-                  <td className="border px-4 py-2">{highlightText(lead.propertyAddress)}</td>
-                  <td className="border px-4 py-2">{lead.details}</td> */}
                   {activeTab === 'cold' && (
                     <>
                     <td className="border px-4 py-2">
@@ -582,7 +704,7 @@ const LeadsTab = () => {
                           onChange={(e) => handleChange(lead.id, 'propertyType', e.target.value)}
                           className="border p-1 rounded w-full"
                         >
-                          <option value="">Select</option>
+                          {/* <option value="">Select</option> */}
                           <option value="Residential">Residential</option>
                           <option value="Commercial">Commercial</option>
                         </select>
@@ -596,7 +718,7 @@ const LeadsTab = () => {
                           className="border p-1 rounded w-full"
                         />
                       </td>
-
+    
                       <td className="border px-4 py-2">
                         <input
                           type="time"
@@ -667,14 +789,21 @@ const LeadsTab = () => {
                         />
                       </td>
                       <td className="border px-4 py-2">{highlightText(lead.propertyAddress)}</td>
-                      <td className="border px-4 py-2">{lead.details}</td>
+                      <td className="border px-4 py-2">
+                        <input
+                          type="text"
+                          value={lead.details}
+                          onChange={(e) => handleChange(lead.id, 'details', e.target.value)}
+                          className="border p-1 rounded w-full"
+                        />
+                      </td>
                       <td className="border px-4 py-2">
                         <select
                           value={lead.propertyType}
                           onChange={(e) => handleChange(lead.id, 'propertyType', e.target.value)}
                           className="border p-1 rounded w-full"
                         >
-                          <option value="">Select</option>
+                          {/* <option value="">Select</option> */}
                           <option value="Residential">Residential</option>
                           <option value="Commercial">Commercial</option>
                         </select>
@@ -766,7 +895,7 @@ const LeadsTab = () => {
                           onChange={(e) => handleChange(lead.id, 'propertyType', e.target.value)}
                           className="border p-1 rounded w-full"
                         >
-                          <option value="">Select</option>
+                          {/* <option value="">Select</option> */}
                           <option value="Residential">Residential</option>
                           <option value="Commercial">Commercial</option>
                         </select>
@@ -921,18 +1050,8 @@ const LeadsTab = () => {
                       </button>
                     </td>
                   </>
+
                 )}
-
-                  {/* <td className="border px-4 py-2 text-center">
-                    <button
-                      className="bg-[#295A47] text-white px-3 py-1 rounded"
-                      onClick={() => handleRemarkClick(lead.id)}
-                    >
-                      Remark
-                    </button>
-
-                  </td> */}
-
 
                 </tr>
               ))

@@ -48,7 +48,7 @@ export function TestimonialsForm({ mode, testimonial, isOpen, onOpenChange, onSa
     const fetchTestimonialForEdit = async (testimonialId: string) => {
       setIsLoadingData(true);
       try {
-        const res = await fetch(`/api/client-reviews/${testimonialId}`);
+        const res = await fetch(`/api/client-reviews/${testimonialId}`, { credentials: 'include' });
         if (!res.ok) throw new Error('Failed to fetch testimonial details');
         const fullTestimonialData = await res.json();
         setFormData(fullTestimonialData);
@@ -154,6 +154,7 @@ export function TestimonialsForm({ mode, testimonial, isOpen, onOpenChange, onSa
       const response = await fetch(apiEndpoint, {
         method: apiMethod,
         body: submitFormData,
+        credentials: 'include',
       });
 
       if (!response.ok) {
@@ -174,214 +175,214 @@ export function TestimonialsForm({ mode, testimonial, isOpen, onOpenChange, onSa
 
   const dialogTitle = mode === 'edit' ? 'Edit Testimonial' : 'Add New Testimonial';
   const buttonText = mode === 'edit' ? 'Save Changes' : 'Create Testimonial';
-return (
-  <Dialog open={isOpen} onOpenChange={onOpenChange}>
-    <DialogContent className="sm:max-w-4xl h-[95vh] flex flex-col bg-gray-50 rounded-2xl shadow-2xl p-4">
-      <DialogHeader>
-        <DialogTitle className="text-2xl font-semibold text-[#00423D] mb-2">
-          {dialogTitle}
-        </DialogTitle>
-      </DialogHeader>
+  return (
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-4xl h-[95vh] flex flex-col bg-gray-50 rounded-2xl shadow-2xl p-4">
+        <DialogHeader>
+          <DialogTitle className="text-2xl font-semibold text-[#00423D] mb-2">
+            {dialogTitle}
+          </DialogTitle>
+        </DialogHeader>
 
-      {isLoadingData ? (
-        <div className="flex-grow flex items-center justify-center">
-          <p>Loading Testimonial Data...</p>
-        </div>
-      ) : (
-        <form
-          onSubmit={handleSubmit}
-          className="flex-grow overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100 pr-4 pl-1 space-y-6"
-        >
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {isLoadingData ? (
+          <div className="flex-grow flex items-center justify-center">
+            <p>Loading Testimonial Data...</p>
+          </div>
+        ) : (
+          <form
+            onSubmit={handleSubmit}
+            className="flex-grow overflow-y-auto scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100 pr-4 pl-1 space-y-6"
+          >
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div>
+                <Label htmlFor="name" className="text-gray-700 font-semibold mb-1 block">
+                  Name <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="name"
+                  name="name"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  className="w-full rounded-lg border border-gray-400 bg-white/70 focus:border-[#00423D] focus:ring-1 focus:ring-[#00423D] focus:ring-offset-0 outline-none transition-all"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="rating" className="text-gray-700 font-semibold mb-1 block">
+                  Rating <span className="text-red-500">*</span>
+                </Label>
+                <Select
+                  name="rating"
+                  value={formData.rating?.toString()}
+                  onValueChange={(value) => handleSelectChange('rating', value)}
+                >
+                  <SelectTrigger className="bg-white/70 border border-gray-400 rounded-lg focus:border-[#00423D] focus:ring-1 focus:ring-[#00423D] focus:ring-offset-0 outline-none transition-all">
+                    <SelectValue placeholder="Select rating" />
+                  </SelectTrigger>
+                  <SelectContent position="popper" className="bg-white border shadow-lg rounded-lg">
+                    {[1, 2, 3, 4, 5].map((rating) => (
+                      <SelectItem
+                        key={rating}
+                        value={rating.toString()}
+                        className="hover:bg-[#00423D]/10 focus:bg-[#00423D]/15 data-[state=checked]:bg-[#00423D]/20 data-[state=checked]:text-[#00423D] data-[state=checked]:font-medium transition-colors duration-150 cursor-pointer"
+                      >
+                        {rating} Star{rating > 1 ? 's' : ''}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
             <div>
-              <Label htmlFor="name" className="text-gray-700 font-semibold mb-1 block">
-                Name <span className="text-red-500">*</span>
+              <Label htmlFor="message" className="text-gray-700 font-semibold mb-1 block">
+                Message <span className="text-red-500">*</span>
               </Label>
-              <Input
-                id="name"
-                name="name"
-                value={formData.name}
+              <Textarea
+                id="message"
+                name="message"
+                value={formData.message}
                 onChange={handleInputChange}
-                className="w-full rounded-lg border border-gray-400 bg-white/70 focus:border-[#00423D] focus:ring-1 focus:ring-[#00423D] focus:ring-offset-0 outline-none transition-all"
+                rows={4}
+                className="w-full rounded-lg border border-gray-300 bg-white/70 focus:border-[#00423D] focus:ring-1 focus:ring-[#00423D] focus:ring-offset-0 outline-none transition-all resize-none"
               />
             </div>
 
-            <div>
-              <Label htmlFor="rating" className="text-gray-700 font-semibold mb-1 block">
-                Rating <span className="text-red-500">*</span>
-              </Label>
-              <Select
-                name="rating"
-                value={formData.rating?.toString()}
-                onValueChange={(value) => handleSelectChange('rating', value)}
-              >
-                <SelectTrigger className="bg-white/70 border border-gray-400 rounded-lg focus:border-[#00423D] focus:ring-1 focus:ring-[#00423D] focus:ring-offset-0 outline-none transition-all">
-                  <SelectValue placeholder="Select rating" />
-                </SelectTrigger>
-                <SelectContent position="popper" className="bg-white border shadow-lg rounded-lg">
-                  {[1, 2, 3, 4, 5].map((rating) => (
-                    <SelectItem
-                      key={rating}
-                      value={rating.toString()}
-                      className="hover:bg-[#00423D]/10 focus:bg-[#00423D]/15 data-[state=checked]:bg-[#00423D]/20 data-[state=checked]:text-[#00423D] data-[state=checked]:font-medium transition-colors duration-150 cursor-pointer"
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Profile Image */}
+              <div>
+                <Label className="text-gray-700 font-semibold mb-1 block">
+                  Profile Image (Optional)
+                </Label>
+                <div className="mt-2 aspect-square w-40 relative rounded-xl border-2 border-dashed border-gray-400/70 flex items-center justify-center group bg-white/60 hover:bg-white transition">
+                  {profileImagePreview ? (
+                    <>
+                      <Image
+                        src={profileImagePreview}
+                        alt="Profile Preview"
+                        fill
+                        style={{ objectFit: 'cover' }}
+                        className="rounded-xl"
+                      />
+                      <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-xl text-white gap-2">
+                        <button
+                          type="button"
+                          onClick={() => profileFileInputRef.current?.click()}
+                          className="text-white flex items-center gap-2 p-2 bg-black/50 rounded-lg hover:bg-black/70"
+                        >
+                          <Pencil className="w-4 h-4" /> Change
+                        </button>
+                      </div>
+                      {selectedProfileFile && (
+                        <button
+                          type="button"
+                          onClick={removeProfileImage}
+                          className="absolute top-2 right-2 p-1 bg-white/80 rounded-full text-gray-800 hover:bg-white"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      )}
+                    </>
+                  ) : (
+                    <div
+                      className="text-center cursor-pointer p-4"
+                      onClick={() => profileFileInputRef.current?.click()}
                     >
-                      {rating} Star{rating > 1 ? 's' : ''}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div>
-            <Label htmlFor="message" className="text-gray-700 font-semibold mb-1 block">
-              Message <span className="text-red-500">*</span>
-            </Label>
-            <Textarea
-              id="message"
-              name="message"
-              value={formData.message}
-              onChange={handleInputChange}
-              rows={4}
-              className="w-full rounded-lg border border-gray-300 bg-white/70 focus:border-[#00423D] focus:ring-1 focus:ring-[#00423D] focus:ring-offset-0 outline-none transition-all resize-none"
-            />
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Profile Image */}
-            <div>
-              <Label className="text-gray-700 font-semibold mb-1 block">
-                Profile Image (Optional)
-              </Label>
-              <div className="mt-2 aspect-square w-40 relative rounded-xl border-2 border-dashed border-gray-400/70 flex items-center justify-center group bg-white/60 hover:bg-white transition">
-                {profileImagePreview ? (
-                  <>
-                    <Image
-                      src={profileImagePreview}
-                      alt="Profile Preview"
-                      fill
-                      style={{ objectFit: 'cover' }}
-                      className="rounded-xl"
-                    />
-                    <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-xl">
-                      <button
-                        type="button"
-                        onClick={() => profileFileInputRef.current?.click()}
-                        className="text-white flex items-center gap-2 p-2 bg-black/50 rounded-lg hover:bg-black/70"
-                      >
-                        <Pencil className="w-4 h-4" /> Change
-                      </button>
+                      <UploadCloud className="mx-auto h-8 w-8 text-gray-400" />
+                      <p className="mt-2 text-xs text-gray-600">Upload</p>
                     </div>
-                    {selectedProfileFile && (
+                  )}
+                  <Input
+                    id="profileFile"
+                    type="file"
+                    accept="image/*"
+                    ref={profileFileInputRef}
+                    onChange={handleProfileFileChange}
+                    className="hidden"
+                  />
+                </div>
+              </div>
+
+              {/* Review Images */}
+              <div>
+                <Label className="text-gray-700 font-semibold mb-1 block">
+                  Review Images (Optional)
+                </Label>
+                <div className="mt-2 grid grid-cols-3 gap-1">
+                  {reviewImagesPreview.map((preview, index) => (
+                    <div
+                      key={index}
+                      className="relative aspect-square rounded-lg border border-gray-400 overflow-hidden"
+                    >
+                      <Image
+                        src={preview}
+                        alt={`Review ${index + 1}`}
+                        fill
+                        style={{ objectFit: 'cover' }}
+                      />
                       <button
                         type="button"
-                        onClick={removeProfileImage}
+                        onClick={() => removeReviewImage(index)}
                         className="absolute top-2 right-2 p-1 bg-white/80 rounded-full text-gray-800 hover:bg-white"
                       >
                         <X className="w-4 h-4" />
                       </button>
-                    )}
-                  </>
-                ) : (
+                    </div>
+                  ))}
                   <div
-                    className="text-center cursor-pointer p-4"
-                    onClick={() => profileFileInputRef.current?.click()}
+                    className="aspect-square rounded-xl border-2 border-dashed border-gray-400/70 flex items-center justify-center cursor-pointer bg-white/60 hover:bg-white transition"
+                    onClick={() => reviewFilesInputRef.current?.click()}
                   >
-                    <UploadCloud className="mx-auto h-8 w-8 text-gray-400" />
-                    <p className="mt-2 text-xs text-gray-600">Upload</p>
+                    <Plus className="h-8 w-8 text-gray-400" />
                   </div>
-                )}
+                </div>
                 <Input
-                  id="profileFile"
+                  id="reviewFiles"
                   type="file"
                   accept="image/*"
-                  ref={profileFileInputRef}
-                  onChange={handleProfileFileChange}
+                  multiple
+                  ref={reviewFilesInputRef}
+                  onChange={handleReviewFilesChange}
                   className="hidden"
                 />
               </div>
             </div>
 
-            {/* Review Images */}
             <div>
-              <Label className="text-gray-700 font-semibold mb-1 block">
-                Review Images (Optional)
+              <Label htmlFor="videoUrls" className="text-gray-700 font-semibold mb-1 block">
+                Video URLs (Optional)
               </Label>
-              <div className="mt-2 grid grid-cols-3 gap-1">
-                {reviewImagesPreview.map((preview, index) => (
-                  <div
-                    key={index}
-                    className="relative aspect-square rounded-lg border border-gray-400 overflow-hidden"
-                  >
-                    <Image
-                      src={preview}
-                      alt={`Review ${index + 1}`}
-                      fill
-                      style={{ objectFit: 'cover' }}
-                    />
-                    <button
-                      type="button"
-                      onClick={() => removeReviewImage(index)}
-                      className="absolute top-2 right-2 p-1 bg-white/80 rounded-full text-gray-800 hover:bg-white"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
-                ))}
-                <div
-                  className="aspect-square rounded-xl border-2 border-dashed border-gray-400/70 flex items-center justify-center cursor-pointer bg-white/60 hover:bg-white transition"
-                  onClick={() => reviewFilesInputRef.current?.click()}
-                >
-                  <Plus className="h-8 w-8 text-gray-400" />
-                </div>
-              </div>
-              <Input
-                id="reviewFiles"
-                type="file"
-                accept="image/*"
-                multiple
-                ref={reviewFilesInputRef}
-                onChange={handleReviewFilesChange}
-                className="hidden"
+              <Textarea
+                id="videoUrls"
+                value={videoUrls.join('\n')}
+                onChange={handleVideoUrlsChange}
+                placeholder="https://youtube.com/watch?v=..."
+                rows={3}
+                className="w-full rounded-lg border border-gray-400 bg-white/70 focus:border-[#00423D] focus:ring-1 focus:ring-[#00423D] focus:ring-offset-0 outline-none transition-all"
               />
             </div>
-          </div>
 
-          <div>
-            <Label htmlFor="videoUrls" className="text-gray-700 font-semibold mb-1 block">
-              Video URLs (Optional)
-            </Label>
-            <Textarea
-              id="videoUrls"
-              value={videoUrls.join('\n')}
-              onChange={handleVideoUrlsChange}
-              placeholder="https://youtube.com/watch?v=..."
-              rows={3}
-              className="w-full rounded-lg border border-gray-400 bg-white/70 focus:border-[#00423D] focus:ring-1 focus:ring-[#00423D] focus:ring-offset-0 outline-none transition-all"
-            />
-          </div>
-
-          <DialogFooter className="sticky bottom-0 bg-gray-50 py-4 mt-4 -mx-1 flex justify-end gap-3">
-            <DialogClose asChild>
+            <DialogFooter className="sticky bottom-0 bg-gray-50 py-4 mt-4 -mx-1 flex justify-end gap-3">
+              <DialogClose asChild>
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="rounded-xl border border-gray-400 text-gray-700 hover:bg-gray-100 transition"
+                >
+                  Cancel
+                </Button>
+              </DialogClose>
               <Button
-                type="button"
-                variant="outline"
-                className="rounded-xl border border-gray-400 text-gray-700 hover:bg-gray-100 transition"
+                type="submit"
+                disabled={isSubmitting}
+                className="rounded-xl bg-[#00423D] hover:bg-[#006B63] text-white px-6 py-2 transition"
               >
-                Cancel
+                {isSubmitting ? 'Saving...' : buttonText}
               </Button>
-            </DialogClose>
-            <Button
-              type="submit"
-              disabled={isSubmitting}
-              className="rounded-xl bg-[#00423D] hover:bg-[#006B63] text-white px-6 py-2 transition"
-            >
-              {isSubmitting ? 'Saving...' : buttonText}
-            </Button>
-          </DialogFooter>
-        </form>
-      )}
-    </DialogContent>
-  </Dialog>
-);
+            </DialogFooter>
+          </form>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
 }

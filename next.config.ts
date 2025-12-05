@@ -24,6 +24,21 @@ const nextConfig: NextConfig = {
       rules: {},
     },
   },
+  webpack: (config, { isServer }) => {
+    if (isServer) {
+      config.externals = config.externals || [];
+      config.externals.push({
+        mysql2: 'commonjs mysql2',
+      });
+    } else {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        net: false,
+        tls: false,
+      };
+    }
+    return config;
+  },
 
   // ✅ Add redirects here
   async redirects() {

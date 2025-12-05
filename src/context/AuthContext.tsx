@@ -1,73 +1,78 @@
 "use client";
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { NextRequest, NextResponse } from 'next/server';
-import jwt from 'jsonwebtoken';
+import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+
+interface User {
+  user_id: string;
+  name: string;
+  email: string;
+  phone: string;
+}
 
 interface AuthContextType {
+  user: User | null;
   isLoggedIn: boolean;
-  setIsLoggedIn: (value: boolean) => void;
-  checkAuth: () => void;
+  login: (email: string, password: string) => Promise<boolean>;
+  logout: () => void;
+  setUser: (user: User | null) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const [user, setUser] = useState<User | null>(null);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  const checkAuth = () => {
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    const userData = localStorage.getItem("user");
+    if (token && userData) {
+      setUser(JSON.parse(userData));
+      setIsLoggedIn(true);
+    }
+  }, []);
+
+  const login = async (email: string, password: string) => {
     try {
-      const cookies = document.cookie.split("; ");
-      const loggedInCookie = cookies.find((cookie) => cookie.trim().startsWith("loggedIn="));
-      const loggedInValue = loggedInCookie?.split("=")[1];
-      const newLoginState = loggedInValue === "true";
-      setIsLoggedIn(newLoginState);
-    } catch (error) {
-      setIsLoggedIn(false);
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (!res.ok) return false;
+
+      const data = await res.json();
+      console.log("Storing JWT token in localStorage:", data.token);
+      localStorage.setItem("token", data.token);
+
+      // Map API user object to match frontend interface (id -> user_id)
+      const userData = {
+        ...data.user,
+        user_id: data.user.id
+      };
+      delete userData.id;
+
+      localStorage.setItem("user", JSON.stringify(userData));
+
+      setUser(userData);
+      setIsLoggedIn(true);
+      return true;
+    } catch (err) {
+      console.error("Login error:", err);
+      return false;
     }
   };
 
-  // Check auth on mount
-  useEffect(() => {
-    console.log("AuthProvider mounted");
-    checkAuth();
-  }, []);
-
-  // Listen for storage events
-  useEffect(() => {
-    const handleStorageChange = () => {
-      console.log("Storage changed, checking auth");
-      checkAuth();
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-    return () => window.removeEventListener('storage', handleStorageChange);
-  }, []);
-
-  // Listen for visibility changes
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible') {
-        console.log("Page visible, checking auth");
-        checkAuth();
-      }
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
-  }, []);
-
-  // Periodically check auth state
-  useEffect(() => {
-    const interval = setInterval(() => {
-      checkAuth();
-    }, 60000); // Check every 5 seconds
-
-    return () => clearInterval(interval);
-  }, []);
+  const logout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    setUser(null);
+    setIsLoggedIn(false);
+  };
 
   return (
-    <AuthContext.Provider value={{ isLoggedIn, setIsLoggedIn, checkAuth }}>
+    <AuthContext.Provider value={{ user, isLoggedIn, login, logout, setUser }}>
       {children}
     </AuthContext.Provider>
   );
@@ -75,22 +80,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
 export function useAuth() {
   const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
+  if (!context) throw new Error("useAuth must be used within AuthProvider");
   return context;
-}
-
-export async function GET(req: NextRequest) {
-  const token = req.cookies.get('token')?.value;
-  if (!token) {
-    return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
-  }
-  try {
-    const user = jwt.verify(token, process.env.JWT_SECRET as string);
-    // user is authenticated
-    return NextResponse.json({ user });
-  } catch (err) {
-    return NextResponse.json({ error: 'Invalid token' }, { status: 401 });
-  }
 }

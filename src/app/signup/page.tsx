@@ -13,7 +13,10 @@ export default function SignupPage() {
         confirmPassword: "",
         username: "",
         phone: "",
-        about: "",
+        wp: "",
+        // about: "",
+        occupation: "",
+        address: "",
         joinAs: "", // Default value
     });
     const [buttonDisabled, setButtonDisabled] = useState(true);
@@ -28,6 +31,7 @@ export default function SignupPage() {
     // Error states for validations
     const [emailError, setEmailError] = useState("");
     const [phoneError, setPhoneError] = useState("");
+    const [wpError, setWpError] = useState("");
     const [passwordError, setPasswordError] = useState("");
 
     // Regex patterns for validations
@@ -36,21 +40,21 @@ export default function SignupPage() {
 
     const options = [
         { value: "", label: "Select your role", icon: null },
-        { value: "refer_earn_partner", label: "Refer & Earn Partner", icon: (
+        { value: "referuser", label: "Refer & Earn Partner", icon: (
             <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
             </svg>
         )},
-        { value: "Admin", label: "Admin", icon: (
+        { value: "client", label: "Client", icon: (
             <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
             </svg>
         )},
-        { value: "Super Admin", label: "Super Admin", icon: (
-            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-            </svg>
-        )}
+        // { value: "Super Admin", label: "Super Admin", icon: (
+        //     <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+        //         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        //     </svg>
+        // )}
     ];
 
     const selectedOption = options.find(opt => opt.value === user.joinAs);
@@ -61,39 +65,59 @@ export default function SignupPage() {
             user.password !== user.confirmPassword && user.confirmPassword.length > 0
         );
         setPasswordTooShort(user.password.length > 0 && user.password.length < 6);
-    }, [user.password, user.confirmPassword]);
+}, [user.password, user.confirmPassword]);
 
-    // Dynamic validation while typing
-    useEffect(() => {
-        validateEmail(user.email);
-        validatePhone(user.phone);
-        validatePassword(user.password);
-    }, [user.email, user.phone, user.password]);
-
-    // Disable button if required fields are empty or terms not accepted
-    useEffect(() => {
-        if (
-            user.email &&
-            user.password &&
-            user.confirmPassword &&
-            user.username &&
-            user.phone &&
-            user.joinAs &&
-            !passwordMismatch &&
-            !passwordTooShort &&
-            termsAccepted &&
-            !emailError &&
-            !phoneError &&
-            !passwordError
-        ) {
-            setButtonDisabled(false);
-        } else {
-            setButtonDisabled(true);
-        }
-    }, [user, passwordMismatch, passwordTooShort, termsAccepted, emailError, phoneError, passwordError]);
+// Dynamic validation while typing
+// Disable button if required fields are empty or terms not accepted
+useEffect(() => {
+    if (
+        user.email &&
+        user.password &&
+        user.confirmPassword &&
+        user.username &&
+        user.phone &&
+        user.joinAs &&
+        user.password === user.confirmPassword &&
+        user.password.length >= 6 &&
+        user.phone.match(phonePattern) &&
+        user.email.match(emailPattern) &&
+        user.wp &&
+        user.address &&
+        user.occupation &&
+        !passwordMismatch &&
+        !passwordTooShort &&
+        termsAccepted &&
+        !emailError &&
+        !phoneError &&
+        !passwordError
+    ) {
+        setButtonDisabled(false);
+    } else {
+        setButtonDisabled(true);
+    }
+}, [
+    user.email,
+    user.password,
+    user.confirmPassword,
+    user.username,
+    user.phone,
+    user.wp,
+    user.address,
+    user.occupation,
+    user.joinAs,
+    passwordMismatch,
+    passwordTooShort,
+    termsAccepted,
+    emailError,
+    phoneError,
+    wpError,
+    passwordError,
+]);
 
     const validateEmail = (email:string) => {
-        if (email && !emailPattern.test(email)) {
+        if (email && !email.includes("@")) {
+            setEmailError("Email must contain '@' character.");
+        } else if (email && !emailPattern.test(email)) {
             setEmailError("Invalid email format.");
         } else {
             setEmailError("");
@@ -105,6 +129,14 @@ export default function SignupPage() {
             setPhoneError("Phone number must be 10 digits.");
         } else {
             setPhoneError("");
+        }
+    };
+
+    const validateWhatsapp = (wp:string) => {
+        if (wp && !phonePattern.test(wp)) {
+            setWpError("WhatsApp number must be 10 digits.");
+        } else {
+            setWpError("");
         }
     };
 
@@ -125,22 +157,37 @@ export default function SignupPage() {
         try {
             setLoading(true);
 
-            const aboutValue =
-            user.about.trim() === ""
-                ? `Hi, I am ${user.username || "a new user"}. This is my bio.`
-                : user.about;
-
-            const response = await axios.post("/api/users/signup", {
+            // Log the form payload to debug
+            console.log("Signup payload:", {
+                full_name: user.username,
                 email: user.email,
                 password: user.password,
-                username: user.username,
                 phone: user.phone,
-                about: aboutValue
+                whatsapp: user.wp,
+                address: user.address,
+                occupation: user.occupation,
+                role: user.joinAs
             });
-            // console.log("Signup success", response.data);
-            // toast.success("Signup successful! Redirecting...");
-            toast.success("✅ Verification email sent. Please check your inbox.");
-            router.push("/verifyemail");
+
+            // const aboutValue =
+            // user.about.trim() === ""
+            //     ? `Hi, I am ${user.username || "a new user"}. This is my bio.`
+            //     : user.about;
+
+            const response = await axios.post("/api/users/signup", {
+                full_name: user.username,
+                email: user.email,
+                password: user.password,
+                phone: user.phone,
+                whatsapp: user.wp,
+                address: user.address,
+                occupation: user.occupation,
+                role: user.joinAs
+            });
+
+            console.log("Signup success", response.data);
+            toast.success("🎉 Signup successful! Please log in.");
+            router.push("/login");
         } catch (error) {
             if (error instanceof Error) {
                 console.error("Signup failed", error.message);
@@ -179,7 +226,7 @@ export default function SignupPage() {
                 <div className="flex flex-col">
                     {/* Username */}
                     <label htmlFor="username" className="mb-1 text-sm text-gray-700">
-                        Username <span className="text-red-500">*</span>
+                        Full Name <span className="text-red-500">*</span>
                     </label>
                     <input
                         className="p-3 border border-gray-300 rounded-lg mb-4 bg-white text-black focus:outline-none focus:border-teal-500"
@@ -241,7 +288,10 @@ export default function SignupPage() {
                         id="email"
                         type="email"
                         value={user.email}
-                        onChange={(e) => setUser({ ...user, email: e.target.value })}
+                        onChange={(e) => {
+                            setUser({ ...user, email: e.target.value });
+                            validateEmail(e.target.value);
+                        }}
                         placeholder="Enter email"
                     />
                     {emailError && <p className="text-red-500 text-sm mb-4">{emailError}</p>}
@@ -255,11 +305,53 @@ export default function SignupPage() {
                         id="phone"
                         type="tel"
                         value={user.phone}
-                        onChange={(e) => setUser({ ...user, phone: e.target.value })}
+                        onChange={(e) => {
+                            setUser({ ...user, phone: e.target.value });
+                            validatePhone(e.target.value);
+                        }}
                         placeholder="Enter phone number"
                     />
                     {phoneError && <p className="text-red-500 text-sm mb-4">{phoneError}</p>}
-
+                    {/* wp Number */}
+                    <label htmlFor="phone" className="mb-1 text-sm text-gray-700">
+                        Whatsapp Number <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                        className={`p-3 border ${wpError ? "border-red-500" : "border-gray-300"} rounded-lg mb-4 bg-white text-black focus:outline-none focus:border-teal-500`}
+                        id="wp"
+                        type="tel"
+                        value={user.wp}
+                        onChange={(e) => {
+                            setUser({ ...user, wp: e.target.value });
+                            validateWhatsapp(e.target.value);
+                        }}
+                        placeholder="Enter whatsapp number"
+                    />
+                    {wpError && <p className="text-red-500 text-sm mb-4">{wpError}</p>}
+                    {/* Occupation */}
+                    <label htmlFor="occupation" className="mb-1 text-sm text-gray-700">
+                        Occupation <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                        className="p-3 border border-gray-300 rounded-lg mb-4 bg-white text-black focus:outline-none focus:border-teal-500"
+                        id="occupation"
+                        type="text"
+                        value={user.occupation}
+                        onChange={(e) => setUser({ ...user, occupation: e.target.value })}
+                        placeholder="Enter occupation"
+                    />
+                    {/* address */}
+                    <label htmlFor="address" className="mb-1 text-sm text-gray-700">
+                        Address <span className="text-red-500">*</span>
+                    </label>
+                    <input
+                        className="p-3 border border-gray-300 rounded-lg mb-4 bg-white text-black focus:outline-none focus:border-teal-500"
+                        id="occupation"
+                        type="text"
+                        value={user.address}
+                        onChange={(e) => setUser({ ...user, address: e.target.value })}
+                        placeholder="Enter address"
+                    />
                     {/* Password */}
                     <label htmlFor="password" className="mb-1 text-sm text-gray-700">
                         Password <span className="text-red-500">*</span>
@@ -272,7 +364,10 @@ export default function SignupPage() {
                             id="password"
                             type={showPassword ? "text" : "password"}
                             value={user.password}
-                            onChange={(e) => setUser({ ...user, password: e.target.value })}
+                            onChange={(e) => {
+                                setUser({ ...user, password: e.target.value });
+                                validatePassword(e.target.value);
+                            }}
                             placeholder="Use at least 6 characters and special symbols"
                         />
                         <button
@@ -300,16 +395,17 @@ export default function SignupPage() {
                         id="confirmPassword"
                         type="password"
                         value={user.confirmPassword}
-                        onChange={(e) =>
-                            setUser({ ...user, confirmPassword: e.target.value })
-                        }
+                        onChange={(e) => {
+                            setUser({ ...user, confirmPassword: e.target.value });
+                            validatePassword(e.target.value);
+                        }}
                         placeholder="Re-enter password"
                     />
                     {passwordMismatch && (
                         <p className="text-red-500 text-sm mb-4">Passwords do not match!</p>
                     )}
 
-                    {/* About Yourself (Optional) */}
+                    {/* About Yourself (Optional)
                     <label htmlFor="about" className="mb-1 text-sm text-gray-700">
                         Tell us something about yourself (Optional)
                     </label>
@@ -320,11 +416,11 @@ export default function SignupPage() {
                         onChange={(e) => setUser({ ...user, about: e.target.value })}
                         placeholder="Share a little about yourself..."
                         rows={3}
-                    />
+                    /> */}
 
                     {/* Terms and Conditions */}
                     <div className="flex items-center mb-4">
-                        <div className="relative flex items-center">
+                        <label htmlFor="terms" className="relative flex items-center text-sm text-gray-700 cursor-pointer">
                             <input
                                 type="checkbox"
                                 id="terms"
@@ -346,19 +442,16 @@ export default function SignupPage() {
                                     <div className="w-4 h-4 border-2 border-t-transparent border-teal-500 rounded-full animate-spin"></div>
                                 </div>
                             )}
-                        </div>
-                        <label
-                            htmlFor="terms"
-                            className="text-sm text-gray-700 cursor-pointer ml-2"
-                        >
-                            I accept the {" "}
-                            <Link
-                                href="/terms"
-                                className="text-teal-600 hover:text-teal-700 font-semibold"
-                            >
-                                Terms & Conditions
-                            </Link>
-                            <span className="text-red-500">*</span>
+                            <span className="ml-8">
+                                I accept the {" "}
+                                <Link
+                                    href="/terms"
+                                    className="text-teal-600 hover:text-teal-700 font-semibold"
+                                >
+                                    Terms & Conditions
+                                </Link>
+                                <span className="text-red-500">*</span>
+                            </span>
                         </label>
                     </div>
 
@@ -389,3 +482,4 @@ export default function SignupPage() {
         </div>
     );
 }
+

@@ -72,11 +72,11 @@ const HeroSection = () => {
               <FaPen className="mr-2" /> Estimate Your Cost
             </button>
           </Link>
-          <Link href="/our-designers">
+          {/* <Link href="/our-designers">
             <button className="w-60 bg-primary border-2 border-[#295A47] cursor-pointer flex items-center justify-center px-5 py-3 rounded-lg text-lg shadow-lg hover:bg-[#295A47] transition">
               <FaUser className="mr-2 text-2xl" /> Hire a Designer
             </button>
-          </Link>
+          </Link> */}
         </div>
       </div>
 

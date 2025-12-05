@@ -1,30 +1,107 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 
 type Tab = "cold" | "site" | "booking" | "booked";
 
-const SalesPage: React.FC = () => {
+interface ProjectData {
+  appointment_id: number;
+  lead_id: string;
+  client_name: string;
+  client_phone: string;
+  location: string;
+  project_value: number;
+  commission: number;
+  agent_share: number;
+  property_type: string;
+  cold_call_date: string;
+  cold_call_time: string;
+  cold_call_status: string;
+  site_visit_date: string;
+  site_visit_time: string;
+  site_visit_status: string;
+  booking_date: string;
+  booking_time: string;
+  booking_status: string;
+  booking_id: string;
+  agent_name: string;
+  address?: string;
+  lead_date?: string;
+  created_at?: string;
+}
+
+interface SalesPageProps {
+  agentId?: string;
+}
+
+const SalesPage: React.FC<SalesPageProps> = ({ agentId }) => {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<Tab>("cold");
   const [status, setStatus] = useState("all");
   const [showEntries, setShowEntries] = useState("all");
   const [filterType, setFilterType] = useState<'all' | 'residential' | 'commercial'>('all');
+  const [projectsData, setProjectsData] = useState<ProjectData[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const siteVisitData = [
-    { id: 1, appId: "HD7345667", project: "Rajwada Grand", client: "Kalyan Chatterjee", address: "Kolkata", phone: "+91 9999999999", req: "3BHK", status: "Upcoming", rep: "John Bor", propertyType: "Residential",Date: "12/01/20", Time: "15:00"},
-    { id: 2, appId: "HD7345668", project: "Rajwada Grand", client: "Arun Kumar", address: "Delhi", phone: "+91 8888888888", req: "2BHK", status: "Upcoming", rep: "Jane Doe", propertyType: "Residential",Date: "12/03/20",Time: "15:00" },
-    { id: 3, appId: "HD7345669", project: "Commercial Plaza", client: "Business Corp", address: "Mumbai", phone: "+91 7777777777", req: "Office Space", status: "Upcoming", rep: "Mike Smith", propertyType: "Commercial",Date: "12/05/20", Time: "15:00" },
-    { id: 4, appId: "HD7345670", project: "Rajwada Grand", client: "Priya Singh", address: "Bangalore", phone: "+91 6666666666", req: "4BHK", status: "Upcoming", rep: "Alex Johnson", propertyType: "Residential",Date: "12/4/20",Time: "15:00"},
-    { id: 5, appId: "HD7345671", project: "Commercial Plaza", client: "Tech Solutions", address: "Pune", phone: "+91 5555555555", req: "Warehouse", status: "Upcoming", rep: "Sara Lee", propertyType: "Commercial",Date: "02/01/20",Time: "15:00"},
-  ];
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          console.error('No token found');
+          return;
+        }
+        const response = await fetch('/api/sales-admin/projects', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+        if (response.ok) {
+          const data = await response.json();
+          setProjectsData(data.projects || []);
+        } else {
+          console.error('Failed to fetch projects');
+        }
+      } catch (error) {
+        console.error('Error fetching projects:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const filteredData = siteVisitData.filter(item => filterType === 'all' || item.propertyType.toLowerCase() === filterType);
+    fetchProjects();
+  }, []);
 
-  const totalCount = siteVisitData.length;
-  const residentialCount = siteVisitData.filter(item => item.propertyType === 'Residential').length;
-  const commercialCount = siteVisitData.filter(item => item.propertyType === 'Commercial').length;
+  const filteredData = projectsData.filter((project) => {
+    const matchesType = filterType === 'all' || project.property_type.toLowerCase() === filterType;
+    let matchesStatus = false;
+    switch (activeTab) {
+      case 'cold':
+        matchesStatus = project.cold_call_status !== 'Confirmed';
+        break;
+      case 'site':
+        matchesStatus = project.cold_call_status === 'Confirmed' && project.site_visit_status !== 'Confirmed';
+        break;
+      case 'booking':
+        matchesStatus = project.site_visit_status === 'Confirmed';
+        break;
+      case 'booked':
+        matchesStatus = project.booking_status === 'Booked';
+        break;
+    }
+    return matchesType && matchesStatus;
+  });
+
+  const totalCount = projectsData.length;
+  const residentialCount = projectsData.filter(item => item.property_type === 'Residential').length;
+  const commercialCount = projectsData.filter(item => item.property_type === 'Commercial').length;
 
   const renderTable = () => {
+    if (loading) {
+      return <div className="text-center mt-4">Loading...</div>;
+    }
+
     switch (activeTab) {
       case "cold":
         return (
@@ -32,29 +109,26 @@ const SalesPage: React.FC = () => {
             <thead className="bg-[#295A47] text-white">
               <tr>
                 <th className="p-2 border">Sl.No</th>
-                <th className="p-2 border">Project Name</th>
+                <th className="p-2 border">Lead ID</th>
                 <th className="p-2 border">Client Name</th>
-                <th className="p-2 border">Address</th>
                 <th className="p-2 border">Phone Number</th>
-                <th className="p-2 border">Cold Call Status</th>
-                <th className="p-2 border">Representative Name</th>
-                <th className="p-2 border">Date</th>
-                <th className="p-2 border">Time</th>
+                <th className="p-2 border">Address</th>
+                <th className="p-2 border">Lead Date</th>
+                <th className="p-2 border">Property Type</th>
               </tr>
             </thead>
             <tbody>
-              {/* Example row */}
-              <tr>
-                <td className="p-2 border text-center">1</td>
-                <td className="p-2 border">Rajwada Grand</td>
-                <td className="p-2 border">Kalyan Chatterjee</td>
-                <td className="p-2 border">Kolkata</td>
-                <td className="p-2 border">+91 9999999999</td>
-                <td className="p-2 border">Interested</td>
-                <td className="p-2 border">John Bor</td>
-                <td className="p-2 border">12/01/20</td>
-                <td className="p-2 border">4PM</td>
-              </tr>
+              {filteredData.map((item, index) => (
+                <tr key={item.lead_id}>
+                  <td className="p-2 border text-center">{index + 1}</td>
+                  <td className="p-2 border">{item.lead_id}</td>
+                  <td className="p-2 border">{item.client_name}</td>
+                  <td className="p-2 border">{item.client_phone}</td>
+                  <td className="p-2 border">{item.location}</td>
+                  <td className="p-2 border">{item.created_at ? new Date(item.created_at).toLocaleDateString() : 'N/A'}</td>
+                  <td className="p-2 border">{item.property_type}</td>
+                </tr>
+              ))}
             </tbody>
           </table>
         );
@@ -66,33 +140,25 @@ const SalesPage: React.FC = () => {
               <tr>
                 <th className="p-2 border">Sl.No</th>
                 <th className="p-2 border">Appointment ID</th>
-                <th className="p-2 border">Project Name</th>
+                <th className="p-2 border">Lead ID</th>
                 <th className="p-2 border">Client Name</th>
-                <th className="p-2 border">Address</th>
                 <th className="p-2 border">Phone Number</th>
-                <th className="p-2 border">Status</th>
-                <th className="p-2 border">Representative Name</th>
+                <th className="p-2 border">Location</th>
                 <th className="p-2 border">Property Type</th>
-                <th className="p-2 border">Date</th>
-                <th className="p-2 border">Time</th>
-
+                <th className="p-2 border">Created At</th>
               </tr>
             </thead>
             <tbody>
               {filteredData.map((item, index) => (
-                <tr key={item.id}>
+                <tr key={item.lead_id}>
                   <td className="p-2 border text-center">{index + 1}</td>
-                  <td className="p-2 border">{item.appId}</td>
-                  <td className="p-2 border">{item.project}</td>
-                  <td className="p-2 border">{item.client}</td>
-                  <td className="p-2 border">{item.address}</td>
-                  <td className="p-2 border">{item.phone}</td>
-                  <td className="p-2 border">{item.status}</td>
-                  <td className="p-2 border">{item.rep}</td>
-                  <td className="p-2 border">{item.propertyType}</td>
-                  <td className="p-2 border">{item.Date}</td>
-                  <td className="p-2 border">{item.Time}</td>
-
+                  <td className="p-2 border">{item.appointment_id}</td>
+                  <td className="p-2 border">{item.lead_id}</td>
+                  <td className="p-2 border">{item.client_name}</td>
+                  <td className="p-2 border">{item.client_phone}</td>
+                  <td className="p-2 border">{item.location}</td>
+                  <td className="p-2 border">{item.property_type}</td>
+                  <td className="p-2 border">{item.created_at ? new Date(item.created_at).toLocaleDateString() : 'N/A'}</td>
                 </tr>
               ))}
             </tbody>
@@ -106,84 +172,69 @@ const SalesPage: React.FC = () => {
               <tr>
                 <th className="p-2 border">Sl.No</th>
                 <th className="p-2 border">Appointment ID</th>
-                <th className="p-2 border">Commission</th>
-                <th className="p-2 border">Project Name</th>
+                <th className="p-2 border">Lead ID</th>
                 <th className="p-2 border">Client Name</th>
-                <th className="p-2 border">Address</th>
                 <th className="p-2 border">Phone Number</th>
-                <th className="p-2 border">Booking Status</th>
-                <th className="p-2 border">Representative Name</th>
-                <th className="p-2 border">Property Type</th>
                 <th className="p-2 border">Project Value</th>
-                <th className="p-2 border">Payment Status</th>
-                <th className="p-2 border">Date</th>
-                <th className="p-2 border">Time</th>
+                <th className="p-2 border">Commission</th>
+                <th className="p-2 border">Agent Share</th>
+                <th className="p-2 border">Property Type</th>
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td className="p-2 border text-center">1</td>
-                <td className="p-2 border">BK456321</td>
-                <td className="p-2 border">5%</td>
-                <td className="p-2 border">Rajwada Grand</td>
-                <td className="p-2 border">Kalyan Chatterjee</td>
-                <td className="p-2 border">Kolkata</td>
-                <td className="p-2 border">+91 9999999999</td>
-                <td className="p-2 border">Confirmed</td>
-                <td className="p-2 border">John Bor</td>
-                <td className="p-2 border">Residential</td>
-                <td className="p-2 border">₹10,00,000</td>
-                <td className="p-2 border">Paid</td>
-                <td className="p-2 border">12/01/21</td>
-                <td className="p-2 border">12:00</td>
-              </tr>
+              {filteredData.map((item, index) => (
+                <tr key={item.lead_id}>
+                  <td className="p-2 border text-center">{index + 1}</td>
+                  <td className="p-2 border">{item.appointment_id}</td>
+                  <td className="p-2 border">{item.lead_id}</td>
+                  <td className="p-2 border">{item.client_name}</td>
+                  <td className="p-2 border">{item.client_phone}</td>
+                  <td className="p-2 border">₹{item.project_value.toLocaleString()}</td>
+                  <td className="p-2 border">{item.commission}%</td>
+                  <td className="p-2 border">₹{item.agent_share.toLocaleString()}</td>
+                  <td className="p-2 border">{item.property_type}</td>
+                </tr>
+              ))}
             </tbody>
           </table>
         );
-    
-      case "booked":
-          return (
-            <table className=" min-w-full border mt-4">
-              <thead className="bg-[#295A47] text-white">
-                <tr>
-                  <th className="p-2 border">Sl.No</th>
-                  <th className="p-2 border">Appointment ID</th>
-                  <th className="p-2 border">Commission</th>
-                  <th className="p-2 border">Project Name</th>
-                  <th className="p-2 border">Project Value</th>
-                  <th className="p-2 border">Client Name</th>
-                  <th className="p-2 border">Address</th>
-                  <th className="p-2 border">Phone Number</th>
-                  <th className="p-2 border">Booking Status</th>
-                  <th className="p-2 border">Representative Name</th>
-                  <th className="p-2 border">Property Type</th>
-                  <th className="p-2 border">Payment Status</th>
-                  <th className="p-2 border">Date</th>
-                  <th className="p-2 border">Time</th>
 
+      case "booked":
+        return (
+          <table className="min-w-full border mt-4">
+            <thead className="bg-[#295A47] text-white">
+              <tr>
+                <th className="p-2 border">Sl.No</th>
+                <th className="p-2 border">Appointment ID</th>
+                <th className="p-2 border">Lead ID</th>
+                <th className="p-2 border">Client Name</th>
+                <th className="p-2 border">Phone Number</th>
+                <th className="p-2 border">Project Value</th>
+                <th className="p-2 border">Commission</th>
+                <th className="p-2 border">Agent Share</th>
+                <th className="p-2 border">Property Type</th>
+                <th className="p-2 border">Created At</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredData.map((item, index) => (
+                <tr key={item.lead_id}>
+                  <td className="p-2 border text-center">{index + 1}</td>
+                  <td className="p-2 border">{item.appointment_id}</td>
+                  <td className="p-2 border">{item.lead_id}</td>
+                  <td className="p-2 border">{item.client_name}</td>
+                  <td className="p-2 border">{item.client_phone}</td>
+                  <td className="p-2 border">₹{item.project_value.toLocaleString()}</td>
+                  <td className="p-2 border">{item.commission}%</td>
+                  <td className="p-2 border">₹{item.agent_share.toLocaleString()}</td>
+                  <td className="p-2 border">{item.property_type}</td>
+                  <td className="p-2 border">{new Date(item.created_at).toLocaleDateString()}</td>
                 </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td className="p-2 border text-center">1</td>
-                  <td className="p-2 border">BK456321</td>
-                  <td className="p-2 border">5%</td>
-                  <td className="p-2 border">Rajwada Grand</td>
-                  <td className="p-2 border">₹10,00,000</td>
-                  <td className="p-2 border">Kalyan Chatterjee</td>
-                  <td className="p-2 border">Kolkata</td>
-                  <td className="p-2 border">+91 9999999999</td>
-                  <td className="p-2 border">Confirmed</td>
-                  <td className="p-2 border">John Bor</td>
-                  <td className="p-2 border">Residential</td>
-                  <td className="p-2 border">Paid</td>
-                  <td className="p-2 border">12/01/21</td>
-                  <td className="p-2 border">12:00</td>
-                </tr>
-              </tbody>
-            </table>
-          );
-      }
+              ))}
+            </tbody>
+          </table>
+        );
+    }
   };
 
   return (
@@ -307,7 +358,7 @@ const SalesPage: React.FC = () => {
       )}
 
       {/* Table */}
-      <div className="bg-green-900 mt-4 bg-white p-4 rounded-lg shadow-sm overflow-x-auto">
+      <div className="bg-white mt-4 p-4 rounded-lg shadow-sm overflow-x-auto">
         {renderTable()}
       </div>
     </div>

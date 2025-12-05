@@ -859,7 +859,6 @@ const EstimatePage = () => {
                 {/* Commercial Flow */}
                 {projectType === 'commercial' && !showProjectTypeModal && (
                     <CommercialForm
-                        ref={commercialFormRef}
                         onSubmit={handleCommercialFormSubmit}
                     />
                 )}

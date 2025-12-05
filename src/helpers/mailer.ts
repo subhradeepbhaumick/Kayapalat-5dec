@@ -1,16 +1,16 @@
 import nodemailer from 'nodemailer';
 
 // Email templates
-const verificationEmail = (token: string) => `
+const verificationEmail = (userId: string) => `
   <h1>Welcome to Kayapalat!</h1>
   <p>Please verify your email by clicking the link below:</p>
-  <a href="${process.env.NEXT_PUBLIC_APP_URL}/verify-email?token=${token}">Verify Email</a>
+  <a href="${process.env.NEXT_PUBLIC_APP_URL}/verify-email?token=${userId}">Verify Email</a>
 `;
 
-const resetPasswordEmail = (token: string) => `
+const resetPasswordEmail = (userId: string) => `
   <h1>Password Reset Request</h1>
   <p>Click the link below to reset your password:</p>
-  <a href="${process.env.NEXT_PUBLIC_APP_URL}/reset-password?token=${token}">Reset Password</a>
+  <a href="${process.env.NEXT_PUBLIC_APP_URL}/reset-password?token=${userId}">Reset Password</a>
 `;
 
 // Create transporter
@@ -67,8 +67,11 @@ export const sendPasswordResetEmail = async (email: string, token: string) => {
  * Adjust forwarding logic to match your actual mailer implementation.
  */
 export type SendEmailOptions = {
-  to: string;
-  subject: string;
+  email: string;
+  emailType: string;
+  userId: string;
+  to?: string;
+  subject?: string;
   text?: string;
   html?: string;
   from?: string;
@@ -76,29 +79,16 @@ export type SendEmailOptions = {
 };
 
 export async function sendEmail(opts: SendEmailOptions) {
-  // @ts-ignore - prefer existing implementations if available
-  if (typeof sendMail === 'function') {
-    // @ts-ignore
-    return sendMail(opts);
-  }
+  const { email, emailType, userId } = opts;
 
-  // @ts-ignore - common nodemailer transporter pattern
-  if (typeof transporter !== 'undefined' && typeof (transporter as any).sendMail === 'function') {
-    // @ts-ignore
-    return (transporter as any).sendMail({
-      from: opts.from ?? undefined,
-      to: opts.to,
-      subject: opts.subject,
-      text: opts.text,
-      html: opts.html,
-    });
+  if (emailType === "VERIFY") {
+    return sendVerificationEmail(email, userId);
+  } else if (emailType === "RESET") {
+    return sendPasswordResetEmail(email, userId);
+  } else {
+    console.warn('Unknown emailType:', emailType);
+    return false;
   }
-
-  // Fallback: log and return a resolved value so callers don't crash.
-  // Replace with real implementation as soon as possible.
-   
-  console.warn('sendEmail called but no mailer implementation found', opts);
-  return Promise.resolve({ accepted: [], rejected: [] });
 }
 
 // Also expose a default object for any default-import consumers

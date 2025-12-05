@@ -1,23 +1,44 @@
-import { NextResponse } from 'next/server';
-import { getToken } from 'next-auth/jwt';
+import { NextResponse } from "next/server";
+import jwt from "jsonwebtoken";
 
-export async function GET(request: Request) {
+export async function GET(req: Request) {
   try {
-    const token = await getToken({ req: request });
-    
-    if (!token) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    const authHeader = req.headers.get("authorization");
+
+    if (!authHeader || !authHeader.startsWith("Bearer ")) {
+      return NextResponse.json(
+        { error: "Unauthorized: Missing token" },
+        { status: 401 }
+      );
     }
 
-    return NextResponse.json({ 
+    const token = authHeader.split(" ")[1];
+
+    let decoded: any;
+    try {
+      decoded = jwt.verify(token, process.env.JWT_SECRET!);
+    } catch (err) {
+      return NextResponse.json(
+        { error: "Invalid or expired token" },
+        { status: 401 }
+      );
+    }
+
+    return NextResponse.json({
       user: {
-        id: token.id,
-        name: token.name,
-        email: token.email
-      }
+        id: decoded.id,
+        name: decoded.name,
+        email: decoded.email,
+        role: decoded.role,
+        phone: decoded.phone,
+        whatsapp: decoded.whatsapp,
+      },
     });
   } catch (error) {
-    console.error('Auth check failed:', error);
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
+    console.error("Auth check failed:", error);
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
   }
-} 
+}

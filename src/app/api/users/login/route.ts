@@ -1,110 +1,142 @@
-import { executeQuery } from '@/lib/db';
-import { NextRequest, NextResponse } from 'next/server';
-import bcrypt from 'bcryptjs';
-import jwt from 'jsonwebtoken';
-import { debug } from 'console';
+// import { NextRequest, NextResponse } from "next/server";
+// import { executeQuery } from "@/lib/db";
+// import bcrypt from "bcryptjs";
+// import jwt from "jsonwebtoken";
 
-interface User {
-  id: number;
-  role: string;
-  first_name: string;
-  last_name: string;
-  username: string;
-  email: string;
-  password: string;
-  phone: string;
-  address: string | null;
-  message: string | null;
-}
+// export async function POST(req: NextRequest) {
+//   try {
+//     const { login, password } = await req.json();
+
+//     if (!login || !password) {
+//       return NextResponse.json(
+//         { error: "Login and password are required." },
+//         { status: 400 }
+//       );
+//     }
+
+//     // Find user by matching login with email, phone or user_id
+//     const [users] = await executeQuery(
+//       `SELECT user_id, name, email, phone, role, password_hash FROM users_kp_db
+//        WHERE (email = ? OR phone = ? OR user_id = ?)`,
+//       [login, login, login]
+//     );
+
+//     if (!users || users.length === 0) {
+//       return NextResponse.json(
+//         { error: "Invalid login credentials." },
+//         { status: 401 }
+//       );
+//     }
+
+//     const user = users[0];
+
+//     // Verify password
+//     const passwordMatch = await bcrypt.compare(password, user.password_hash);
+//     if (!passwordMatch) {
+//       return NextResponse.json(
+//         { error: "Invalid login credentials." },
+//         { status: 401 }
+//       );
+//     }
+
+//     // Prepare JWT payload
+//     const payload = {
+//       user_id: user.user_id,
+//       name: user.name,
+//       email: user.email,
+//       phone: user.phone,
+//       role: user.role
+//     };
+
+//     // Generate JWT token
+//     const token = jwt.sign(payload, process.env.JWT_SECRET!, { expiresIn: "1h" });
+
+//     // Set cookies using raw Set-Cookie headers to ensure SameSite attribute
+//     return NextResponse.json(
+//       { message: "Login successful", user: payload },
+//       {
+//         status: 200,
+//         headers: {
+//           "Set-Cookie": [
+//             \`token=\${token}; HttpOnly; Path=/; Max-Age=3600; SameSite=Lax\`,
+//             "loggedIn=true; Path=/; Max-Age=3600; SameSite=Lax"
+//           ],
+//         },
+//       }
+//     );
+
+//   } catch (error: any) {
+//     console.error("Login error:", error);
+//     return NextResponse.json(
+//       { error: error.message || "Internal Server Error" },
+//       { status: 500 }
+//     );
+//   }
+// }
+import { NextRequest, NextResponse } from "next/server";
+import { executeQuery } from "@/lib/db";
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
 
 export async function POST(req: NextRequest) {
   try {
-    const reqBody = await req.json();
-    const { login, password } = reqBody;
-    console.log("🔎 Login attempt for:", login);
+    const { login, password } = await req.json();
 
-    // Find user by email or username
-    const [users] = await executeQuery<User>(
-      'SELECT * FROM users WHERE (email = ? OR username = ?) AND deleted_at IS NULL',
-      [login, login]
+    if (!login || !password) {
+      return NextResponse.json(
+        { error: "Login and password are required." },
+        { status: 400 }
+      );
+    }
+
+    const [users] = await executeQuery(
+      `SELECT user_id, name, email, phone, role, password_hash FROM users_kp_db
+       WHERE (email = ? OR phone = ? OR user_id = ?)`,
+      [login, login, login]
     );
 
     if (!users || users.length === 0) {
-      console.log("❌ User not found");
-      return NextResponse.json({ 
-        error: "No account found with that email or username.",
-        code: "USER_NOT_FOUND",
-        success: false 
-      }, { status: 401 });
-    }
-debugger;
-    const user = users[0];
-    console.log("✅ User found");
-    const validPassword = await bcrypt.compare(password, user.password);
-    if (!validPassword) {
-      console.log("❌ Invalid password");
-      return NextResponse.json({ 
-        error: "Incorrect password for this account.",
-        code: "WRONG_PASSWORD",
-        success: false 
-      }, { status: 401 });
+      return NextResponse.json(
+        { error: "Invalid login credentials." },
+        { status: 401 }
+      );
     }
 
-    console.log("🔐 Generating JWT...");
-    const token = {
-      id: user.id,
+    const user = users[0];
+
+    const passwordMatch = await bcrypt.compare(password, user.password_hash);
+    if (!passwordMatch) {
+      return NextResponse.json(
+        { error: "Invalid login credentials." },
+        { status: 401 }
+      );
+    }
+
+    const payload = {
+      user_id: user.user_id,
+      name: user.name,
       email: user.email,
-      username: user.username,
-      role: user.role,
-      name: `${user.first_name} ${user.last_name}`
+      phone: user.phone,
+      role: user.role
     };
 
-    if (!process.env.JWT_SECRET) {
-      throw new Error("JWT_SECRET is not defined");
-    }
-    const accessToken = jwt.sign(token, process.env.JWT_SECRET, { expiresIn: "1h" });
+    const token = jwt.sign(payload, process.env.JWT_SECRET!, {
+      expiresIn: "1d",
+    });
 
-    // Create the response
-    const response = NextResponse.json({
-      message: "🎉 Login Successful",
+    // Return token in JSON for localStorage only
+    return NextResponse.json({
       success: true,
-      user: {
-        id: user.id,
-        email: user.email,
-        username: user.username,
-        role: user.role,
-        name: `${user.first_name} ${user.last_name}`,
-        phone: user.phone
-      }
+      message: "Login successful",
+      token,
+      user: payload
     });
 
-    // Set the cookie with proper options
-    response.cookies.set({
-      name: "token",
-      value: accessToken,
-      httpOnly: true,
-      sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
-      maxAge: 3600, // 1 hour in seconds
-      path: "/",
-    });
-
-    // Also set a loggedIn cookie for client-side checks
-    response.cookies.set({
-      name: "loggedIn",
-      value: "true",
-      sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
-      maxAge: 3600,
-      path: "/",
-    });
-
-    return response;
   } catch (error: any) {
-    console.error("❗️ Login error:", error);
-    return NextResponse.json({ 
-      error: "An error occurred during login. Please try again.",
-      success: false 
-    }, { status: 500 });
+    console.error("Login error:", error);
+    return NextResponse.json(
+      { error: error.message || "Internal Server Error" },
+      { status: 500 }
+    );
   }
 }

@@ -2,74 +2,165 @@
 
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { PlusCircle, X } from "lucide-react";
+import { useAuth } from '@/contexts/AuthContext'; // make sure this exists
+
 
 interface Client {
-  name: string;
+  client_name: string;
   email?: string;
-  phone: string;
+  client_phone: string;
   whatsapp: string;
   address: string;
   city: string;
   state: string;
   pincode: string;
-  LeadDate: string;
+  lead_date: string;
+  appointment_id?: string;
 }
 
 const ClientPage: React.FC = () => {
+  const { user } = useAuth();
   const [showForm, setShowForm] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
   const [clients, setClients] = useState<Client[]>([]);
   const [formData, setFormData] = useState<Client>({
-    name: "",
+    client_name: "",
     email: "",
-    phone: "",
+    client_phone: "",
     whatsapp: "",
     address: "",
     city: "",
     state: "",
     pincode: "",
-    LeadDate: "",
+    lead_date: "",
   });
+
+  useEffect(() => {
+    const fetchClients = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          console.error('No token found');
+          return;
+        }
+        const res = await fetch(`/api/lead?agent_id=${user?.user_id}`, {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          setClients(data);
+        } else {
+          console.error("Failed to fetch clients");
+        }
+      } catch (err) {
+        console.error("Error fetching clients:", err);
+      }
+    };
+
+    if (user?.user_id) {
+      fetchClients();
+    }
+  }, [user?.user_id]);
+  const formatDate = (isoDate: string) => {
+  if (!isoDate) return '';
+  const d = new Date(isoDate);
+  const day = String(d.getDate()).padStart(2, '0');
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const year = d.getFullYear();
+  return `${day}-${month}-${year}`;
+};
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData.name || !formData.phone) return;
-    const newClient = { ...formData, Date: new Date().toLocaleDateString('en-GB') };
-    setClients((prev) => [...prev, newClient]);
-    setFormData({
-      name: "",
-      email: "",
-      phone: "",
-      whatsapp: "",
-      address: "",
-      city: "",
-      state: "",
-      pincode: "",
-      LeadDate: "",
-    });
-    setShowForm(false);
-    setShowPopup(true);
+
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  if (!formData.client_name || !formData.client_phone) return;
+
+  // Validation alerts
+  if (formData.email && !formData.email.includes('@')) {
+    alert('Email should contain "@"');
+    return;
+  }
+  if (!/^\d{10}$/.test(formData.client_phone)) {
+    alert('Phone should contain exactly 10 digits');
+    return;
+  }
+  if (!/^\d{10}$/.test(formData.whatsapp)) {
+    alert('WhatsApp should contain exactly 10 digits');
+    return;
+  }
+
+  const today = new Date();
+  const lead_date = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0') + '-' + String(today.getDate()).padStart(2, '0');
+
+  const newClient = {
+    ...formData,
+    lead_date,
+    agent_id: user?.user_id || null, // <-- automatically pass logged-in agent
+    admin_id: user?.user_id || null  // optional, if you want admin_id also
   };
+
+  try {
+    const res = await fetch("/api/lead", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(newClient),
+    });
+
+    const result = await res.json();
+
+    if (res.ok) {
+      // Fetch updated list from server
+      const fetchRes = await fetch(`/api/lead?agent_id=${user?.user_id}`);
+      if (fetchRes.ok) {
+        const updatedClients = await fetchRes.json();
+        setClients(updatedClients);
+      }
+      setFormData({
+        client_name: "",
+        email: "",
+        client_phone: "",
+        whatsapp: "",
+        address: "",
+        city: "",
+        state: "",
+        pincode: "",
+        lead_date: "",
+      });
+      setShowForm(false);
+      setShowPopup(true);
+    } else {
+      console.error(result);
+      alert("Failed to save client: " + result.error);
+    }
+  } catch (err) {
+    console.error(err);
+    alert("Error saving client");
+  }
+};
+
+
 
   const handleCancel = () => {
     setShowForm(false);
     setFormData({
-      name: "",
+      client_name: "",
       email: "",
-      phone: "",
+      client_phone: "",
       whatsapp: "",
       address: "",
       city: "",
       state: "",
       pincode: "",
-      LeadDate: "",
+      lead_date: "",
     });
   };
 
@@ -112,8 +203,8 @@ const ClientPage: React.FC = () => {
           <form onSubmit={handleSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <input
               type="text"
-              name="name"
-              value={formData.name}
+              name="client_name"
+              value={formData.client_name}
               onChange={handleChange}
               placeholder="Client Name"
               required
@@ -124,13 +215,13 @@ const ClientPage: React.FC = () => {
               name="email"
               value={formData.email}
               onChange={handleChange}
-              placeholder="Email ID (optional)"
+              placeholder="Email ID"
               className="p-2 border rounded-md focus:ring-2 focus:ring-blue-500"
             />
             <input
               type="text"
-              name="phone"
-              value={formData.phone}
+              name="client_phone"
+              value={formData.client_phone}
               onChange={handleChange}
               placeholder="Phone Number"
               required
@@ -142,7 +233,7 @@ const ClientPage: React.FC = () => {
               value={formData.whatsapp}
               onChange={handleChange}
               placeholder="WhatsApp Number"
-              required
+              
               className="p-2 border rounded-md focus:ring-2 focus:ring-blue-500"
             />
             <input
@@ -151,7 +242,7 @@ const ClientPage: React.FC = () => {
               value={formData.address}
               onChange={handleChange}
               placeholder="Address"
-              required
+              
               className="p-2 border rounded-md focus:ring-2 focus:ring-blue-500 col-span-1 md:col-span-2"
             />
             <input
@@ -160,7 +251,7 @@ const ClientPage: React.FC = () => {
               value={formData.city}
               onChange={handleChange}
               placeholder="City / Town"
-              required
+              
               className="p-2 border rounded-md focus:ring-2 focus:ring-blue-500"
             />
             <input
@@ -169,7 +260,7 @@ const ClientPage: React.FC = () => {
               value={formData.state}
               onChange={handleChange}
               placeholder="State"
-              required
+            
               className="p-2 border rounded-md focus:ring-2 focus:ring-blue-500"
             />
             <input
@@ -178,7 +269,7 @@ const ClientPage: React.FC = () => {
               value={formData.pincode}
               onChange={handleChange}
               placeholder="Pincode"
-              required
+              
               className="p-2 border rounded-md focus:ring-2 focus:ring-blue-500"
             />
 
@@ -220,16 +311,16 @@ const ClientPage: React.FC = () => {
           <table className=" min-w-full border border-gray-300">
             <thead className="bg-[#d7e7d0]">
               <tr>
-                <th className="border px-4 py-2 text-left">Sl No</th>
-                <th className="border px-4 py-2 text-left">Client Name</th>
-                <th className="border px-4 py-2 text-left">Email</th>
-                <th className="border px-4 py-2 text-left">Phone</th>
-                <th className="border px-4 py-2 text-left">WhatsApp</th>
-                <th className="border px-4 py-2 text-left">Address</th>
-                <th className="border px-4 py-2 text-left">City</th>
-                <th className="border px-4 py-2 text-left">State</th>
-                <th className="border px-4 py-2 text-left">Pincode</th>
-                <th className="border px-4 py-2 text-left">Lead Date</th>
+                <th className="border px-1 py-2 text-center">Appointment ID</th>
+                <th className="border px-4 py-2 text-center">Client Name</th>
+                <th className="border px-4 py-2 text-center">Email</th>
+                <th className="border px-4 py-2 text-center">Phone</th>
+                <th className="border px-4 py-2 text-center">WhatsApp</th>
+                <th className="border px-4 py-2 text-center">Address</th>
+                <th className="border px-4 py-2 text-center">City</th>
+                <th className="border px-4 py-2 text-center">State</th>
+                <th className="border px-4 py-2 text-center">Pincode</th>
+                <th className="border px-4 py-2 text-center">Lead Date</th>
               </tr>
             </thead>
             <tbody>
@@ -249,16 +340,17 @@ const ClientPage: React.FC = () => {
               ) : (
                 clients.map((client, index) => (
                   <tr key={index} className="hover:bg-gray-50">
-                    <td className="border px-4 py-2">{index + 1}</td>
-                    <td className="border px-4 py-2">{client.name}</td>
+                    <td className="border px-4 py-2">{client.appointment_id}</td>
+                    <td className="border px-4 py-2">{client.client_name}</td>
                     <td className="border px-4 py-2">{client.email || <span className="italic text-gray-400">null</span>}</td>
-                    <td className="border px-4 py-2">{client.phone}</td>
+                    <td className="border px-4 py-2">{client.client_phone}</td>
                     <td className="border px-4 py-2">{client.whatsapp}</td>
                     <td className="border px-4 py-2">{client.address}</td>
                     <td className="border px-4 py-2">{client.city}</td>
                     <td className="border px-4 py-2">{client.state}</td>
                     <td className="border px-4 py-2">{client.pincode}</td>
-                    <td className="border px-4 py-2">{client.LeadDate}</td>
+                    <td className="border px-4 py-2">{formatDate(client.lead_date)}</td>
+
                   </tr>
                 ))
               )}

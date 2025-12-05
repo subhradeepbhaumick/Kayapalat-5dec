@@ -2,6 +2,9 @@
 
 import React, { useState } from 'react';
 import { Menu, Bell, LayoutDashboard, Users, UserPlus, BarChart3, ClipboardList, Search, LogOut, User,Settings } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { useRouter } from 'next/navigation';
+import toast from 'react-hot-toast';
 import AgentsTab from './sales_agents';
 import LeadsTab from './sales_leads';
 import PaymentsTab from './sales_payments';
@@ -15,10 +18,23 @@ const SalesAdmin = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [activeTab, setActiveTab] = useState('Dashboard');
 
-  // Mock user data (since no backend)
-  const user = {
-    name: "Ragini Sarkar",
-    profilePicture: "/Screenshot 2025-11-07 174332.png" // Using existing image from public folder
+  const { user, logout } = useAuth();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    try {
+      const response = await fetch('/api/auth/logout', { method: 'POST' });
+      if (response.ok) {
+        logout();
+        toast.success('Logged out successfully');
+        router.push('/login');
+      } else {
+        toast.error('Failed to logout');
+      }
+    } catch (error) {
+      console.error('Logout failed:', error);
+      toast.error('Logout failed');
+    }
   };
 
   const sidebarItems = [
@@ -36,7 +52,7 @@ const SalesAdmin = () => {
   return (
     <div className="min-h-screen bg-[#D2EBD0] flex">
       {/* Sidebar */}
-      <div className={`fixed inset-y-0 left-0 z-50 ${sidebarCollapsed ? 'w-16' : 'w-64'} bg-white shadow-lg transform transition-all duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0`}>
+      <div className={`fixed inset-y-0 left-0 z-50 ${sidebarCollapsed ? 'w-16' : 'w-64'} bg-white shadow-lg transition-all duration-300 ease-in-out`}>
         {/* Header Section */}
         <div className="p-4 border-b bg-[#D7E7D0]">
           <div className="flex items-center justify-between">
@@ -44,7 +60,7 @@ const SalesAdmin = () => {
               <div className="flex items-center space-x-3">
                 <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
                   <img
-                    src={user.profilePicture}
+                    src={user?.profilePicture || "/user.png"}
                     alt="Profile"
                     className="w-full h-full object-cover"
                     onError={(e) => {
@@ -59,9 +75,9 @@ const SalesAdmin = () => {
                   <User className="w-6 h-6 text-gray-500 hidden" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-[#DC0835]">{user.name}</h3>
+                  <h3 className="font-semibold text-[#DC0835]">{user?.name || "Admin"}</h3>
                   <p className="text-sm text-gray-600">Sales Administrator</p>
-                  <p className="text-sm text-black-600">ID: <strong>A123</strong></p>
+                  <p className="text-sm text-black-600">ID: <strong>{user?.user_id || "N/A"}</strong></p>
                 </div>
               </div>
             )}
@@ -92,7 +108,7 @@ const SalesAdmin = () => {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 overflow-y-auto pt-20">
+      <div className={`flex-1 overflow-y-auto pt-20 ${sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-64'}`}>
         {/* Navbar */}
         <div className={`bg-white shadow-md p-4 flex justify-between items-center fixed top-0 z-40 ${sidebarCollapsed ? 'lg:left-16 left-0' : 'lg:left-64 left-0'} right-0`}>
           <div className="flex items-center space-x-4">
@@ -121,7 +137,7 @@ const SalesAdmin = () => {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
             </div>
           </div>
-          <button className="flex items-center space-x-2 font-semibold text-gray-700 hover:text-[#295A47] transition-colors">
+          <button onClick={handleLogout} className="flex items-center space-x-2 font-semibold text-red-500 hover:text-[#295A47] transition-colors">
             <LogOut size={25}  />
             <span>Logout</span>
           </button>
@@ -135,7 +151,7 @@ const SalesAdmin = () => {
         </div>
 
         {/* Hero Section */}
-        <div className="p-8">
+        <div className={`p-8 ${sidebarCollapsed ? 'lg:p-4' : ''}`}>
           <div className="max-w-8xl pt-4 mx-auto">
             <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
               {activeTab === 'Dashboard' && (

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Users, Search, Calendar } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import DatePicker from 'react-datepicker';
@@ -15,56 +15,39 @@ interface Agent {
   status: 'Active' | 'Inactive';
   joinDate: string;
   profilePic: string;
+  location: string;
+}
+
+interface ApiResponse {
+  agents: Agent[];
+  admins: string[];
 }
 
 const SuperAdmin_Agents = () => {
   const router = useRouter();
 
-  // Dummy data
-  const [agents] = useState<Agent[]>([
-    {
-      id: 1,
-      name: 'Rahul Sharma',
-      phone: '9876543210',
-      email: 'rahul@kayapalat.com',
-      admin: 'Ragini Sarkar',
-      status: 'Active',
-      joinDate: '2025-10-25',
-      profilePic: 'https://randomuser.me/api/portraits/men/32.jpg',
-    },
-    {
-      id: 2,
-      name: 'Ananya Sen',
-      phone: '9123456789',
-      email: 'ananya@kayapalat.com',
-      admin: 'Anirban Dey',
-      status: 'Inactive',
-      joinDate: '2025-11-02',
-      profilePic: 'https://randomuser.me/api/portraits/women/47.jpg',
-    },
-    {
-      id: 3,
-      name: 'Sourav Das',
-      phone: '9832012345',
-      email: 'sourav@kayapalat.com',
-      admin: 'Sohini Mukherjee',
-      status: 'Active',
-      joinDate: '2025-11-05',
-      profilePic: 'https://randomuser.me/api/portraits/men/41.jpg',
-    },
-    {
-      id: 4,
-      name: 'Puja Mondal',
-      phone: '9934567890',
-      email: 'puja@kayapalat.com',
-      admin: 'Ragini Sarkar',
-      status: 'Active',
-      joinDate: '2025-11-08',
-      profilePic: 'https://randomuser.me/api/portraits/women/58.jpg',
-    },
-  ]);
+  const [agents, setAgents] = useState<Agent[]>([]);
+  const [admins, setAdmins] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const admins = Array.from(new Set(agents.map((a) => a.admin)));
+  useEffect(() => {
+    const fetchAgents = async () => {
+      try {
+        const response = await fetch('/api/superadmin/agents');
+        if (!response.ok) {
+          throw new Error('Failed to fetch agents');
+        }
+        const data: ApiResponse = await response.json();
+        setAgents(data.agents);
+        setAdmins(data.admins);
+      } catch (error) {
+        console.error('Error fetching agents:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchAgents();
+  }, []);
 
   // Filters & search
   const [selectedAdmin, setSelectedAdmin] = useState('All');
@@ -79,10 +62,10 @@ const SuperAdmin_Agents = () => {
       const matchesAdmin = selectedAdmin === 'All' || a.admin === selectedAdmin;
       const matchesStatus = statusFilter === 'All' || a.status === statusFilter;
       const matchesSearch =
-        a.name.toLowerCase().includes(search.toLowerCase()) ||
-        a.email.toLowerCase().includes(search.toLowerCase()) ||
-        a.phone.includes(search) ||
-        a.location.toLowerCase().includes(search.toLowerCase());
+        (a.name?.toLowerCase() || '').includes(search.toLowerCase()) ||
+        (a.email?.toLowerCase() || '').includes(search.toLowerCase()) ||
+        (a.phone || '').includes(search) ||
+        (a.location?.toLowerCase() || '').includes(search.toLowerCase());
 
       const join = new Date(a.joinDate);
       const matchesFrom = !fromDate || join >= fromDate;
@@ -104,6 +87,39 @@ const SuperAdmin_Agents = () => {
     sessionStorage.setItem('previousRoute', '/superadmin');
     router.push('/referuser');
   };
+
+  // Handle admin change
+  const handleAdminChange = async (agentId: number, newAdmin: string) => {
+    try {
+      const response = await fetch('/api/superadmin/agents', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ agent_id: agentId, admin_id: newAdmin }),
+      });
+      if (!response.ok) {
+        throw new Error('Failed to update admin');
+      }
+      // Update local state
+      setAgents((prevAgents) =>
+        prevAgents.map((agent) =>
+          agent.id === agentId ? { ...agent, admin: newAdmin } : agent
+        )
+      );
+    } catch (error) {
+      console.error('Error updating admin:', error);
+      // Optionally, show an error message to the user
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="p-6 text-center">
+        <div className="text-lg">Loading agents...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6">
@@ -194,6 +210,7 @@ const SuperAdmin_Agents = () => {
               <th className="px-4 py-2 border">Name</th>
               <th className="px-4 py-2 border">Email</th>
               <th className="px-4 py-2 border">Phone</th>
+              <th className="px-4 py-2 border">Location</th>
               <th className="px-4 py-2 border">Admin</th>
               <th className="px-4 py-2 border">Status</th>
               <th className="px-4 py-2 border">Join Date</th>
@@ -227,7 +244,24 @@ const SuperAdmin_Agents = () => {
                     className="px-4 py-2 border"
                     dangerouslySetInnerHTML={{ __html: highlight(agent.phone) }}
                   />
-                  <td className="px-4 py-2 border">{agent.admin}</td>
+                  <td
+                    className="px-4 py-2 border"
+                    dangerouslySetInnerHTML={{ __html: highlight(agent.location) }}
+                  />
+                  <td className="px-4 py-2 border">
+                    <select
+                      value={agent.admin}
+                      onChange={(e) => handleAdminChange(agent.id, e.target.value)}
+                      onClick={(e) => e.stopPropagation()}
+                      className="w-full border rounded px-2 py-1"
+                    >
+                      {admins.map((a, i) => (
+                        <option key={i} value={a}>
+                          {a}
+                        </option>
+                      ))}
+                    </select>
+                  </td>
                   <td
                     className={`px-4 py-2 border text-center font-medium ${
                       agent.status === 'Active'
@@ -245,7 +279,7 @@ const SuperAdmin_Agents = () => {
             ) : (
               <tr>
                 <td
-                  colSpan={9}
+                  colSpan={10}
                   className="text-center py-4 text-gray-500 border"
                 >
                   No matching agents found.

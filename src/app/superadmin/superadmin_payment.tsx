@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { BarChart3, Filter, Search, UserCog, X, Trash2, Upload } from 'lucide-react';
 
 const PaymentsTab = () => {
@@ -15,126 +15,141 @@ const PaymentsTab = () => {
   // Store transaction proofs per agent
   const [transactionProofs, setTransactionProofs] = useState<Record<string, any[]>>({});
 
-  const adminAgentMap: Record<string, string[]> = {
-    'A01': ['A101', 'A102'],
-    'A02': ['A103', 'A104'],
-  };
-  
-  const [payments, setPayments] = useState([
-    {
-      id: 1,
-      agentId: 'A101',
-      agentName: 'Rohit Sharma',
-      clientName: 'Neha Gupta',
-      projectName: 'Sunrise Residency',
-      clientEstimate: '₹12,00,000',
-      agentShare: 120000,
-      agentPaid: 80000,
-      due: 40000,
-      paymentStatus: 'Due',
-      bankDetails: {
-        accountHolderName: 'Rohit Sharma',
-        upiId: 'rohit@ybl',
-        bankName: 'HDFC Bank',
-        accountNumber: '123456789012',
-        ifscCode: 'HDFC0001234',
-        upiQr: 'https://example.com/rohit_qr.png',
-      },
-    },
-    {
-      id: 2,
-      agentId: 'A102',
-      agentName: 'Priya Das',
-      clientName: 'Rajesh Kumar',
-      projectName: 'Green Valley Homes',
-      clientEstimate: '₹18,50,000',
-      agentShare: 185000,
-      agentPaid: 185000,
-      due: 0,
-      paymentStatus: 'Paid',
-      bankDetails: {
-        accountHolderName: 'Priya Das',
-        upiId: 'priya@okicici',
-        bankName: 'ICICI Bank',
-        accountNumber: '987654321012',
-        ifscCode: 'ICIC0005678',
-        upiQr: 'https://example.com/priya_qr.png',
-      },
-    },
-    {
-      id: 3,
-      agentId: 'A103',
-      agentName: 'Sourav Sen',
-      clientName: 'Ananya Paul',
-      projectName: 'Dream City Heights',
-      clientEstimate: '₹9,75,000',
-      agentShare: 97500,
-      agentPaid: 60000,
-      due: 37500,
-      paymentStatus: 'Due',
-      bankDetails: {
-        accountHolderName: 'Sourav Sen',
-        upiId: 'sourav@okaxis',
-        bankName: 'Axis Bank',
-        accountNumber: '111122223333',
-        ifscCode: 'UTIB0002244',
-        upiQr: '',
-      },
-    },
-    {
-      id: 4,
-      agentId: 'A104',
-      agentName: 'Karan Mehta',
-      clientName: 'Sneha Roy',
-      projectName: 'Lake View Villas',
-      clientEstimate: '₹15,20,000',
-      agentShare: 152000,
-      agentPaid: 152000,
-      due: 0,
-      paymentStatus: 'Paid',
-      bankDetails: {
-        accountHolderName: 'Karan Mehta',
-        upiId: 'karan@okhdfc',
-        bankName: 'HDFC Bank',
-        accountNumber: '444433332222',
-        ifscCode: 'HDFC0007890',
-        upiQr: 'https://example.com/karan_qr.png',
-      },
-    },
-  ]);
+  const [admins, setAdmins] = useState<any[]>([]);
+  const [agentAdminMap, setAgentAdminMap] = useState<Record<string, string[]>>({});
 
-  const handleInputChange = (id: number, field: string, value: number) => {
+  const [payments, setPayments] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Fetch data on component mount
+  useEffect(() => {
+    fetchPayments();
+    fetchAdmins();
+    fetchAgentAdminMap();
+  }, []);
+
+  const getAdminName = (agentId: string) => {
+    for (const [adminId, agents] of Object.entries(agentAdminMap)) {
+      if (agents.includes(agentId)) {
+        const admin = admins.find(a => a.id === adminId);
+        return admin ? admin.name : 'Unknown';
+      }
+    }
+    return 'Unknown';
+  };
+
+  const fetchAdmins = async () => {
+    try {
+      const response = await fetch('/api/superadmin/admins');
+      const result = await response.json();
+      if (result.success) {
+        setAdmins(result.data);
+      }
+    } catch (error) {
+      console.error('Error fetching admins:', error);
+    }
+  };
+
+  const fetchAgentAdminMap = async () => {
+    try {
+      const response = await fetch('/api/superadmin/agent-admin-map');
+      const result = await response.json();
+      if (result.success) {
+        setAgentAdminMap(result.data);
+      }
+    } catch (error) {
+      console.error('Error fetching agent-admin map:', error);
+    }
+  };
+
+  const fetchPayments = async () => {
+    try {
+      const response = await fetch('/api/superadmin/payments');
+      const result = await response.json();
+      if (result.success) {
+        setPayments(result.data);
+      }
+    } catch (error) {
+      console.error('Error fetching payments:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updatePayment = async (appointmentId: string, field: string, value: any) => {
+    try {
+      const response = await fetch('/api/superadmin/payments', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          appointment_id: appointmentId,
+          [field]: value,
+        }),
+      });
+      const result = await response.json();
+      if (!result.success) {
+        console.error('Error updating payment:', result.error);
+        // Revert local state on error
+        fetchPayments();
+      }
+    } catch (error) {
+      console.error('Error updating payment:', error);
+      // Revert local state on error
+      fetchPayments();
+    }
+  };
+
+  const handleInputChange = (id: string, field: string, value: number) => {
+    // Update local state immediately for better UX
     setPayments(prev =>
       prev.map(row =>
         row.id === id
           ? {
               ...row,
               [field]: value,
-              ...(field === 'agentShare' || field === 'agentPaid'
+              ...(field === 'agent_share'
                 ? {
-                    due: Math.max(
-                      (field === 'agentShare' ? value : row.agentShare) -
-                        (field === 'agentPaid' ? value : row.agentPaid),
-                      0
-                    ),
+                    due: Math.max(value - row.agent_paid, 0),
+                  }
+                : field === 'agent_paid'
+                ? {
+                    due: Math.max(row.agent_share - value, 0),
                   }
                 : {}),
             }
           : row
       )
     );
+
+    // Update backend only for agent_share since that's what the database supports
+    if (field === 'agent_share') {
+      updatePayment(id, field, value);
+    }
   };
 
-  const handleStatusChange = (id: number, value: string) => {
+  const handleStatusChange = (id: string, value: string) => {
+    // Update local state immediately
     setPayments(prev =>
       prev.map(row =>
-        row.id === id ? { ...row, paymentStatus: value } : row
+        row.id === id ? { ...row, payment_status: value } : row
       )
     );
+
+    // Update backend
+    updatePayment(id, 'payment_status', value);
   };
 
   const handleBankView = (bankDetails: any) => {
-    setDisplayData(bankDetails);
+    setDisplayData({
+      accountHolderName: bankDetails.account_holder_name,
+      upiId: bankDetails.upi_id,
+      bankName: bankDetails.bank_name,
+      accountNumber: bankDetails.account_number,
+      ifscCode: bankDetails.ifsc_code,
+      upiQr: bankDetails.qr_code,
+    });
     setShowBankModal(true);
   };
 
@@ -143,21 +158,29 @@ const PaymentsTab = () => {
     setShowProofModal(true);
   };
 
-  const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!currentAgentId) return;
     const file = e.target.files?.[0];
     if (file) {
-      const proofURL = URL.createObjectURL(file);
-      const newProof = {
-        id: Date.now(),
-        file: proofURL,
-        date: new Date().toLocaleDateString(),
-        time: new Date().toLocaleTimeString(),
-      };
-      setTransactionProofs(prev => ({
-        ...prev,
-        [currentAgentId]: [...(prev[currentAgentId] || []), newProof],
-      }));
+      const formData = new FormData();
+      formData.append('agent_id', currentAgentId);
+      formData.append('file', file);
+
+      try {
+        const response = await fetch('/api/superadmin/payments/proofs', {
+          method: 'POST',
+          body: formData,
+        });
+        const result = await response.json();
+        if (result.success) {
+          // Refresh proofs
+          handleProofView(currentAgentId);
+        } else {
+          console.error('Error uploading proof:', result.error);
+        }
+      } catch (error) {
+        console.error('Error uploading proof:', error);
+      }
     }
   };
 
@@ -169,7 +192,7 @@ const PaymentsTab = () => {
   };
 
   const highlightText = (text: string) => {
-    if (!searchTerm.trim()) return text;
+    if (!text || !searchTerm.trim()) return text || '';
     const regex = new RegExp(`(${searchTerm})`, 'gi');
     return text.split(regex).map((part, i) =>
       regex.test(part) ? (
@@ -185,12 +208,12 @@ const PaymentsTab = () => {
   const filteredPayments = payments.filter(p => {
     const matchesAdmin =
       selectedAdmin === 'All' ||
-      adminAgentMap[selectedAdmin]?.includes(p.agentId);
-    const matchesFilter = filter === 'All' || p.paymentStatus === filter;
+      agentAdminMap[selectedAdmin]?.includes(p.agent_id);
+    const matchesFilter = filter === 'All' || p.payment_status === filter;
     const matchesSearch =
-      p.agentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      p.agentId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      p.clientName.toLowerCase().includes(searchTerm.toLowerCase());
+      (p.agent_name || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (p.agent_id || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (p.client_name || '').toLowerCase().includes(searchTerm.toLowerCase());
     return matchesAdmin && matchesFilter && matchesSearch;
   });
 
@@ -215,8 +238,9 @@ const PaymentsTab = () => {
             className="border border-gray-300 rounded-md px-3 py-1 focus:outline-none focus:ring-2 focus:ring-[#295A47]"
           >
             <option value="All">All</option>
-            <option value="A01">Susmita</option>
-            <option value="A02">Meghadipa</option>
+            {admins.map(admin => (
+              <option key={admin.id} value={admin.id}>{admin.name}</option>
+            ))}
           </select>
         </div>
 
@@ -254,9 +278,11 @@ const PaymentsTab = () => {
               <th className="px-4 py-2">Sl. No</th>
               <th className="px-4 py-2">Agent ID</th>
               <th className="px-4 py-2">Agent Name</th>
+              <th className="px-4 py-2">Admin Name</th>
               <th className="px-4 py-2">Client Name</th>
               <th className="px-4 py-2">Project Name</th>
               <th className="px-4 py-2">Client Estimate</th>
+              <th className="px-4 py-2">Commission (%)</th>
               <th className="px-4 py-2">Agent Share (₹)</th>
               <th className="px-4 py-2">Agent Paid (₹)</th>
               <th className="px-4 py-2">Due (₹)</th>
@@ -269,24 +295,26 @@ const PaymentsTab = () => {
             {filteredPayments.map((row, i) => (
               <tr key={row.id} className="border-t hover:bg-gray-50">
                 <td className="px-4 py-2">{i + 1}</td>
-                <td className="px-4 py-2">{highlightText(row.agentId)}</td>
-                <td className="px-4 py-2">{highlightText(row.agentName)}</td>
-                <td className="px-4 py-2">{highlightText(row.clientName)}</td>
-                <td className="px-4 py-2">{row.projectName}</td>
-                <td className="px-4 py-2">{row.clientEstimate}</td>
+                <td className="px-4 py-2">{highlightText(row.agent_id)}</td>
+                <td className="px-4 py-2">{highlightText(row.agent_name)}</td>
+                <td className="px-4 py-2">{getAdminName(row.agent_id)}</td>
+                <td className="px-4 py-2">{highlightText(row.client_name)}</td>
+                <td className="px-4 py-2">{row.project_name}</td>
+                <td className="px-4 py-2">₹{(row.client_estimate || 0).toLocaleString()}</td>
+                <td className="px-4 py-2">{row.commission}</td>
                 <td className="px-4 py-2">
                   <input
                     type="number"
-                    value={row.agentShare}
-                    onChange={e => handleInputChange(row.id, 'agentShare', Number(e.target.value))}
+                    value={row.agent_share}
+                    onChange={e => handleInputChange(row.id, 'agent_share', Number(e.target.value))}
                     className="border rounded-md px-2 py-1 w-28"
                   />
                 </td>
                 <td className="px-4 py-2">
                   <input
                     type="number"
-                    value={row.agentPaid}
-                    onChange={e => handleInputChange(row.id, 'agentPaid', Number(e.target.value))}
+                    value={row.agent_paid}
+                    onChange={e => handleInputChange(row.id, 'agent_paid', Number(e.target.value))}
                     className="border rounded-md px-2 py-1 w-28"
                   />
                 </td>
@@ -295,10 +323,10 @@ const PaymentsTab = () => {
                 </td>
                 <td className="px-4 py-2">
                   <select
-                    value={row.paymentStatus}
+                    value={row.payment_status}
                     onChange={e => handleStatusChange(row.id, e.target.value)}
                     className={`px-2 py-1 rounded-md border text-white font-medium cursor-pointer ${
-                      row.paymentStatus === 'Paid'
+                      row.payment_status === 'Paid'
                         ? 'bg-green-500'
                         : 'bg-red-500'
                     }`}
@@ -309,13 +337,20 @@ const PaymentsTab = () => {
                 </td>
                 <td
                   className="px-4 py-2 text-blue-600 underline cursor-pointer"
-                  onClick={() => handleBankView(row.bankDetails)}
+                  onClick={() => handleBankView({
+                    account_holder_name: row.account_holder_name,
+                    upi_id: row.upi_id,
+                    bank_name: row.bank_name,
+                    account_number: row.account_number,
+                    ifsc_code: row.ifsc_code,
+                    qr_code: row.upi_qr,
+                  })}
                 >
                   Tap to View
                 </td>
                 <td
                   className="px-4 py-2 text-indigo-600 underline cursor-pointer"
-                  onClick={() => handleProofView(row.agentId)}
+                  onClick={() => handleProofView(row.agent_id)}
                 >
                   Post
                 </td>

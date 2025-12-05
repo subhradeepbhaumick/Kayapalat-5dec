@@ -2,6 +2,9 @@
 
 import React, { useState } from 'react';
 import { Menu, X, LayoutDashboard, Bell, TrendingUp, FileText, BarChart3, Shield, HelpCircle, User, Users, Share2, Gift, Search, LogOut, Trash2, Settings, ChevronDown, ChevronRight } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { useRouter } from 'next/navigation';
+import toast from 'react-hot-toast';
 import SalesPage from './sales_page';
 import ClientProfile from './settings_client_profile';
 import BankDetails from './settings_bank_details';
@@ -71,11 +74,70 @@ const ReferUserDashboard = () => {
     }
   ]);
 
-  // Mock user data (since no backend)
-  const user = {
-    name: "John Doe",
-    profilePicture: "/user.png" // Using existing user.png from public folder
+  const { logout } = useAuth();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    try {
+      const response = await fetch('/api/auth/logout', { method: 'POST' });
+      if (response.ok) {
+        logout();
+        toast.success('Logged out successfully');
+        router.push('/login');
+      } else {
+        toast.error('Failed to logout');
+      }
+    } catch (error) {
+      console.error('Logout failed:', error);
+      toast.error('Logout failed');
+    }
   };
+
+  // Mock user data (since no backend)
+  const [user, setUser] = useState({
+    name: "John Doe",
+    id: "",
+    role: "Refer & Earn Partner",
+    profilePicture: "/user.png"
+  });
+
+  React.useEffect(() => {
+  const fetchUserData = async () => {
+    try {
+      console.log('Fetching user data...');
+      const token = localStorage.getItem('token');
+      if (!token) {
+        console.warn('No token found in localStorage');
+        return;
+      }
+      const res = await fetch("/api/referuser/profile", {
+        method: "GET",
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      const data = await res.json();
+      console.log("USER DATA:", data);
+
+      if (data.agent) {
+        setUser({
+          name: data.agent.name,
+          id: data.agent.agent_id,
+          role: "Refer & Earn Partner",
+          profilePicture: data.agent.profilePic || "/user.png"
+        });
+      } else {
+        console.warn('Agent data not present in response.');
+      }
+    } catch (error) {
+      console.error('Failed to fetch user data:', error);
+    }
+  };
+
+  fetchUserData();
+}, []);
+
+
 
   const sidebarItems = [
     { icon: LayoutDashboard, label: 'Dashboard', key: 'Dashboard' },
@@ -89,7 +151,7 @@ const ReferUserDashboard = () => {
   return (
     <div className="min-h-screen bg-[#D2EBD0] flex">
       {/* Sidebar */}
-      <div className={`fixed inset-y-0 left-0 z-50 ${sidebarCollapsed ? 'w-16' : 'w-64'} bg-white shadow-lg transform transition-all duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0`}>
+      <div className={`fixed inset-y-0 left-0 z-50 ${sidebarCollapsed ? 'w-16' : 'w-64'} bg-white shadow-lg transition-all duration-300 ease-in-out`}>
         {/* Header Section */}
         <div className="p-4 border-b bg-[#D7E7D0]">
           <div className="flex items-center justify-between">
@@ -113,7 +175,8 @@ const ReferUserDashboard = () => {
                 </div>
                 <div>
                   <h3 className="font-semibold text-[#295A47]">{user.name}</h3>
-                  <p className="text-sm text-gray-600">Refer & Earn Partner</p>
+                  <p className="text-sm text-gray-600">ID: {user.id}</p>
+                  <p className="text-sm text-gray-600">{user.role}</p>
                 </div>
               </div>
             )}
@@ -220,7 +283,7 @@ const ReferUserDashboard = () => {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 overflow-y-auto pt-20">
+      <div className={`flex-1 overflow-y-auto pt-20 ${sidebarCollapsed ? 'lg:ml-16' : 'lg:ml-64'}`}>
         {/* Navbar */}
         <div className={`bg-white shadow-md p-4 flex justify-between items-center fixed top-0 z-40 ${sidebarCollapsed ? 'lg:left-16 left-0' : 'lg:left-64 left-0'} right-0`}>
           <div className="flex items-center space-x-4">
@@ -249,7 +312,7 @@ const ReferUserDashboard = () => {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
             </div>
           </div>
-          <button className="flex items-center space-x-2 font-semibold text-gray-700 hover:text-[#295A47] transition-colors">
+          <button onClick={handleLogout} className="flex items-center space-x-2 font-semibold text-red-500 hover:text-[#295A47] transition-colors">
             <LogOut size={25}  />
             <span>Logout</span>
           </button>
@@ -269,14 +332,17 @@ const ReferUserDashboard = () => {
               {activeTab === 'Dashboard' && (
                 <>
                   <div className="text-center mb-8">
-                    <h1 className="text-4xl font-bold text-[#295A47] mb-4">
+                    <h1 className="text-4xl font-bold text-[#295A47] mb-4 ">
                       Welcome to Refer & Earn Dashboard
                     </h1>
                     <p className="text-gray-600 text-lg">
                       Share Kayapalat with friends and family, earn rewards for every successful referral!
                     </p>
                   </div>
-
+                  <div>
+                    {/* kayapalat website ad */}
+                    <h2 className="text-2xl font-bold text-[#295A47] mb-6 text-center">here the ads will be shown</h2>
+                  </div>
                   {/* Stats Cards */}
                   {/* <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                     <div className="bg-[#D7E7D0] rounded-lg p-6 text-center">
@@ -329,7 +395,7 @@ const ReferUserDashboard = () => {
 
                   {/* Call to Action */}
                   <div className="text-center mt-8">
-                    <button className="bg-[#295A47] text-white px-8 py-3 rounded-lg font-semibold hover:bg-[#1e3d32] transition-colors">
+                    <button onClick={() => { setActiveTab('Settings'); setActiveSettingsTab('Client Profile'); }} className="bg-red-500 text-white px-8 py-3 rounded-lg font-semibold hover:bg-gray-500 transition-colors">
                       Start Referring Now
                     </button>
                   </div>
@@ -394,7 +460,7 @@ const ReferUserDashboard = () => {
                 </>
               )}
 
-              {activeTab === 'Sales' && <SalesPage />}
+              {activeTab === 'Sales' && <SalesPage agentId={user.id} />}
 
               {activeTab === 'My Invoices' && (
                 <>

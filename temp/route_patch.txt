@@ -1,0 +1,52 @@
+// Update existing record
+      console.log("Updating bank details for agent_id:", agent_id);
+      await executeQuery(
+        `UPDATE agent_bank_details SET
+          account_holder_name = ?,
+          bank_name = ?,
+          account_number = ?,
+          ifsc_code = ?,
+          upi_id = ?,
+          qr_code = ?,
+          updated_at = NOW()
+          WHERE agent_id = ?`,
+        [accountHolderName, bankName, accountNumber, ifscCode, upiId, upiQr, agent_id]
+      );
+    } else {
+      // Insert new record
+      console.log("Inserting new bank details for agent_id:", agent_id);
+      await executeQuery(
+        `INSERT INTO agent_bank_details
+          (agent_id, account_holder_name, bank_name, account_number, ifsc_code, upi_id, qr_code, created_at, updated_at)
+          VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`,
+        [agent_id, accountHolderName, bankName, accountNumber, ifscCode, upiId, upiQr]
+      );
+    }
+=======
+    if (existing.length > 0) {
+      // Update existing record
+      console.log("Updating bank details for agent_id:", agent_id);
+      const updateResult = await executeQuery(
+        `UPDATE agent_bank_details SET
+          account_holder_name = ?,
+          bank_name = ?,
+          account_number = ?,
+          ifsc_code = ?,
+          upi_id = ?,
+          qr_code = ?,
+          updated_at = NOW()
+          WHERE agent_id = ?`,
+        [accountHolderName, bankName, accountNumber, ifscCode, upiId, upiQr, agent_id]
+      );
+      console.log("Update result:", updateResult);
+    } else {
+      // Insert new record
+      console.log("Inserting new bank details for agent_id:", agent_id);
+      const insertResult = await executeQuery(
+        `INSERT INTO agent_bank_details
+          (agent_id, account_holder_name, bank_name, account_number, ifsc_code, upi_id, qr_code, created_at, updated_at)
+          VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), NOW())`,
+        [agent_id, accountHolderName, bankName, accountNumber, ifscCode, upiId, upiQr]
+      );
+      console.log("Insert result:", insertResult);
+    }

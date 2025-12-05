@@ -96,7 +96,7 @@ const OurBlogs = () => {
               <div className="relative w-full h-52 rounded-t-xl overflow-hidden">
                 <Image
                   src={blog.image || 'https://placehold.co/600x400/d2ebd0/00423d?text=Image'}
-                  alt={blog.title}
+                  alt={blog.title || 'Blog image'}
                   fill
                   style={{ objectFit: 'cover' }}
                   className="transition-transform  border-2 rounded-[5%] duration-300 group-hover:scale-105"
@@ -112,7 +112,7 @@ const OurBlogs = () => {
 
                 {blog.tags && blog.tags.length > 0 && (
                   <div className="flex flex-wrap items-center gap-2 mb-auto">
-                    {blog.tags.slice(0, 3).map(tag => (
+                    {blog.tags.slice(0, 3).map((tag) => (
                       <span key={tag.slug} className="bg-teal-100 text-teal-800 text-xs font-semibold px-2.5 py-1 rounded-full flex items-center gap-1.5  ">
                         <FaTag size={10} /> {tag.name}
                       </span>
