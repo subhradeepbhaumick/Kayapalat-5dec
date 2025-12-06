@@ -141,16 +141,19 @@ const PaymentsTab = () => {
     updatePayment(id, 'payment_status', value);
   };
 
-  const handleBankView = (bankDetails: any) => {
-    setDisplayData({
-      accountHolderName: bankDetails.account_holder_name,
-      upiId: bankDetails.upi_id,
-      bankName: bankDetails.bank_name,
-      accountNumber: bankDetails.account_number,
-      ifscCode: bankDetails.ifsc_code,
-      upiQr: bankDetails.qr_code,
-    });
-    setShowBankModal(true);
+  const handleBankView = async (agentId: string) => {
+    try {
+      const response = await fetch(`/api/superadmin/agents-bank-details?agent_id=${agentId}`);
+      const result = await response.json();
+      if (result.success) {
+        setDisplayData(result.data);
+        setShowBankModal(true);
+      } else {
+        console.error('Error fetching bank details:', result.error);
+      }
+    } catch (error) {
+      console.error('Error fetching bank details:', error);
+    }
   };
 
   const handleProofView = (agentId: string) => {
@@ -335,18 +338,13 @@ const PaymentsTab = () => {
                     <option value="Due" className="text-black">Due</option>
                   </select>
                 </td>
-                <td
-                  className="px-4 py-2 text-blue-600 underline cursor-pointer"
-                  onClick={() => handleBankView({
-                    account_holder_name: row.account_holder_name,
-                    upi_id: row.upi_id,
-                    bank_name: row.bank_name,
-                    account_number: row.account_number,
-                    ifsc_code: row.ifsc_code,
-                    qr_code: row.upi_qr,
-                  })}
-                >
-                  Tap to View
+                <td className="px-4 py-2">
+                  <button
+                    className="bg-[#295A47] text-white px-3 py-1 rounded-md hover:bg-[#3a6b58] transition-colors"
+                    onClick={() => handleBankView(row.agent_id)}
+                  >
+                    View
+                  </button>
                 </td>
                 <td
                   className="px-4 py-2 text-indigo-600 underline cursor-pointer"
@@ -359,6 +357,62 @@ const PaymentsTab = () => {
           </tbody>
         </table>
       </div>
+
+      {/* Bank Details Modal */}
+      {showBankModal && displayData && (
+        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-lg w-96 h-96 mx-4 p-6 relative overflow-y-auto">
+            <button
+              onClick={() => setShowBankModal(false)}
+              className="absolute top-3 right-3 text-gray-500 hover:text-red-500"
+            >
+              <X className="w-6 h-6" />
+            </button>
+
+            <h2 className="text-xl font-semibold text-gray-700 mb-4 text-center">
+              Bank Details
+            </h2>
+
+            <div className="space-y-3">
+              <div>
+                <label className="block text-sm font-medium text-gray-600">Account Holder Name</label>
+                <p className="mt-1 text-gray-900">{displayData.account_holder_name || 'N/A'}</p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-600">UPI ID</label>
+                <p className="mt-1 text-gray-900">{displayData.upi_id || 'N/A'}</p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-600">Bank Name</label>
+                <p className="mt-1 text-gray-900">{displayData.bank_name || 'N/A'}</p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-600">Account Number</label>
+                <p className="mt-1 text-gray-900">{displayData.account_number || 'N/A'}</p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-600">IFSC Code</label>
+                <p className="mt-1 text-gray-900">{displayData.ifsc_code || 'N/A'}</p>
+              </div>
+
+              {displayData.qr_code && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-600">UPI QR Code</label>
+                  <img
+                    src={displayData.qr_code}
+                    alt="UPI QR Code"
+                    className="mt-1 max-w-full h-auto max-h-48 object-contain"
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Transaction Proof Modal */}
       {showProofModal && currentAgentId && (
