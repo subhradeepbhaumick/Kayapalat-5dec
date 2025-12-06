@@ -1,1 +1,10 @@
-- [x] Fix destructuring in appointmentList query in src/app/api/sales-admin/invoice/route.ts
+- [x] Update superadmin_dashboard.tsx to fetch and display real stats
+  - [x] Add state for activeAgents, totalLeads, totalRevenue
+  - [x] Add useEffect to fetch from /api/superadmin/dashboard_stats
+  - [x] Update JSX to display fetched values
+  - [x] Format revenue with ₹ symbol
+- [x] Update sales_admin.tsx to fetch and display real stats
+  - [x] Add state for activeAgents, totalLeads, totalRevenue
+  - [x] Add useEffect to fetch from /api/sales-admin/dashboard_stats with authorization
+  - [x] Update JSX to display fetched values
+  - [x] Format revenue with ₹ symbol

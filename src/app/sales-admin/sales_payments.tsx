@@ -6,6 +6,7 @@ import { Filter, Search } from 'lucide-react';
 const PaymentsTab = () => {
   const [filter, setFilter] = useState('All');
   const [searchTerm, setSearchTerm] = useState('');
+  const [showPopup, setShowPopup] = useState(false);
 
   const [payments, setPayments] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -33,33 +34,11 @@ const PaymentsTab = () => {
     }
   };
 
-  const handleStatusChange = async (id: string, value: string) => {
-    try {
-      const response = await fetch('/api/sales-admin/payments', {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          appointment_id: id,
-          payment_status: value,
-        }),
-      });
-
-      const result = await response.json();
-      if (result.success) {
-        setPayments(prev =>
-          prev.map(row =>
-            row.id === id ? { ...row, payment_status: value } : row
-          )
-        );
-      } else {
-        console.error('Error updating payment status:', result.error);
-      }
-    } catch (error) {
-      console.error('Error updating payment status:', error);
-    }
+  const handleStatusChange = () => {
+    setShowPopup(true);
   };
+
+
 
   const highlightText = (text: string) => {
     if (!searchTerm.trim()) return text;
@@ -158,7 +137,7 @@ const PaymentsTab = () => {
                   <td className="px-4 py-2">
                     <select
                       value={row.payment_status}
-                      onChange={e => handleStatusChange(row.id, e.target.value)}
+                      onChange={() => handleStatusChange()}
                       className={`px-2 py-1 rounded-md border text-white font-medium cursor-pointer ${
                         row.payment_status === 'Paid'
                           ? 'bg-green-500 border-green-600'
@@ -187,6 +166,23 @@ const PaymentsTab = () => {
         </table>
       </div>
 
+      {/* Popup */}
+      {showPopup && (
+        <div className="fixed inset-0 bg-black/70 bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full text-center">
+            <h2 className="text-lg font-semibold text-gray-800 mb-4">Access Denied</h2>
+            <p className="text-gray-600 mb-4">
+              You cannot change the payment status. Please contact the superadmin to make changes.
+            </p>
+            <button
+              onClick={() => setShowPopup(false)}
+              className="bg-[#295A47] text-white px-4 py-2 rounded hover:bg-[#1e3a32] text-right"
+            >
+              OK,Thank You
+            </button>
+          </div>
+        </div>
+      )}
 
     </>
   );

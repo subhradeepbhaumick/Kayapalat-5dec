@@ -50,6 +50,7 @@ const LeadsTab = () => {
   const [filterType, setFilterType] = useState<'all' | 'residential' | 'commercial'>('all');
   const [leads, setLeads] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(true);
+  const [seenLeads, setSeenLeads] = useState<Set<number>>(new Set());
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -75,7 +76,7 @@ const LeadsTab = () => {
             clientName: project.client_name || 'N/A',
             clientContact: project.client_phone || 'N/A',
             AppoinmentID: project.appointment_id || 'N/A',
-            projectName: project.project_name || 'N/A', 
+            projectName: project.project_name || 'N/A',
             projectvalue: project.project_value?.toString() || 'N/A',
             agentshare: project.agent_share?.toString() || 'N/A',
             Commission: project.commission?.toString() || 'N/A',
@@ -110,6 +111,39 @@ const LeadsTab = () => {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [currentLeadId, setCurrentLeadId] = useState<number | null>(null);
   const [currentComment, setCurrentComment] = useState('');
+
+  // Fetch remarks when modal opens
+  useEffect(() => {
+    if (isPopupOpen && currentLeadId) {
+      const fetchRemarks = async () => {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          console.warn('No token found');
+          return;
+        }
+
+        const currentLead = leads.find(lead => lead.id === currentLeadId);
+        if (!currentLead) return;
+
+        try {
+          const res = await fetch(`/api/sales-admin/remarks?appointment_id=${currentLead.AppoinmentID}`, {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+            },
+          });
+          const data = await res.json();
+          if (data.remarks) {
+            setLeads(prev => prev.map(lead => lead.id === currentLeadId ? { ...lead, remarks: data.remarks } : lead));
+          }
+        } catch (error) {
+          console.error('Error fetching remarks:', error);
+        }
+      };
+
+      fetchRemarks();
+    }
+  }, [isPopupOpen, currentLeadId, leads]);
   
 
   // Filter leads by tab, status, dates, showEntries, and search
@@ -184,6 +218,9 @@ const LeadsTab = () => {
       return;
     }
 
+    // Mark as seen when modified
+    setSeenLeads(prev => new Set([...prev, id]));
+
     setLeads((prev) =>
       prev.map((lead) => {
         if (lead.id === id) {
@@ -215,9 +252,9 @@ const LeadsTab = () => {
     else if (field === 'propertyAddress') updates.location = value;
     else if (field === 'details') updates.details = value;
     else if (field === 'propertyType') updates.property_type = value;
-    else if (field === 'coldcallDate') updates.cold_call_date = value;
-    else if (field === 'coldcallTime') updates.cold_call_time = value;
-    else if (field === 'coldcallStatus') updates.cold_call_status = value;
+    else if (field === 'coldCallDate') updates.cold_call_date = value;
+    else if (field === 'coldCallTime') updates.cold_call_time = value;
+    else if (field === 'coldCallStatus') updates.cold_call_status = value;
     else if (field === 'siteVisitDate') updates.site_visit_date = value;
     else if (field === 'siteVisitTime') updates.site_visit_time = value;
     else if (field === 'siteVisitStatus') updates.site_visit_status = value;
@@ -253,31 +290,7 @@ const LeadsTab = () => {
   const commercialCount = leads.filter(lead => lead.coldCallStatus === 'Confirmed' && lead.siteVisitStatus !== 'Confirmed' && lead.propertyType === 'Commercial').length;
 
   // Handle remark button click
-  const handleRemarkClick = async (leadId: number) => {
-    const token = localStorage.getItem('token');
-    if (!token) {
-      console.warn('No token found');
-      return;
-    }
-
-    const currentLead = leads.find(lead => lead.id === leadId);
-    if (!currentLead) return;
-
-    try {
-      const res = await fetch(`/api/sales-admin/remarks?appointment_id=${currentLead.AppoinmentID}`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
-      const data = await res.json();
-      if (data.remarks) {
-        setLeads(prev => prev.map(lead => lead.id === leadId ? { ...lead, remarks: data.remarks } : lead));
-      }
-    } catch (error) {
-      console.error('Error fetching remarks:', error);
-    }
-
+  const handleRemarkClick = (leadId: number) => {
     setCurrentLeadId(leadId);
     setIsPopupOpen(true);
     setCurrentComment('');
@@ -509,14 +522,14 @@ const LeadsTab = () => {
               onChange={(e) => setStatus(e.target.value)}
             >
               <option value="all">All</option>
-              <option value="upcoming">Upcoming</option>
-              <option value="not_responding">Not Responding</option>
-              <option value="no_show">No Show</option>
-              <option value="not_interested">Booked Somewhere Else</option>
-              <option value="booked">Booked</option>
-              <option value="time_asc">By Time Ascending</option>
-              <option value="time_desc">By Time Descending</option>
-              <option value="confirmed">Confirmed</option>
+              <option value="Upcoming">Upcoming</option>
+              <option value="Not Responding">Not Responding</option>
+              <option value="No Show">No Show</option>
+              <option value="Booked Somewhere Else">Booked Somewhere Else</option>
+              <option value="Booked">Booked</option>
+              <option value="By Time Ascending">By Time Ascending</option>
+              <option value="By Time Descending">By Time Descending</option>
+              <option value="Confirmed">Confirmed</option>
             </select>
           </div>
 
@@ -714,16 +727,16 @@ const LeadsTab = () => {
                         <input
                           type="date"
                           value={lead.coldCallDate}
-                          onChange={(e) => handleChange(lead.id, 'coldcallDate', e.target.value)}
+                          onChange={(e) => handleChange(lead.id, 'coldCallDate', e.target.value)}
                           className="border p-1 rounded w-full"
                         />
                       </td>
-    
+
                       <td className="border px-4 py-2">
                         <input
                           type="time"
                           value={lead.coldCallTime}
-                          onChange={(e) => handleChange(lead.id, 'coldcallTime', e.target.value)}
+                          onChange={(e) => handleChange(lead.id, 'coldCallTime', e.target.value)}
                           className="border p-1 rounded w-full"
                         />
                       </td>
@@ -731,7 +744,7 @@ const LeadsTab = () => {
                       <td className="border px-4 py-2">
                         <select
                           value={lead.coldCallStatus}
-                          onChange={(e) => handleChange(lead.id, 'coldcallStatus', e.target.value)}
+                          onChange={(e) => handleChange(lead.id, 'coldCallStatus', e.target.value)}
                           className="border p-1 rounded w-full"
                         >
                           <option>Upcoming</option>

@@ -2,7 +2,6 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { Users, Search, Calendar } from 'lucide-react';
-import { useRouter } from 'next/navigation';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 
@@ -24,7 +23,6 @@ interface ApiResponse {
 }
 
 const SuperAdmin_Agents = () => {
-  const router = useRouter();
 
   const [agents, setAgents] = useState<Agent[]>([]);
   const [admins, setAdmins] = useState<string[]>([]);
@@ -82,11 +80,7 @@ const SuperAdmin_Agents = () => {
     return text.replace(regex, '<mark class="bg-yellow-200">$1</mark>');
   };
 
-  // Row click → go to agent dashboard
-  const handleRowClick = (agent: Agent) => {
-    sessionStorage.setItem('previousRoute', '/superadmin');
-    router.push('/referuser');
-  };
+
 
   // Handle admin change
   const handleAdminChange = async (agentId: number, newAdmin: string) => {
@@ -221,8 +215,7 @@ const SuperAdmin_Agents = () => {
               filteredAgents.map((agent, index) => (
                 <tr
                   key={agent.id}
-                  onClick={() => handleRowClick(agent)}
-                  className="hover:bg-green-50 cursor-pointer transition"
+                  className="hover:bg-green-50 transition"
                 >
                   <td className="px-4 py-2 border text-center">{index + 1}</td>
                   <td className="px-4 py-2 border text-center">
@@ -272,7 +265,7 @@ const SuperAdmin_Agents = () => {
                     {agent.status}
                   </td>
                   <td className="px-4 py-2 border text-center">
-                    {agent.joinDate}
+                    {new Date(agent.joinDate).toLocaleDateString()}
                   </td>
                 </tr>
               ))

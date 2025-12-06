@@ -17,9 +17,36 @@ import SettingsTab from './sales_settings';
 const SalesAdmin = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [activeTab, setActiveTab] = useState('Dashboard');
+  const [stats, setStats] = useState({ activeAgents: 0, totalLeads: 0, totalRevenue: 0 });
+  const [loadingStats, setLoadingStats] = useState(true);
 
   const { user, logout } = useAuth();
   const router = useRouter();
+
+  // Fetch dashboard stats
+  React.useEffect(() => {
+    const fetchStats = async () => {
+      try {
+        const token = localStorage.getItem('token');
+        const res = await fetch('/api/sales-admin/dashboard_stats', {
+          headers: {
+            'Authorization': `Bearer ${token}`,
+          },
+        });
+        const data = await res.json();
+        if (res.ok) {
+          setStats(data);
+        } else {
+          console.error('Failed to fetch stats:', data.error);
+        }
+      } catch (err) {
+        console.error('Error fetching stats:', err);
+      } finally {
+        setLoadingStats(false);
+      }
+    };
+    fetchStats();
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -36,6 +63,37 @@ const SalesAdmin = () => {
       toast.error('Logout failed');
     }
   };
+ React.useEffect(() => {
+   const fetchUserData = async () => {
+     try {
+       console.log('Fetching user data...');
+       const token = localStorage.getItem('token');
+       if (!token) {
+         console.warn('No token found in localStorage');
+         return;
+       }
+       const res = await fetch("/api/sales-admin/profile", {
+         method: "GET",
+         headers: {
+           'Authorization': `Bearer ${token}`,
+         },
+       });
+       const data = await res.json();
+       console.log("USER DATA:", data);
+ 
+       if (data.admin) {
+         // User data is already managed by useAuth context
+         console.log('Admin data fetched:', data.admin);
+       } else {
+         console.warn('Admin data not present in response.');
+       }
+     } catch (error) {
+       console.error('Failed to fetch user data:', error);
+     }
+   };
+ 
+   fetchUserData();
+ }, []);
 
   const sidebarItems = [
     { icon: LayoutDashboard, label: 'Dashboard', key: 'Dashboard' },
@@ -60,7 +118,7 @@ const SalesAdmin = () => {
               <div className="flex items-center space-x-3">
                 <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-200 flex items-center justify-center">
                   <img
-                    src={user?.profilePicture || "/user.png"}
+                    src={user?.profile_pic || "/placeholder_person.jpg"}
                     alt="Profile"
                     className="w-full h-full object-cover"
                     onError={(e) => {
@@ -137,10 +195,82 @@ const SalesAdmin = () => {
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
             </div>
           </div>
-          <button onClick={handleLogout} className="flex items-center space-x-2 font-semibold text-red-500 hover:text-[#295A47] transition-colors">
-            <LogOut size={25}  />
-            <span>Logout</span>
+          <button
+
+            onClick={handleLogout}
+            className="relative flex items-center justify-start cursor-pointer overflow-hidden shadow-md"
+            style={{
+              width: "45px",
+              height: "45px",
+              borderRadius: "50%",
+              backgroundColor: "rgb(255, 65, 65)",
+              transition: "0.3s",
+            }}
+            onMouseEnter={(e) => {
+              // Expand button
+              e.currentTarget.style.width = "125px";
+              e.currentTarget.style.borderRadius = "40px";
+
+              // ICON changes
+              const icon = e.currentTarget.querySelector(".logout-icon");
+              icon.style.width = "30%";
+              icon.style.paddingLeft = "20px";
+
+              // TEXT appears
+              const label = e.currentTarget.querySelector(".logout-text");
+              label.style.opacity = 1;
+              label.style.width = "70%";
+              label.style.paddingRight = "10px";
+            }}
+            onMouseLeave={(e) => {
+              // Collapse button
+              e.currentTarget.style.width = "45px";
+              e.currentTarget.style.borderRadius = "50%";
+
+              // ICON reset
+              const icon = e.currentTarget.querySelector(".logout-icon");
+              icon.style.width = "100%";
+              icon.style.paddingLeft = "0px";
+
+              // TEXT reset
+              const label = e.currentTarget.querySelector(".logout-text");
+              label.style.opacity = 0;
+              label.style.width = "0%";
+              label.style.paddingRight = "0px";
+            }}
+          >
+            {/* ICON */}
+            <div
+              className="logout-icon flex items-center justify-center"
+              style={{
+                width: "100%",
+                transition: "0.3s",
+              }}
+            >
+              <svg viewBox="0 0 512 512" width="17px">
+                <path
+                  fill="white"
+                  d="M377.9 105.9L500.7 228.7c7.2 7.2 11.3 17.1 11.3 27.3s-4.1 20.1-11.3 27.3L377.9 406.1c-6.4 6.4-15 9.9-24 9.9c-18.7 0-33.9-15.2-33.9-33.9l0-62.1-128 0c-17.7 0-32-14.3-32-32l0-64c0-17.7 14.3-32 32-32l128 0 0-62.1c0-18.7 15.2-33.9 33.9-33.9c9 0 17.6 3.6 24 9.9zM160 96L96 96c-17.7 0-32 14.3-32 32l0 256c0 17.7 14.3 32 32 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32l-64 0c-53 0-96-43-96-96L0 128C0 75 43 32 96 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32z"
+                />
+              </svg>
+            </div>
+
+            {/* TEXT */}
+            <div
+              className="logout-text absolute right-0 font-semibold text-white"
+              style={{
+                width: "0%",
+                opacity: 0,
+                transition: "0.3s",
+                fontSize: "1.1em",
+                whiteSpace: "nowrap",
+              }}
+            >
+              Logout
+            </div>
           </button>
+
+
         </div>
 
         {/* Welcome Bar */}
@@ -165,21 +295,21 @@ const SalesAdmin = () => {
                     </p>
                   </div>
 
-                  {/* Placeholder Stats Cards */}
+                  {/* Stats Cards */}
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                     <div className="bg-[#D7E7D0] rounded-lg p-6 text-center">
                       <Users className="w-12 h-12 text-[#295A47] mx-auto mb-4" />
-                      <h3 className="text-2xl font-bold text-[#295A47]">0</h3>
-                      <p className="text-gray-700">Active Agents</p>
+                      <h3 className="text-2xl font-bold text-[#295A47]">{loadingStats ? '...' : stats.activeAgents}</h3>
+                      <p className="text-gray-700">Total Agents</p>
                     </div>
                     <div className="bg-[#D7E7D0] rounded-lg p-6 text-center">
                       <UserPlus className="w-12 h-12 text-[#295A47] mx-auto mb-4" />
-                      <h3 className="text-2xl font-bold text-[#295A47]">0</h3>
+                      <h3 className="text-2xl font-bold text-[#295A47]">{loadingStats ? '...' : stats.totalLeads}</h3>
                       <p className="text-gray-700">Total Leads</p>
                     </div>
                     <div className="bg-[#D7E7D0] rounded-lg p-6 text-center">
                       <BarChart3 className="w-12 h-12 text-[#295A47] mx-auto mb-4" />
-                      <h3 className="text-2xl font-bold text-[#295A47]">₹0</h3>
+                      <h3 className="text-2xl font-bold text-[#295A47]">₹{loadingStats ? '...' : (stats.totalRevenue || 0).toLocaleString()}</h3>
                       <p className="text-gray-700">Revenue</p>
                     </div>
                   </div>

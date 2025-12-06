@@ -482,7 +482,7 @@ const InvoicesTable = () => {
                   <button
                     onClick={handleSearch}
                     disabled={loadingProjects}
-                    className={`px-3 py-1 text-white rounded ${loadingProjects ? 'bg-gray-400 cursor-not-allowed' : 'bg-blue-500 hover:bg-blue-700'}`}
+                    className={`px-3 py-1 text-white rounded ${loadingProjects ? 'bg-gray-400 cursor-not-allowed' : 'bg-green-500 hover:bg-green-700'}`}
                   >
                     {loadingProjects ? 'Loading...' : 'Search'}
                   </button>
@@ -722,7 +722,7 @@ const InvoicesTable = () => {
                           type="number"
                           value={invoiceData.paid}
                           onChange={(e) => handlePaidChange(e.target.value)}
-                          className="w-full border border-gray-300 rounded-md p-2 focus:ring-blue-500 focus:border-blue-500"
+                          className="w-full border border-gray-300 rounded-md p-2 focus:ring-green-500 focus:border-green-500"
                           placeholder="Enter paid amount"
                         />
                       </td>

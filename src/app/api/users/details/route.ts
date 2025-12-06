@@ -17,7 +17,7 @@ export async function GET(req: Request) {
     const decoded: any = jwt.verify(token, process.env.JWT_SECRET!);
 
     const [users] = await executeQuery(
-      "SELECT user_id, name, email, phone, role FROM users_kp_db WHERE user_id = ?",
+      "SELECT user_id, name, email, phone, role, profile_pic FROM users_kp_db WHERE user_id = ?",
       [decoded.user_id]
     );
 

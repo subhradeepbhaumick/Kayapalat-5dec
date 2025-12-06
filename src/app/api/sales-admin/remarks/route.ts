@@ -50,12 +50,12 @@ export async function GET(request: NextRequest) {
 
     // Fetch remarks
     const [rows] = await pool.execute(
-      'SELECT id, remarks, created_at FROM remarks WHERE appointment_id = ? ORDER BY created_at DESC',
+      'SELECT remark_id, remarks, created_at FROM remarks WHERE appointment_id = ? ORDER BY created_at DESC',
       [appointmentId]
     );
 
     const remarks = (rows as any[]).map(row => ({
-      id: row.id,
+      id: row.remark_id,
       date: row.created_at.toISOString().split('T')[0], // YYYY-MM-DD
       time: row.created_at.toTimeString().split(' ')[0], // HH:MM:SS
       comment: row.remarks,
@@ -104,7 +104,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
 
-    // Insert remark
+    // Insert new remark
     await pool.execute(
       'INSERT INTO remarks (appointment_id, remarks, created_at) VALUES (?, ?, NOW())',
       [appointment_id, remark]

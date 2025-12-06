@@ -81,10 +81,10 @@ export function sanitizeContentLinks(htmlContent: string): string {
   );
 }
 
-export const query = (...args: unknown[]) => {
+export const query = async (...args: unknown[]) => {
   if (typeof pool !== 'undefined' && typeof (pool as any).query === 'function') {
     // @ts-ignore
-    return (pool as any).query(...args);
+    return await (pool as any).query(...args);
   }
   throw new Error('Database pool is not available.');
 };

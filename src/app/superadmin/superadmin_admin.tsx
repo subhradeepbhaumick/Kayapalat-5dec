@@ -3,7 +3,6 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { Users, X } from 'lucide-react';
-import { useRouter } from 'next/navigation';
 
 interface Admin {
   user_id: string;
@@ -14,7 +13,6 @@ interface Admin {
 }
 
 const SuperAdmin_Admin = () => {
-  const router = useRouter();
 
   const [admins, setAdmins] = useState<Admin[]>([]);
   const [selectedAdmin, setSelectedAdmin] = useState<string>('All');
@@ -34,6 +32,10 @@ const SuperAdmin_Admin = () => {
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
+  const [errors, setErrors] = useState({
+    email: '',
+    phone: '',
+  });
 
   // Fetch admins from DB on mount
   useEffect(() => {
@@ -42,10 +44,10 @@ const SuperAdmin_Admin = () => {
         const res = await fetch('/api/superadmin/admin_page');
         const data = await res.json();
         if (res.ok) {
-          // Add default profile image if missing
+          // Use actual profile_pic from DB, fallback to placeholder
           const adminsWithPic = data.admins.map((a: any) => ({
             ...a,
-            profilePic: '/placeholder_person.jpg',
+            profilePic: a.profile_pic || '/placeholder_person.jpg',
           }));
           setAdmins(adminsWithPic);
         } else {
@@ -65,7 +67,23 @@ const SuperAdmin_Admin = () => {
   );
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+
+    // Validate fields
+    if (name === 'email') {
+      if (!value.includes('@')) {
+        setErrors(prev => ({ ...prev, email: 'Email must contain @' }));
+      } else {
+        setErrors(prev => ({ ...prev, email: '' }));
+      }
+    } else if (name === 'phone') {
+      if (value && value.length !== 10) {
+        setErrors(prev => ({ ...prev, phone: 'Phone must be 10 digits' }));
+      } else {
+        setErrors(prev => ({ ...prev, phone: '' }));
+      }
+    }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -82,6 +100,10 @@ const SuperAdmin_Admin = () => {
     e.preventDefault();
     if (!formData.name || !formData.email) {
       alert('Name and Email are required');
+      return;
+    }
+    if (errors.email || errors.phone) {
+      alert('Please fix the validation errors');
       return;
     }
     if (!isEditing && !formData.password) {
@@ -142,13 +164,7 @@ const SuperAdmin_Admin = () => {
     }
   };
 
-  const handleRowClick = (admin: Admin) => {
-    sessionStorage.setItem('previousRoute', '/superadmin');
-    router.push('/sales-admin');
-  };
-
   const handleEditClick = (admin: Admin, e: React.MouseEvent) => {
-    e.stopPropagation(); // Prevent row click
     setIsEditing(true);
     setEditingAdmin(admin);
     setFormData({
@@ -229,7 +245,7 @@ const SuperAdmin_Admin = () => {
           </thead>
           <tbody>
             {filteredAdmins.length > 0 ? filteredAdmins.map((admin, index) => (
-              <tr key={admin.user_id} className="hover:bg-green-50 cursor-pointer transition" onClick={() => handleRowClick(admin)}>
+              <tr key={admin.user_id} className="hover:bg-green-50 transition">
                 <td className="px-4 py-2 border text-center">{admin.user_id}</td>
                 <td className="px-4 py-2 border text-center">
                   <img src={admin.profilePic} className="w-10 h-10 rounded-full mx-auto" />
@@ -265,8 +281,14 @@ const SuperAdmin_Admin = () => {
 
             <form onSubmit={submitAdmin} encType="multipart/form-data" className="space-y-3">
               <input name="name" placeholder="Name" className="w-full border p-2 rounded" onChange={handleInputChange} value={formData.name} />
-              <input name="email" placeholder="Email" className="w-full border p-2 rounded" onChange={handleInputChange} value={formData.email} />
-              <input name="phone" placeholder="Phone" className="w-full border p-2 rounded" onChange={handleInputChange} value={formData.phone} />
+              <div>
+                <input name="email" placeholder="Email" className="w-full border p-2 rounded" onChange={handleInputChange} value={formData.email} />
+                {errors.email && <p className="text-red-500 text-sm">{errors.email}</p>}
+              </div>
+              <div>
+                <input name="phone" placeholder="Phone" className="w-full border p-2 rounded" onChange={handleInputChange} value={formData.phone} />
+                {errors.phone && <p className="text-red-500 text-sm">{errors.phone}</p>}
+              </div>
               <input name="whatsapp" placeholder="WhatsApp" className="w-full border p-2 rounded" onChange={handleInputChange} value={formData.whatsapp} />
               <input name="address" placeholder="Address" className="w-full border p-2 rounded" onChange={handleInputChange} value={formData.address} />
               <div className="flex items-center space-x-4">
