@@ -1,10 +1,6 @@
-- [x] Update superadmin_dashboard.tsx to fetch and display real stats
-  - [x] Add state for activeAgents, totalLeads, totalRevenue
-  - [x] Add useEffect to fetch from /api/superadmin/dashboard_stats
-  - [x] Update JSX to display fetched values
-  - [x] Format revenue with ₹ symbol
-- [x] Update sales_admin.tsx to fetch and display real stats
-  - [x] Add state for activeAgents, totalLeads, totalRevenue
-  - [x] Add useEffect to fetch from /api/sales-admin/dashboard_stats with authorization
-  - [x] Update JSX to display fetched values
-  - [x] Format revenue with ₹ symbol
+# TODO: Secure Database Credentials in Sales-Admin Routes
+
+- [x] Create .env.local with database credentials (DB_HOST, DB_USER, DB_PASSWORD, DB_NAME)
+- [x] Update src/app/api/sales-admin/projects/route.ts to import and use the pool from src/lib/db.ts
+- [x] Update src/app/api/sales-admin/remarks/route.ts to import and use the pool from src/lib/db.ts
+- [x] Remove hardcoded fallbacks for sensitive data in the routes

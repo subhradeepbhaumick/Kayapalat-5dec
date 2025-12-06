@@ -1,16 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import jwt from 'jsonwebtoken';
-import mysql from 'mysql2/promise';
-
-const pool = mysql.createPool({
-  host: process.env.DB_HOST || 'localhost',
-  user: process.env.DB_USER || 'root',
-  password: process.env.DB_PASSWORD || 'Tony@26062002',
-  database: process.env.DB_NAME || 'kayapalat_db',
-  waitForConnections: true,
-  connectionLimit: 10,
-  queueLimit: 0,
-});
+import { pool } from '../../../../lib/db';
 
 export async function GET(request: NextRequest) {
   try {
