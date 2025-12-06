@@ -37,6 +37,9 @@ const ClientPage: React.FC = () => {
     lead_date: "",
   });
 
+  const [agentDBInfo, setAgentDBInfo] = useState<any>(null);
+  const [showReminderModal, setShowReminderModal] = useState(false);
+
   useEffect(() => {
     const fetchClients = async () => {
       try {
@@ -65,6 +68,47 @@ const ClientPage: React.FC = () => {
       fetchClients();
     }
   }, [user?.user_id]);
+
+  useEffect(() => {
+    if (user === undefined) return;
+
+    if (!user?.user_id) {
+      return;
+    }
+
+    const fetchProfile = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          return;
+        }
+
+        const res = await fetch("/api/referuser/profile", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+          },
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          setAgentDBInfo(data.agent || null);
+        }
+
+      } catch (error) {
+        console.error("Error fetching profile:", error);
+      }
+    };
+
+    fetchProfile();
+  }, [user]);
+
+  useEffect(() => {
+    if (agentDBInfo && (!agentDBInfo.representativeId || agentDBInfo.representativeId.trim() === '' || agentDBInfo.representativeId === agentDBInfo.agent_id)) {
+      setShowReminderModal(true);
+    }
+  }, [agentDBInfo]);
   const formatDate = (isoDate: string) => {
   if (!isoDate) return '';
   const d = new Date(isoDate);
@@ -297,6 +341,26 @@ const handleSubmit = async (e: React.FormEvent) => {
             >
               Close
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Reminder Modal */}
+      {showReminderModal && (
+        <div className="fixed inset-0 bg-black/50 bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">Important Reminder</h3>
+            <p className="text-gray-600 mb-6">
+              You do not have a Representative ID in your profile yet. Do not start referring unless you get your Representative ID, otherwise you will not get any reward.
+            </p>
+            <div className="flex justify-end">
+              <button
+                onClick={() => setShowReminderModal(false)}
+                className="px-4 py-2 bg-[#295A47] text-white rounded-lg hover:bg-[#1e3d32] transition-colors"
+              >
+                OK
+              </button>
+            </div>
           </div>
         </div>
       )}
