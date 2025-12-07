@@ -91,8 +91,8 @@ const OurBlogs = () => {
 
         <div className="flex gap-6 flex-wrap mt-10 md:mt-20 justify-center">
           {/* --- New Card Design --- */}
-          {blogs.map((blog) => (
-            <div key={blog.id} className="w-80 bg-white rounded-xl group flex flex-col shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 border border-gray-200/80 text-left">
+          {blogs.map((blog, index) => (
+            <div key={blog.id || index} className="w-80 bg-white rounded-xl group flex flex-col shadow-lg hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 border border-gray-200/80 text-left">
               <div className="relative w-full h-52 rounded-t-xl overflow-hidden">
                 <Image
                   src={blog.image || 'https://placehold.co/600x400/d2ebd0/00423d?text=Image'}

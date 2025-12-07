@@ -80,7 +80,7 @@ const SalesAdmin = () => {
        });
        const data = await res.json();
        console.log("USER DATA:", data);
- 
+
        if (data.admin) {
          // User data is already managed by useAuth context
          console.log('Admin data fetched:', data.admin);
@@ -91,9 +91,38 @@ const SalesAdmin = () => {
        console.error('Failed to fetch user data:', error);
      }
    };
- 
+
    fetchUserData();
  }, []);
+
+React.useEffect(() => {
+  const handleFullscreenChange = () => {
+    const doc = document as any;
+    console.log('Fullscreen change detected:', {
+      fullscreenElement: document.fullscreenElement,
+      webkitFullscreenElement: doc.webkitFullscreenElement,
+      mozFullScreenElement: doc.mozFullScreenElement,
+      msFullscreenElement: doc.msFullscreenElement
+    });
+    if (!document.fullscreenElement && !doc.webkitFullscreenElement && !doc.mozFullScreenElement && !doc.msFullscreenElement) {
+      console.log('Exiting fullscreen, collapsing sidebar');
+      setSidebarCollapsed(true);
+    }
+  };
+
+  // Add event listeners for cross-browser support
+  document.addEventListener('fullscreenchange', handleFullscreenChange);
+  document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+  document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+  document.addEventListener('MSFullscreenChange', handleFullscreenChange);
+
+  return () => {
+    document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+    document.removeEventListener('mozfullscreenchange', handleFullscreenChange);
+    document.removeEventListener('MSFullscreenChange', handleFullscreenChange);
+  };
+}, []);
 
   const sidebarItems = [
     { icon: LayoutDashboard, label: 'Dashboard', key: 'Dashboard' },
@@ -212,15 +241,19 @@ const SalesAdmin = () => {
               e.currentTarget.style.borderRadius = "40px";
 
               // ICON changes
-              const icon = e.currentTarget.querySelector(".logout-icon");
-              icon.style.width = "30%";
-              icon.style.paddingLeft = "20px";
+              const iconElement = e.currentTarget.querySelector(".logout-icon");
+              if (iconElement instanceof HTMLElement) {
+                iconElement.style.width = "30%";
+                iconElement.style.paddingLeft = "20px";
+              }
 
               // TEXT appears
-              const label = e.currentTarget.querySelector(".logout-text");
-              label.style.opacity = 1;
-              label.style.width = "70%";
-              label.style.paddingRight = "10px";
+              const labelElement = e.currentTarget.querySelector(".logout-text");
+              if (labelElement instanceof HTMLElement) {
+                labelElement.style.opacity = "1";
+                labelElement.style.width = "70%";
+                labelElement.style.paddingRight = "10px";
+              }
             }}
             onMouseLeave={(e) => {
               // Collapse button
@@ -228,15 +261,19 @@ const SalesAdmin = () => {
               e.currentTarget.style.borderRadius = "50%";
 
               // ICON reset
-              const icon = e.currentTarget.querySelector(".logout-icon");
-              icon.style.width = "100%";
-              icon.style.paddingLeft = "0px";
+              const iconElement = e.currentTarget.querySelector(".logout-icon");
+              if (iconElement instanceof HTMLElement) {
+                iconElement.style.width = "100%";
+                iconElement.style.paddingLeft = "0px";
+              }
 
               // TEXT reset
-              const label = e.currentTarget.querySelector(".logout-text");
-              label.style.opacity = 0;
-              label.style.width = "0%";
-              label.style.paddingRight = "0px";
+              const labelElement = e.currentTarget.querySelector(".logout-text");
+              if (labelElement instanceof HTMLElement) {
+                labelElement.style.opacity = "0";
+                labelElement.style.width = "0%";
+                labelElement.style.paddingRight = "0px";
+              }
             }}
           >
             {/* ICON */}

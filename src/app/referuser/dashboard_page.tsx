@@ -101,7 +101,7 @@ const ReferUserDashboard = () => {
     profilePicture: "/user.png"
   });
 
-  React.useEffect(() => {
+ React.useEffect(() => {
   const fetchUserData = async () => {
     try {
       console.log('Fetching user data...');
@@ -135,6 +135,20 @@ const ReferUserDashboard = () => {
   };
 
   fetchUserData();
+}, []);
+
+React.useEffect(() => {
+  const handleFullscreenChange = () => {
+    if (!document.fullscreenElement) {
+      setSidebarCollapsed(true);
+    }
+  };
+
+  document.addEventListener('fullscreenchange', handleFullscreenChange);
+
+  return () => {
+    document.removeEventListener('fullscreenchange', handleFullscreenChange);
+  };
 }, []);
 
 
@@ -328,15 +342,19 @@ const ReferUserDashboard = () => {
                 e.currentTarget.style.borderRadius = "40px";
 
                 // ICON changes
-                const icon = e.currentTarget.querySelector(".logout-icon");
-                icon.style.width = "30%";
-                icon.style.paddingLeft = "20px";
+                const icon = e.currentTarget.querySelector(".logout-icon") as HTMLElement;
+                if (icon) {
+                  icon.style.width = "30%";
+                  icon.style.paddingLeft = "20px";
+                }
 
                 // TEXT appears
-                const label = e.currentTarget.querySelector(".logout-text");
-                label.style.opacity = 1;
-                label.style.width = "70%";
-                label.style.paddingRight = "10px";
+                const label = e.currentTarget.querySelector(".logout-text") as HTMLElement;
+                if (label) {
+                  label.style.opacity = "1";
+                  label.style.width = "70%";
+                  label.style.paddingRight = "10px";
+                }
               }}
               onMouseLeave={(e) => {
                 // Collapse button
@@ -344,15 +362,19 @@ const ReferUserDashboard = () => {
                 e.currentTarget.style.borderRadius = "50%";
 
                 // ICON reset
-                const icon = e.currentTarget.querySelector(".logout-icon");
-                icon.style.width = "100%";
-                icon.style.paddingLeft = "0px";
+                const icon = e.currentTarget.querySelector(".logout-icon") as HTMLElement;
+                if (icon) {
+                  icon.style.width = "100%";
+                  icon.style.paddingLeft = "0px";
+                }
 
                 // TEXT reset
-                const label = e.currentTarget.querySelector(".logout-text");
-                label.style.opacity = 0;
-                label.style.width = "0%";
-                label.style.paddingRight = "0px";
+                const label = e.currentTarget.querySelector(".logout-text") as HTMLElement;
+                if (label) {
+                  label.style.opacity = "0";
+                  label.style.width = "0%";
+                  label.style.paddingRight = "0px";
+                }
               }}
             >
               {/* ICON */}

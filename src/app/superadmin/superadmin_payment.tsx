@@ -9,8 +9,11 @@ const PaymentsTab = () => {
   const [selectedAdmin, setSelectedAdmin] = useState('All');
   const [showBankModal, setShowBankModal] = useState(false);
   const [showProofModal, setShowProofModal] = useState(false);
+  const [showNoBankDetailsPopup, setShowNoBankDetailsPopup] = useState(false);
   const [displayData, setDisplayData] = useState<any>(null);
   const [currentAgentId, setCurrentAgentId] = useState<string | null>(null);
+  const [currentAppointmentId, setCurrentAppointmentId] = useState<string | null>(null);
+  const [currentAgentName, setCurrentAgentName] = useState<string>('');
 
   // Store transaction proofs per agent
   const [transactionProofs, setTransactionProofs] = useState<Record<string, any[]>>({});
@@ -36,6 +39,15 @@ const PaymentsTab = () => {
       }
     }
     return 'Unknown';
+  };
+
+  const getAdminId = (agentId: string): string | null => {
+    for (const [adminId, agents] of Object.entries(agentAdminMap)) {
+      if (agents.includes(agentId)) {
+        return adminId;
+      }
+    }
+    return null;
   };
 
   const fetchAdmins = async () => {
@@ -123,8 +135,8 @@ const PaymentsTab = () => {
       )
     );
 
-    // Update backend only for agent_share since that's what the database supports
-    if (field === 'agent_share') {
+    // Update backend for both agent_share and agent_paid
+    if (field === 'agent_share' || field === 'agent_paid') {
       updatePayment(id, field, value);
     }
   };
@@ -149,24 +161,46 @@ const PaymentsTab = () => {
         setDisplayData(result.data);
         setShowBankModal(true);
       } else {
-        console.error('Error fetching bank details:', result.error);
+        // Find agent name from payments data
+        const agent = payments.find(p => p.agent_id === agentId);
+        setCurrentAgentId(agentId);
+        setCurrentAgentName(agent?.agent_name || 'Unknown');
+        setShowNoBankDetailsPopup(true);
       }
     } catch (error) {
       console.error('Error fetching bank details:', error);
     }
   };
 
-  const handleProofView = (agentId: string) => {
+  const handleProofView = async (agentId: string, appointmentId: string) => {
     setCurrentAgentId(agentId);
+    setCurrentAppointmentId(appointmentId);
+    try {
+      const response = await fetch(`/api/superadmin/payments/proofs?agent_id=${agentId}`);
+      const result = await response.json();
+      if (result.success) {
+        setTransactionProofs(prev => ({
+          ...prev,
+          [agentId]: result.data
+        }));
+      }
+    } catch (error) {
+      console.error('Error fetching proofs:', error);
+    }
     setShowProofModal(true);
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!currentAgentId) return;
+    if (!currentAgentId || !currentAppointmentId) return;
     const file = e.target.files?.[0];
     if (file) {
+      const adminId = getAdminId(currentAgentId);
+      if (!adminId) return;
+
       const formData = new FormData();
+      formData.append('appointment_id', currentAppointmentId);
       formData.append('agent_id', currentAgentId);
+      formData.append('admin_id', adminId);
       formData.append('file', file);
 
       try {
@@ -177,7 +211,7 @@ const PaymentsTab = () => {
         const result = await response.json();
         if (result.success) {
           // Refresh proofs
-          handleProofView(currentAgentId);
+          handleProofView(currentAgentId, currentAppointmentId);
         } else {
           console.error('Error uploading proof:', result.error);
         }
@@ -279,6 +313,7 @@ const PaymentsTab = () => {
           <thead className="bg-[#295A47] text-white">
             <tr>
               <th className="px-4 py-2">Sl. No</th>
+              <th className="px-4 py-2">Appointment ID</th>
               <th className="px-4 py-2">Agent ID</th>
               <th className="px-4 py-2">Agent Name</th>
               <th className="px-4 py-2">Admin Name</th>
@@ -298,6 +333,7 @@ const PaymentsTab = () => {
             {filteredPayments.map((row, i) => (
               <tr key={row.id} className="border-t hover:bg-gray-50">
                 <td className="px-4 py-2">{i + 1}</td>
+                <td className="px-4 py-2">{row.id}</td>
                 <td className="px-4 py-2">{highlightText(row.agent_id)}</td>
                 <td className="px-4 py-2">{highlightText(row.agent_name)}</td>
                 <td className="px-4 py-2">{getAdminName(row.agent_id)}</td>
@@ -346,11 +382,13 @@ const PaymentsTab = () => {
                     View
                   </button>
                 </td>
-                <td
-                  className="px-4 py-2 text-indigo-600 underline cursor-pointer"
-                  onClick={() => handleProofView(row.agent_id)}
-                >
-                  Post
+                <td className="px-4 py-2">
+                  <button
+                    className="bg-[#295A47] text-white px-3 py-1 rounded-md hover:bg-[#3a6b58] transition-colors"
+                    onClick={() => handleProofView(row.agent_id, row.id)}
+                  >
+                    Post
+                  </button>
                 </td>
               </tr>
             ))}
@@ -448,20 +486,18 @@ const PaymentsTab = () => {
                   <tr>
                     <th className="px-4 py-2 border">Sl No</th>
                     <th className="px-4 py-2 border">Date</th>
-                    <th className="px-4 py-2 border">Time</th>
                     <th className="px-4 py-2 border">Proof Image</th>
                     <th className="px-4 py-2 border">Action</th>
                   </tr>
                 </thead>
                 <tbody>
                   {(transactionProofs[currentAgentId] || []).map((p, i) => (
-                    <tr key={p.id} className="border-t">
+                    <tr key={p.t_id} className="border-t">
                       <td className="px-4 py-2 border">{i + 1}</td>
                       <td className="px-4 py-2 border">{p.date}</td>
-                      <td className="px-4 py-2 border">{p.time}</td>
                       <td className="px-4 py-2 border">
                         <a
-                          href={p.file}
+                          href={p.transaction_proof}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="text-blue-600 underline"
@@ -471,7 +507,7 @@ const PaymentsTab = () => {
                       </td>
                       <td className="px-4 py-2 border">
                         <button
-                          onClick={() => handleDeleteProof(currentAgentId, p.id)}
+                          onClick={() => handleDeleteProof(currentAgentId, p.t_id)}
                           className="text-red-600 hover:text-red-800"
                         >
                           <Trash2 className="w-5 h-5 inline" />
@@ -492,6 +528,36 @@ const PaymentsTab = () => {
                   )}
                 </tbody>
               </table>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* No Bank Details Popup */}
+      {showNoBankDetailsPopup && (
+        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-lg w-96 mx-4 p-6 relative">
+            <button
+              onClick={() => setShowNoBankDetailsPopup(false)}
+              className="absolute top-3 right-3 text-gray-500 hover:text-red-500"
+            >
+              <X className="w-6 h-6" />
+            </button>
+
+            <h2 className="text-xl font-semibold text-gray-700 mb-4 text-center">
+              Bank Details Not Found
+            </h2>
+
+            <div className="text-center">
+              <p className="text-gray-600 mb-4">
+                Agent <strong>{currentAgentName}</strong> (ID: <strong>{currentAgentId}</strong>) has not provided their bank details yet.
+              </p>
+              <button
+                onClick={() => setShowNoBankDetailsPopup(false)}
+                className="bg-[#295A47] text-white px-4 py-2 rounded-md hover:bg-[#3a6b58] transition-colors"
+              >
+                OK
+              </button>
             </div>
           </div>
         </div>

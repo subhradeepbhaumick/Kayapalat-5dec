@@ -1,6 +1,10 @@
-# TODO: Secure Database Credentials in Sales-Admin Routes
+# TODO: Implement Sidebar Collapse on Fullscreen Exit
 
-- [x] Create .env.local with database credentials (DB_HOST, DB_USER, DB_PASSWORD, DB_NAME)
-- [x] Update src/app/api/sales-admin/projects/route.ts to import and use the pool from src/lib/db.ts
-- [x] Update src/app/api/sales-admin/remarks/route.ts to import and use the pool from src/lib/db.ts
-- [x] Remove hardcoded fallbacks for sensitive data in the routes
+## Overview
+Add fullscreen exit listeners to collapse the sidebar automatically in dashboard components when exiting fullscreen mode.
+
+## Tasks
+- [x] Add fullscreenchange event listener to src/app/referuser/dashboard_page.tsx
+- [x] Add fullscreenchange event listener to src/app/sales-admin/sales_admin.tsx
+- [x] Add fullscreenchange event listener to src/app/superadmin/superadmin_dashboard.tsx
+- [x] Test the functionality in each dashboard

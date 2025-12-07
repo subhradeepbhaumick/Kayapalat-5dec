@@ -150,8 +150,11 @@ export async function PUT(request: Request) {
     const whatsapp = formData.get('whatsapp') as string;
     const address = formData.get('address') as string;
     const occupation = formData.get('occupation') as string;
-    const representativeId = formData.get('representativeId') as string;
+    let representativeId = formData.get('representativeId') as string;
     const profilePicFile = formData.get('profilePic') as File | null;
+
+    // Ensure representativeId has a value
+    representativeId = representativeId || user_id;
 
     // Validate required fields
     if (!name || !email || !phone || !whatsapp || !address || !occupation || !representativeId) {

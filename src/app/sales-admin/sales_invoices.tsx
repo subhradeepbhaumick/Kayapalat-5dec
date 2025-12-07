@@ -54,6 +54,11 @@ const InvoicesTable = () => {
   const [nextInvoiceId, setNextInvoiceId] = useState<string>('');
   const [loadingProjects, setLoadingProjects] = useState(true);
 
+  // Transaction Proof Modal states
+  const [showProofModal, setShowProofModal] = useState(false);
+  const [transactionProofs, setTransactionProofs] = useState<any[]>([]);
+  const [currentAppointmentId, setCurrentAppointmentId] = useState<string | null>(null);
+
   // Fetch appointment IDs for dropdown
   useEffect(() => {
     const fetchAppointmentIds = async () => {
@@ -378,6 +383,32 @@ const InvoicesTable = () => {
     setModalOpen(false);
   };
 
+  const handleProofView = async (appointmentId: string) => {
+    if (!appointmentId) return;
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/superadmin/payments/proofs?appointment_id=${encodeURIComponent(appointmentId)}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setTransactionProofs(data.data || []);
+        setCurrentAppointmentId(appointmentId);
+        setShowProofModal(true);
+      } else {
+        console.error('Failed to fetch transaction proofs');
+        alert('Failed to fetch transaction proofs');
+      }
+    } catch (error) {
+      console.error('Error fetching transaction proofs:', error);
+      alert('Error fetching transaction proofs');
+    }
+  };
+
   const generatePDF = (invoice: InvoiceData, invoiceId: string) => {
     const doc = new jsPDF();
 
@@ -457,6 +488,7 @@ const InvoicesTable = () => {
               <th className="px-3 py-2 text-center">Agent ID</th>
               <th className="px-3 py-2 text-center">Agent Name</th>
               <th className="px-3 py-2 text-center">Project Name</th>
+              <th className="px-3 py-2 text-center">Transaction Proof</th>
               <th className="px-3 py-2 text-center">Generate Invoice</th>
             </tr>
           </thead>
@@ -506,6 +538,21 @@ const InvoicesTable = () => {
               {/* Project Name */}
               <td className="px-3 py-1 border text-center">
                 {selectedAppointment?.projectName || ''}
+              </td>
+
+              {/* Transaction Proof Button */}
+              <td className="px-3 py-1 border text-center">
+                <button
+                  onClick={() => handleProofView(appointmentInput)}
+                  disabled={!appointmentInput}
+                  className={`px-4 py-1 rounded text-white ${
+                    appointmentInput
+                      ? 'bg-red-500 hover:bg-red-700'
+                      : 'bg-gray-400 cursor-not-allowed'
+                  }`}
+                >
+                  View
+                </button>
               </td>
 
               {/* Generate Invoice Button */}
@@ -844,7 +891,53 @@ const InvoicesTable = () => {
         </div>
       )}
 
-      
+      {/* Transaction Proof Modal */}
+      {showProofModal && (
+        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-2xl max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="bg-gradient-to-r from-green-800 to-emerald-900 text-white p-6 rounded-t-lg flex justify-between items-center">
+              <h3 className="text-3xl font-bold text-center flex-1">Transaction Proofs for {currentAppointmentId}</h3>
+              <button
+                onClick={() => setShowProofModal(false)}
+                className="text-white text-3xl font-bold hover:text-gray-300 ml-auto"
+                aria-label="Close"
+              >
+                &times;
+              </button>
+            </div>
+            <div className="p-8">
+              {transactionProofs.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {transactionProofs.map((proof, index) => (
+                    <div key={index} className="border rounded-lg p-4">
+                      <img src={proof.transaction_proof || proof.image || proof} alt={`Proof ${index + 1}`} className="w-full h-auto rounded mb-2" />
+                      <p className="text-sm text-gray-600 mb-2">Date: {proof.date}</p>
+                      <a
+                        href={proof.transaction_proof || proof.image || proof}
+                        download
+                        className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-700 text-sm"
+                      >
+                        Download
+                      </a>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-center text-gray-500">No transaction proofs found.</p>
+              )}
+            </div>
+            <div className="bg-gray-100 p-6 rounded-b-lg flex justify-end">
+              <button
+                onClick={() => setShowProofModal(false)}
+                className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-700"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       </div>
     </>
   );

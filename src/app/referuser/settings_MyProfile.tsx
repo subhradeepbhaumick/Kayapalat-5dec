@@ -123,6 +123,8 @@ const MyProfilePage: React.FC = () => {
     fetchProfile();
   }, [user]);
 
+
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -138,6 +140,12 @@ const MyProfilePage: React.FC = () => {
   };
 
   const handleSave = async () => {
+    // Validate required fields
+    if (!formData.name || !formData.email || !formData.phone || !formData.whatsapp || !formData.address || !formData.occupation || !formData.representativeId) {
+      alert('All profile fields are required.');
+      return;
+    }
+
     // Only validate password fields if they are provided
     if (formData.password || formData.confirmPassword) {
       if (formData.password !== formData.confirmPassword) {
@@ -161,7 +169,7 @@ const MyProfilePage: React.FC = () => {
       formDataToSend.append('whatsapp', formData.whatsapp);
       formDataToSend.append('address', formData.address);
       formDataToSend.append('occupation', formData.occupation);
-      formDataToSend.append('representativeId', formData.representativeId);
+      formDataToSend.append('representativeId', formData.representativeId || '');
 
       if (selectedFile) {
         formDataToSend.append('profilePic', selectedFile);
@@ -281,7 +289,7 @@ const MyProfilePage: React.FC = () => {
               { label: 'WhatsApp', name: 'whatsapp', type: 'tel', placeholder: 'Enter your WhatsApp number' },
               { label: 'Occupation', name: 'occupation', type: 'text', placeholder: 'Enter your occupation' },
               { label: 'Address', name: 'address', type: 'textarea', placeholder: 'Enter your address' },
-              // { label: 'Representative ID', name: 'representativeId', type: 'text', placeholder: 'Enter your representative ID' },
+              { label: 'Representative ID', name: 'representativeId', type: 'text', placeholder: 'Enter your representative ID', readOnly: true },
               { label: 'New Password', name: 'password', type: 'password', placeholder: 'Enter new password' },
               { label: 'Confirm Password', name: 'confirmPassword', type: 'password', placeholder: 'Confirm new password' },
             ].map((field) => (
@@ -350,8 +358,8 @@ const MyProfilePage: React.FC = () => {
                     type={field.type}
                     value={formData[field.name as keyof ProfileData] || ''}
                     onChange={handleChange}
-                    className={`w-full border rounded-md p-2 ${!isEditing ? 'bg-gray-100 cursor-not-allowed' : ''}`}
-                    readOnly={!isEditing}
+                    className={`w-full border rounded-md p-2 ${!isEditing || field.readOnly ? 'bg-gray-100 cursor-not-allowed' : ''}`}
+                    readOnly={field.readOnly || !isEditing}
                     placeholder={isEditing ? field.placeholder : ''}
                   />
                 )}
@@ -405,6 +413,8 @@ const MyProfilePage: React.FC = () => {
           </div>
         </div>
       )}
+
+
     </div>
   );
 };

@@ -97,6 +97,7 @@ export async function PUT(request: NextRequest) {
     if (updates.booking_time !== undefined) fields.push('booking_time = ?'), values.push(updates.booking_time);
     if (updates.booking_status !== undefined) fields.push('booking_status = ?'), values.push(updates.booking_status);
     if (updates.booking_id !== undefined) fields.push('booking_id = ?'), values.push(updates.booking_id);
+    if (updates.booked_in_next !== undefined) fields.push('bookedInNext = ?'), values.push(updates.booked_in_next);
 
     if (fields.length === 0) {
       return NextResponse.json({ error: 'No valid fields to update' }, { status: 400 });

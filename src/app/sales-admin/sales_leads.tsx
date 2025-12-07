@@ -91,7 +91,7 @@ const LeadsTab = () => {
             bookingDate: project.booking_date || 'N/A',
             bookingTime: project.booking_time || 'N/A',
             bookingStatus: project.booking_status || 'N/A',
-            BookedInNext: 'N/A', // Not in projects table
+            BookedInNext: project.bookedInNext || 'N/A',
             bookingId: 'N/A', // Not in projects table
             propertyType: project.property_type || 'N/A',
             remarks: [], // Remarks not in projects table
@@ -296,22 +296,62 @@ const LeadsTab = () => {
     setCurrentComment('');
   };
   // Handle book button click
-  const handleBookClick = (id: number) => {
-  setLeads(prev =>
-    prev.map(lead => {
-      if (lead.id === id) {
-        return {
-          ...lead,
-          bookingStatus: 'Booked',
-          // Optional: ensure consistent dates/times if missing
-          bookingDate: lead.bookingDate || new Date().toISOString().slice(0, 10),
-          bookingTime: lead.bookingTime || new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }),
-        };
+  const handleBookClick = async (id: number) => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      console.warn('No token found');
+      return;
+    }
+
+    const lead = leads.find(lead => lead.id === id);
+    if (!lead) return;
+
+    // Update local state
+    setLeads(prev =>
+      prev.map(lead => {
+        if (lead.id === id) {
+          return {
+            ...lead,
+            bookingStatus: 'Booked',
+            // Optional: ensure consistent dates/times if missing
+            bookingDate: lead.bookingDate || new Date().toISOString().slice(0, 10),
+            bookingTime: lead.bookingTime || new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }),
+          };
+        }
+        return lead;
+      })
+    );
+
+    // Prepare updates for API
+    const updates: any = {
+      booking_status: 'Booked',
+    };
+    if (!lead.bookingDate) {
+      updates.booking_date = new Date().toISOString().slice(0, 10);
+    }
+    if (!lead.bookingTime) {
+      updates.booking_time = new Date().toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+    }
+
+    try {
+      const res = await fetch('/api/sales-admin/projects', {
+        method: 'PUT',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          appointment_id: lead.AppoinmentID,
+          updates,
+        }),
+      });
+      if (!res.ok) {
+        console.error('Failed to update booking status');
       }
-      return lead;
-    })
-  );
-};
+    } catch (error) {
+      console.error('Error updating booking status:', error);
+    }
+  };
   const handleShareChange = async (id: number, field: string, value: string) => {
   const token = localStorage.getItem('token');
   if (!token) {
@@ -952,7 +992,8 @@ const LeadsTab = () => {
                         <select
                           value={lead.BookedInNext}
                           onChange={(e) => handleChange(lead.id, 'BookedInNext', e.target.value)}
-                          className="border p-1 rounded w-full"
+                          disabled={Boolean(lead.BookedInNext && lead.BookedInNext !== 'N/A')}
+                          className={`border p-1 rounded w-full ${lead.BookedInNext && lead.BookedInNext !== 'N/A' ? 'bg-gray-100 cursor-not-allowed' : ''}`}
                         >
                           <option value="">Select</option>
                           <option value="3days">3 days</option>

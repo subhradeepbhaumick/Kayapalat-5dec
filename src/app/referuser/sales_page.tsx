@@ -115,6 +115,7 @@ const SalesPage: React.FC<SalesPageProps> = ({ agentId }) => {
                 <th className="p-2 border">Address</th>
                 <th className="p-2 border">Lead Date</th>
                 <th className="p-2 border">Property Type</th>
+                <th className="p-2 border">Cold Call Status</th>
               </tr>
             </thead>
             <tbody>
@@ -127,6 +128,7 @@ const SalesPage: React.FC<SalesPageProps> = ({ agentId }) => {
                   <td className="p-2 border">{item.location}</td>
                   <td className="p-2 border">{item.created_at ? new Date(item.created_at).toLocaleDateString() : 'N/A'}</td>
                   <td className="p-2 border">{item.property_type}</td>
+                  <td className="p-2 border">{item.cold_call_status}</td>
                 </tr>
               ))}
             </tbody>
@@ -145,6 +147,7 @@ const SalesPage: React.FC<SalesPageProps> = ({ agentId }) => {
                 <th className="p-2 border">Phone Number</th>
                 <th className="p-2 border">Location</th>
                 <th className="p-2 border">Property Type</th>
+                <th className="p-2 border">Site Visit Status</th>
                 <th className="p-2 border">Created At</th>
               </tr>
             </thead>
@@ -158,6 +161,7 @@ const SalesPage: React.FC<SalesPageProps> = ({ agentId }) => {
                   <td className="p-2 border">{item.client_phone}</td>
                   <td className="p-2 border">{item.location}</td>
                   <td className="p-2 border">{item.property_type}</td>
+                  <td className="p-2 border">{item.site_visit_status}</td>
                   <td className="p-2 border">{item.created_at ? new Date(item.created_at).toLocaleDateString() : 'N/A'}</td>
                 </tr>
               ))}
@@ -179,6 +183,7 @@ const SalesPage: React.FC<SalesPageProps> = ({ agentId }) => {
                 <th className="p-2 border">Commission</th>
                 <th className="p-2 border">Agent Share</th>
                 <th className="p-2 border">Property Type</th>
+                <th className="p-2 border">Booking Status</th>
               </tr>
             </thead>
             <tbody>
@@ -193,6 +198,7 @@ const SalesPage: React.FC<SalesPageProps> = ({ agentId }) => {
                   <td className="p-2 border">{item.commission}%</td>
                   <td className="p-2 border">₹{item.agent_share.toLocaleString()}</td>
                   <td className="p-2 border">{item.property_type}</td>
+                  <td className="p-2 border">{item.booking_status}</td>
                 </tr>
               ))}
             </tbody>
@@ -228,7 +234,7 @@ const SalesPage: React.FC<SalesPageProps> = ({ agentId }) => {
                   <td className="p-2 border">{item.commission}%</td>
                   <td className="p-2 border">₹{item.agent_share.toLocaleString()}</td>
                   <td className="p-2 border">{item.property_type}</td>
-                  <td className="p-2 border">{new Date(item.created_at).toLocaleDateString()}</td>
+                  <td className="p-2 border">{item.created_at ? new Date(item.created_at).toLocaleDateString() : 'N/A'}</td>
                 </tr>
               ))}
             </tbody>

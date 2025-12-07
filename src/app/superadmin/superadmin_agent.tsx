@@ -243,7 +243,7 @@ const SuperAdmin_Agents = () => {
                   />
                   <td className="px-4 py-2 border">
                     <select
-                      value={agent.admin}
+                      value={agent.admin || ''}
                       onChange={(e) => handleAdminChange(agent.id, e.target.value)}
                       onClick={(e) => e.stopPropagation()}
                       className="w-full border rounded px-2 py-1"

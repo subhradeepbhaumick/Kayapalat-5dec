@@ -33,8 +33,8 @@ export async function GET(request: NextRequest) {
         COALESCE(p.project_value, 0) as client_estimate,
         COALESCE(p.commission, 0) as commission,
         COALESCE(p.agent_share, 0) as agent_share,
-        0 as agent_paid,
-        COALESCE(p.agent_share, 0) as due,
+        COALESCE(p.agent_paid, 0) as agent_paid,
+        COALESCE(p.agent_due, 0) as due,
         COALESCE(p.payment_status, 'Due') as payment_status
       FROM projects p
       LEFT JOIN agents a ON p.agent_id = a.agent_id

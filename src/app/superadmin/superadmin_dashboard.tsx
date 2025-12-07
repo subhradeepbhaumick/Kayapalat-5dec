@@ -36,6 +36,35 @@ const SuperAdmin = () => {
     fetchStats();
   }, []);
 
+React.useEffect(() => {
+  const handleFullscreenChange = () => {
+    const doc = document as any;
+    console.log('Fullscreen change detected:', {
+      fullscreenElement: document.fullscreenElement,
+      webkitFullscreenElement: doc.webkitFullscreenElement,
+      mozFullScreenElement: doc.mozFullScreenElement,
+      msFullscreenElement: doc.msFullscreenElement
+    });
+    if (!document.fullscreenElement && !doc.webkitFullscreenElement && !doc.mozFullScreenElement && !doc.msFullscreenElement) {
+      console.log('Exiting fullscreen, collapsing sidebar');
+      setSidebarCollapsed(true);
+    }
+  };
+
+  // Add event listeners for cross-browser support
+  document.addEventListener('fullscreenchange', handleFullscreenChange);
+  document.addEventListener('webkitfullscreenchange', handleFullscreenChange);
+  document.addEventListener('mozfullscreenchange', handleFullscreenChange);
+  document.addEventListener('MSFullscreenChange', handleFullscreenChange);
+
+  return () => {
+    document.removeEventListener('fullscreenchange', handleFullscreenChange);
+    document.removeEventListener('webkitfullscreenchange', handleFullscreenChange);
+    document.removeEventListener('mozfullscreenchange', handleFullscreenChange);
+    document.removeEventListener('MSFullscreenChange', handleFullscreenChange);
+  };
+}, []);
+
   const handleLogout = async () => {
     try {
       const response = await fetch('/api/auth/logout', { method: 'POST' });
