@@ -161,16 +161,16 @@ const LeadsTab = () => {
         filtered = filtered.filter(lead => lead.bookingStatus === 'Booked');
 }
 
-    // Status filter
-    if (status !== 'all') {
-      if (activeTab === 'cold') {
-        filtered = filtered.filter(lead => lead.coldCallStatus === status);
-      } else if (activeTab === 'site') {
-        filtered = filtered.filter(lead => lead.siteVisitStatus === status);
-      } else if (activeTab === 'booking') {
-        filtered = filtered.filter(lead => lead.bookingStatus === status);
-      }
+  // Status filter
+  if (status !== 'all' && status !== 'By Time Ascending' && status !== 'By Time Descending') {
+    if (activeTab === 'cold') {
+      filtered = filtered.filter(lead => lead.coldCallStatus === status);
+    } else if (activeTab === 'site') {
+      filtered = filtered.filter(lead => lead.siteVisitStatus === status);
+    } else if (activeTab === 'booking') {
+      filtered = filtered.filter(lead => lead.bookingStatus === status);
     }
+  }
 
     // Date filter
     if (fromDate) {
@@ -203,6 +203,29 @@ const LeadsTab = () => {
     // Show entries
     if (showEntries !== 'all') {
       filtered = filtered.slice(0, parseInt(showEntries));
+    }
+
+    // Sorting by time
+    if (status === 'By Time Ascending') {
+      filtered = filtered.sort((a, b) => {
+        const aDate = activeTab === 'cold' ? a.coldCallDate : activeTab === 'site' ? a.siteVisitDate : a.bookingDate;
+        const aTime = activeTab === 'cold' ? a.coldCallTime : activeTab === 'site' ? a.siteVisitTime : a.bookingTime;
+        const bDate = activeTab === 'cold' ? b.coldCallDate : activeTab === 'site' ? b.siteVisitDate : b.bookingDate;
+        const bTime = activeTab === 'cold' ? b.coldCallTime : activeTab === 'site' ? b.siteVisitTime : b.bookingTime;
+        const aCombined = aDate + ' ' + aTime;
+        const bCombined = bDate + ' ' + bTime;
+        return aCombined.localeCompare(bCombined);
+      });
+    } else if (status === 'By Time Descending') {
+      filtered = filtered.sort((a, b) => {
+        const aDate = activeTab === 'cold' ? a.coldCallDate : activeTab === 'site' ? a.siteVisitDate : a.bookingDate;
+        const aTime = activeTab === 'cold' ? a.coldCallTime : activeTab === 'site' ? a.siteVisitTime : a.bookingTime;
+        const bDate = activeTab === 'cold' ? b.coldCallDate : activeTab === 'site' ? b.siteVisitDate : b.bookingDate;
+        const bTime = activeTab === 'cold' ? b.coldCallTime : activeTab === 'site' ? b.siteVisitTime : b.bookingTime;
+        const aCombined = aDate + ' ' + aTime;
+        const bCombined = bDate + ' ' + bTime;
+        return bCombined.localeCompare(aCombined);
+      });
     }
 
     return filtered;
@@ -791,9 +814,6 @@ const LeadsTab = () => {
                           <option>Not Responding</option>
                           <option>No Show</option>
                           <option>Booked Somewhere Else</option>
-                          <option>Booked</option>
-                          <option>By Time Ascending</option>
-                          <option>By Time Descending</option>
                           <option>Confirmed</option>
                         </select>
                       </td>
@@ -889,9 +909,6 @@ const LeadsTab = () => {
                           <option>Not Responding</option>
                           <option>No Show</option>
                           <option>Booked Somewhere Else</option>
-                          <option>Booked</option>
-                          <option>By Time Ascending</option>
-                          <option>By Time Descending</option>
                           <option>Confirmed</option>
                         </select>
                       </td>
@@ -983,8 +1000,6 @@ const LeadsTab = () => {
                           <option>No Show</option>
                           <option>Booked Somewhere Else</option>
                           <option>Booked</option>
-                          <option>By Time Ascending</option>
-                          <option>By Time Descending</option>
                           <option>Confirmed</option>
                         </select>
                       </td>

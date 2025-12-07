@@ -15,6 +15,7 @@ interface Agent {
   joinDate: string;
   profilePic: string;
   location: string;
+  lastLeadDate: string | null;
 }
 
 interface ApiResponse {
@@ -207,6 +208,7 @@ const SuperAdmin_Agents = () => {
               <th className="px-4 py-2 border">Location</th>
               <th className="px-4 py-2 border">Admin</th>
               <th className="px-4 py-2 border">Status</th>
+              <th className="px-4 py-2 border">Last Lead</th>
               <th className="px-4 py-2 border">Join Date</th>
             </tr>
           </thead>
@@ -263,6 +265,9 @@ const SuperAdmin_Agents = () => {
                     }`}
                   >
                     {agent.status}
+                  </td>
+                  <td className="px-4 py-2 border text-center">
+                    {agent.lastLeadDate ? new Date(agent.lastLeadDate).toLocaleDateString() : 'N/A'}
                   </td>
                   <td className="px-4 py-2 border text-center">
                     {new Date(agent.joinDate).toLocaleDateString()}

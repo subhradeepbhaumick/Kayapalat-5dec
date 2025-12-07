@@ -1,10 +1,6 @@
-# TODO: Implement Sidebar Collapse on Fullscreen Exit
+# TODO: Add "Last Lead" Column to Agents Table
 
-## Overview
-Add fullscreen exit listeners to collapse the sidebar automatically in dashboard components when exiting fullscreen mode.
-
-## Tasks
-- [x] Add fullscreenchange event listener to src/app/referuser/dashboard_page.tsx
-- [x] Add fullscreenchange event listener to src/app/sales-admin/sales_admin.tsx
-- [x] Add fullscreenchange event listener to src/app/superadmin/superadmin_dashboard.tsx
-- [x] Test the functionality in each dashboard
+- [ ] Modify src/app/api/superadmin/agents/route.ts to include lastLeadDate in agent response
+- [ ] Update Agent interface in src/app/superadmin/superadmin_agent.tsx to include lastLeadDate
+- [ ] Add "Last Lead" column to table header in superadmin_agent.tsx
+- [ ] Add "Last Lead" column data to table body in superadmin_agent.tsx

@@ -30,6 +30,12 @@ export async function GET() {
     `;
 
     const [rows] = await connection.execute(query);
+
+    // Calculate total due from projects table
+    const totalDueQuery = `SELECT SUM(COALESCE(agent_due, 0)) as total_due FROM projects`;
+    const [totalDueResult] = await connection.execute(totalDueQuery);
+    const totalDue = (totalDueResult as any[])[0]?.total_due || 0;
+
     await connection.end();
 
     const rowsArray = rows as any[];
@@ -37,6 +43,7 @@ export async function GET() {
     return NextResponse.json({
       success: true,
       data: rowsArray,
+      totalDue: totalDue,
     });
   } catch (error) {
     console.error('Error fetching invoices:', error);

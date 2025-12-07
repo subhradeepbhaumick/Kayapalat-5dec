@@ -11,9 +11,10 @@ export async function GET(request: NextRequest) {
       results.map(async (agent: any) => {
 
         // ---------------------------
-        // STATUS CALCULATION SECTION
-        // ---------------------------
+// STATUS CALCULATION SECTION
+// ---------------------------
         let status = "Inactive";
+        let lastLeadDate = null;
 
         try {
           const latestProjectQuery = `
@@ -28,13 +29,15 @@ export async function GET(request: NextRequest) {
 
           if (projectResult.length > 0) {
             const latestCreatedAt = new Date(projectResult[0].created_at);
+            lastLeadDate = latestCreatedAt.toISOString().split('T')[0]; // Format as YYYY-MM-DD
             const now = new Date();
 
             const monthsDifference =
               (now.getFullYear() - latestCreatedAt.getFullYear()) * 12 +
               (now.getMonth() - latestCreatedAt.getMonth());
 
-            if (monthsDifference < 2) {
+            // Determine Active status based on months difference
+            if (monthsDifference < 3) {
               status = "Active";
             }
           }
@@ -43,8 +46,8 @@ export async function GET(request: NextRequest) {
         }
 
         // ---------------------------
-        // RETURN AGENT MAPPED DATA
-        // ---------------------------
+// RETURN AGENT MAPPED DATA
+// ---------------------------
         return {
           id: agent.agent_id,
           name: agent.agent_name,
@@ -54,7 +57,8 @@ export async function GET(request: NextRequest) {
           status: status,   // ← Updated
           joinDate: agent.created_at || new Date().toISOString().split('T')[0],
           profilePic: agent.profile_pic || '/placeholder_person.jpg ',
-          location: agent.address || ''
+          location: agent.address || '',
+          lastLeadDate: lastLeadDate
         };
       })
     );

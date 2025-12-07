@@ -11,6 +11,7 @@ const InvoiceTab = () => {
   const [loading, setLoading] = useState(true);
   const [admins, setAdmins] = useState<any[]>([]);
   const [agentAdminMap, setAgentAdminMap] = useState<Record<string, string[]>>({});
+  const [totalDue, setTotalDue] = useState(0);
 
   // Fetch data on component mount
   useEffect(() => {
@@ -59,6 +60,7 @@ const InvoiceTab = () => {
       const result = await response.json();
       if (result.success) {
         setInvoices(result.data);
+        setTotalDue(result.totalDue || 0);
       }
     } catch (error) {
       console.error('Error fetching invoices:', error);
@@ -165,7 +167,7 @@ const InvoiceTab = () => {
             </div>
             <div>
               <h3 className="text-2xl font-bold text-[#295A47]">
-                ₹{filteredInvoices.reduce((sum, inv) => sum + (inv.due || 0), 0).toLocaleString()}
+                ₹{totalDue.toLocaleString()}
               </h3>
               <p className="text-gray-700">Total Due</p>
             </div>
